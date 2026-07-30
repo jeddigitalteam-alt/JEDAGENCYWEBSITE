@@ -85,7 +85,11 @@ export function TeamBoard() {
             boardRef={boardRef}
             reduced={Boolean(reduced)}
             resetToken={resetToken}
-            onLooseChange={(loose) => setLoose(person.name, loose)}
+            // Loose-ness is owned here, not mirrored in the card. Keeping a
+            // second copy in the child meant syncing it back with a setState
+            // inside an effect on every reassemble.
+            loose={looseNames.includes(person.name)}
+            onLooseChange={(isLoose) => setLoose(person.name, isLoose)}
           />
         ))}
       </div>
@@ -98,24 +102,26 @@ function TeamCard({
   boardRef,
   reduced,
   resetToken,
+  loose,
   onLooseChange,
 }: {
   person: Person;
   boardRef: React.RefObject<HTMLDivElement | null>;
   reduced: boolean;
   resetToken: number;
+  loose: boolean;
   onLooseChange: (loose: boolean) => void;
 }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const [loose, setLoose] = useState(false);
 
-  // Spring everything home when the reassemble button is pressed.
+  // Spring everything home when the reassemble button is pressed. Animating
+  // motion values is a side effect on an external system, which is exactly
+  // what an effect is for — and there is no setState to cascade from.
   useEffect(() => {
     if (resetToken === 0) return;
     animate(x, 0, SPRING);
     animate(y, 0, SPRING);
-    setLoose(false);
   }, [resetToken, x, y]);
 
   return (
@@ -132,7 +138,6 @@ function TeamCard({
           animate(x, 0, SPRING);
           animate(y, 0, SPRING);
         }
-        setLoose(!home);
         onLooseChange(!home);
       }}
       className={`relative rounded-xl border bg-ink-raised p-5 ${
