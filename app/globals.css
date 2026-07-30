@@ -146,6 +146,17 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* Marquee track is duplicated once in markup and shifts by exactly -50%,
+   so the loop is seamless whatever the item widths are. */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 /* ============================================================
    accessibility
    ============================================================ */
@@ -194,9 +205,11 @@ body {
 
 /* Custom cursor replaces the pointer on fine-pointer devices only */
 @media (hover: hover) and (pointer: fine) {
-  body[data-cursor="on"],
-  body[data-cursor="on"] a,
-  body[data-cursor="on"] button {
+  /* `data-custom-cursor`, not `data-cursor` — the latter is the per-element
+     label attribute and must never appear on <body>. */
+  body[data-custom-cursor="on"],
+  body[data-custom-cursor="on"] a,
+  body[data-custom-cursor="on"] button {
     cursor: none;
   }
 }

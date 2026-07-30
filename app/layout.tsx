@@ -5,6 +5,10 @@ import { IntroProvider } from "@/components/motion/intro-context";
 import IntroLoader from "@/components/brand/IntroLoader";
 import RouteTransition from "@/components/motion/RouteTransition";
 import SmoothScroll from "@/components/motion/SmoothScroll";
+import Header from "@/components/chrome/Header";
+import Footer from "@/components/chrome/Footer";
+import Cursor from "@/components/chrome/Cursor";
+import CommandPalette from "@/components/chrome/CommandPalette";
 
 /* Display — high contrast, and its italic has real calligraphic slope, which
    is what makes roman/italic mixing legible inside one headline at 11vw. */
@@ -72,9 +76,13 @@ export default function RootLayout({
           <SmoothScroll />
           <IntroLoader />
           <RouteTransition />
+          <Cursor />
+          <CommandPalette />
+          <Header />
           <main id="main" className="flex-1">
             {children}
           </main>
+          <Footer />
         </IntroProvider>
       </body>
     </html>
