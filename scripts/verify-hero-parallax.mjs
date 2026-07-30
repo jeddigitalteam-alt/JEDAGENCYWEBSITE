@@ -20,6 +20,23 @@ const check = (ok, label) => (ok ? pass : fail).push(label);
 
 const LAYERS = 'main section:first-of-type > div[aria-hidden="true"]';
 
+/**
+ * Scroll with REAL wheel events so the input travels through Lenis, exactly as
+ * a trackpad or mouse would. `window.scrollTo()` bypasses Lenis entirely and
+ * will happily report movement that a user never experiences — that is how the
+ * first version of this test passed against an effect that looked static.
+ */
+async function wheelTo(page, target) {
+  await page.mouse.move(700, 500);
+  for (let guard = 0; guard < 60; guard++) {
+    const y = await page.evaluate(() => window.scrollY);
+    if (y >= target - 24) break;
+    await page.mouse.wheel(0, Math.min(120, Math.max(40, target - y)));
+    await page.waitForTimeout(70);
+  }
+  await page.waitForTimeout(550); // let Lenis settle
+}
+
 /** translateY out of a computed matrix, or 0 for `none`. */
 const readY = (page) =>
   page.evaluate((sel) => {
@@ -64,9 +81,15 @@ const browser = await chromium.launch();
   );
   check(/hidden|clip/.test(overflowHidden), `hero clips its backdrop (overflow: ${overflowHidden})`);
 
-  // --- scrolled into the hero
-  await page.evaluate(() => window.scrollTo(0, 450));
-  await page.waitForTimeout(700);
+  // --- halfway through the hero, driven by real wheel input
+  await wheelTo(page, 450);
+  const heroTopMid = await page.evaluate(
+    () => Math.round(document.querySelector("main section").getBoundingClientRect().top),
+  );
+  check(
+    heroTopMid < -300 && heroTopMid > -600,
+    `wheel scrolling actually moved the hero (top at ${heroTopMid}px)`,
+  );
   const mid = await readY(page);
   await page.screenshot({ path: join(out, "02-scrolled.png") });
 
@@ -75,8 +98,15 @@ const browser = await chromium.launch();
     mid[0] < mid[1] && mid[1] < mid[2],
     `layers move at distinct, increasing rates (${mid[0]} < ${mid[1]} < ${mid[2]})`,
   );
-  // Depth is only readable if the spread between layers is meaningful.
-  check(mid[2] - mid[0] >= 40, `visible depth spread between front and back (${(mid[2] - mid[0]).toFixed(1)}px)`);
+  // A differential you can actually perceive, not merely measure.
+  check(
+    mid[2] - mid[0] >= 100,
+    `depth spread is perceptible, not just measurable (${(mid[2] - mid[0]).toFixed(1)}px)`,
+  );
+  check(
+    mid[2] >= 110,
+    `front layer travel is in the visible range (${mid[2]}px at half-hero)`,
+  );
 
   // --- text must NOT be carrying a parallax transform of its own
   const textY = await page.evaluate(() => {
@@ -125,8 +155,7 @@ const browser = await chromium.launch();
   check(headerT === "none", `navigation is not parallaxed (transform: ${headerT})`);
 
   // --- past the hero, layers park and stop
-  await page.evaluate(() => window.scrollTo(0, 3000));
-  await page.waitForTimeout(700);
+  await wheelTo(page, 2400);
   const past = await readY(page);
   check(
     past.every((y) => Number.isFinite(y)),
@@ -152,8 +181,7 @@ const browser = await chromium.launch();
   const page = await ctx.newPage();
   await page.goto(base, { waitUntil: "load" });
   await page.waitForTimeout(800);
-  await page.evaluate(() => window.scrollTo(0, 450));
-  await page.waitForTimeout(600);
+  await wheelTo(page, 450);
   const y = await readY(page);
   check(y.every((v) => v === 0), `reduced motion keeps the backdrop static (${JSON.stringify(y)})`);
   await page.screenshot({ path: join(out, "04-reduced-motion.png") });
@@ -171,12 +199,20 @@ for (const width of [390, 768, 1024, 1440, 2560]) {
   const page = await ctx.newPage();
   await page.goto(base, { waitUntil: "load" });
   await page.waitForTimeout(700);
-  await page.evaluate(() => window.scrollTo(0, 400));
-  await page.waitForTimeout(500);
+  await wheelTo(page, 400);
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
   check(overflow <= 1, `no horizontal overflow mid-scroll @${width} (${overflow}px)`);
+  // Blank edges only show while a layer is displaced — check at the extreme.
+  const gaps = await page.evaluate((sel) => {
+    const hero = document.querySelector("main section").getBoundingClientRect();
+    return [...document.querySelectorAll(sel)].slice(0, 3).filter((el) => {
+      const r = el.getBoundingClientRect();
+      return r.top > hero.top + 1 || r.bottom < hero.bottom - 1;
+    }).length;
+  }, LAYERS);
+  check(gaps === 0, `no layer exposes an edge while displaced @${width} (${gaps} short)`);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(400);
   await page.screenshot({ path: join(out, `top-${width}.png`) });

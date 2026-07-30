@@ -148,8 +148,20 @@ for (const [width, tag] of WIDTHS) {
   notes.push(`⌘K palette opens: ${paletteOpen}`);
   if (!paletteOpen) failures.push("⌘K did not open the command palette");
 
+  // The palette's Escape handler is bound to the dialog, and focus moves to
+  // the input inside a requestAnimationFrame. Pressing Escape before that
+  // lands sends the key to <body>, where nothing is listening — a race, not a
+  // failure. Wait for focus to arrive first.
+  await page
+    .waitForFunction(
+      () => document.activeElement?.getAttribute("aria-label") === "Search pages",
+      null,
+      { timeout: 5000 },
+    )
+    .catch(() => {});
+
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(250);
+  await page.waitForTimeout(300);
   const paletteClosed = await page.evaluate(
     () => !document.querySelector('[role="dialog"][aria-label="Jump to a page"]'),
   );

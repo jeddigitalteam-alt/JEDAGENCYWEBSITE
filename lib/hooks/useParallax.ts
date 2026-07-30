@@ -36,7 +36,7 @@ interface ParallaxOptions {
  */
 export function useParallaxLayers(
   factors: number[],
-  { mobileScale = 0.5, minWidth = 768, maxPx = 220 }: ParallaxOptions = {},
+  { mobileScale = 0.55, minWidth = 768, maxPx = 520 }: ParallaxOptions = {},
 ) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const layersRef = useRef<Array<HTMLElement | null>>([]);

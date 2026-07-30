@@ -23,13 +23,19 @@ const GRAIN =
  * stays geometric. If a video does arrive, drop it in as the deepest layer and
  * hand it `setLayer(0)` — nothing else needs to change.
  *
- * Three moving layers at 0.05 / 0.13 / 0.20, plus two static ones (grain and a
- * legibility scrim). Every layer overhangs the section generously so the lag
- * can never expose an edge, and the section already clips them.
+ * Three moving layers at 0.15 / 0.30 / 0.45, plus two static ones (grain and a
+ * legibility scrim). A layer at factor f travels at (1 - f) of page speed, so
+ * the front layer drifts at ~55% — a differential you can actually see. The
+ * first pass used 0.05/0.13/0.20, which lagged by only 45px across the whole
+ * hero and read as static.
+ *
+ * Overhangs are sized against the travel, not by eye: the front layer moves up
+ * to 0.45 x hero height, so it starts 60% above and stands 230% tall, leaving
+ * slack at both ends no matter how far it drifts. The section clips them.
  */
 export function Hero() {
   const { introDone, shouldRun } = useIntro();
-  const { sectionRef, setLayer } = useParallaxLayers([0.05, 0.13, 0.2]);
+  const { sectionRef, setLayer } = useParallaxLayers([0.15, 0.3, 0.45]);
 
   // While the client is still deciding (shouldRun === null) hold the pre-state
   // so nothing flashes in front of the loader.
@@ -54,10 +60,10 @@ export function Hero() {
       <div
         ref={setLayer(0)}
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-[15%] -top-[35%] h-[170%] opacity-[0.7]"
+        className="pointer-events-none absolute -inset-x-[15%] -top-[40%] h-[190%] opacity-[0.7]"
         style={{
           background:
-            "radial-gradient(58% 46% at 74% 26%, color-mix(in oklab, var(--blue) 26%, transparent) 0%, transparent 68%)",
+            "radial-gradient(52% 41% at 74% 26%, color-mix(in oklab, var(--blue) 26%, transparent) 0%, transparent 68%)",
         }}
       />
 
@@ -66,11 +72,11 @@ export function Hero() {
       <div
         ref={setLayer(1)}
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-[10%] -top-[28%] h-[156%]"
+        className="pointer-events-none absolute -inset-x-[10%] -top-[50%] h-[200%]"
       >
         <svg
           viewBox={VIEWBOX}
-          className="absolute -right-[14%] top-[6%] w-[62vmax] text-blue opacity-[0.11]"
+          className="absolute -right-[14%] top-[15.5%] w-[62vmax] text-blue opacity-[0.11]"
           fill="none"
           stroke="currentColor"
           strokeWidth={3}
@@ -83,7 +89,7 @@ export function Hero() {
         </svg>
         <svg
           viewBox={VIEWBOX}
-          className="absolute -left-[20%] bottom-[4%] w-[46vmax] -rotate-[18deg] text-blue opacity-[0.085]"
+          className="absolute -left-[20%] bottom-[14%] w-[46vmax] -rotate-[18deg] text-blue opacity-[0.085]"
           fill="none"
           stroke="currentColor"
           strokeWidth={4}
@@ -100,7 +106,7 @@ export function Hero() {
       <div
         ref={setLayer(2)}
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-[20%] -top-[22%] h-[144%]"
+        className="pointer-events-none absolute -inset-x-[20%] -top-[60%] h-[230%]"
         style={{
           backgroundImage:
             "repeating-linear-gradient(45deg, color-mix(in oklab, var(--blue) 26%, transparent) 0 1px, transparent 1px 148px)",
