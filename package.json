@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "gen:logo": "node scripts/gen-logo.mjs",
-    "shoot:loader": "node scripts/shoot-loader.mjs"
+    "gen:placeholders": "node scripts/gen-placeholders.mjs",
+    "shoot:loader": "node scripts/shoot-loader.mjs",
+    "verify:routes": "node scripts/verify-routes.mjs",
+    "verify:interactions": "node scripts/verify-interactions.mjs"
   },
   "dependencies": {
     "geist": "^1.7.2",

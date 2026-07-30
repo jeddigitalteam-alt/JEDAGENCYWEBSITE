@@ -37,27 +37,28 @@ export function IntroProvider({ children }: { children: React.ReactNode }) {
 
   // Decided on the client only: sessionStorage and the media query are both
   // unavailable during SSR, and guessing either would cause a flash.
+  //
+  // Deferred a frame rather than set synchronously in the effect body — the
+  // loader renders nothing until `shouldRun` resolves, so a single frame costs
+  // nothing and this avoids the cascading render the lint rule warns about.
   useEffect(() => {
-    const prefersReduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    setReduced(prefersReduced);
+    const raf = requestAnimationFrame(() => {
+      setReduced(
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      );
 
-    let seen = false;
-    try {
-      seen = sessionStorage.getItem(SESSION_KEY) === "1";
-    } catch {
-      // Private browsing / storage disabled — treat as unseen but never throw.
-      seen = false;
-    }
+      let seen = false;
+      try {
+        seen = sessionStorage.getItem(SESSION_KEY) === "1";
+      } catch {
+        // Private browsing / storage disabled — treat as unseen, never throw.
+        seen = false;
+      }
 
-    if (seen) {
-      setShouldRun(false);
-      setPhase("done");
-    } else {
-      setShouldRun(true);
-      setPhase("running");
-    }
+      setShouldRun(!seen);
+      setPhase(seen ? "done" : "running");
+    });
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   const markIntroDone = useCallback(() => {

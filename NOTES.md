@@ -114,6 +114,55 @@ collects console errors. Two traps it exists to avoid:
 `scripts/preview-mark.mjs` rasterises the static SVGs for a quick eyeball.
 Both write to `.preview/`, which is gitignored.
 
+## Bugs found during verification
+
+Recorded because each rendered *fine* and was wrong.
+
+1. **Cursor disc labelled "on" everywhere.** `Cursor` set `data-cursor="on"` on
+   `<body>` as its enable flag, while `data-cursor="View"` is the per-element
+   label. `closest("[data-cursor]")` therefore matched `<body>` from anywhere,
+   so every hover showed a disc reading "ON". Renamed the flag to
+   `data-custom-cursor`. There is now a regression check asserting `<body>`
+   carries no `data-cursor`.
+2. **Team cards could not be dragged.** `TeamBoard` passed `animate={{ x, y }}`
+   alongside `drag`; the animation prop fights the gesture and the drag never
+   commits. Rebuilt on `useMotionValue` so the gesture owns the transform.
+3. **Loader lock had no beat** (see timing section above).
+4. Two *test* faults worth noting, since both initially looked like product
+   bugs: synthetic mouse events are viewport-relative, so dragging a card below
+   the fold silently does nothing (fix: `scrollIntoViewIfNeeded`); and asserting
+   an `AnimatePresence` element is gone needs a wait longer than its exit
+   duration.
+
+## Lint: `react-hooks/set-state-in-effect`
+
+The React compiler lint flagged 8 instances. All were fixed properly rather than
+suppressed, and three were genuine improvements:
+
+- `useMediaQuery` (new, `lib/hooks/`) built on `useSyncExternalStore` — matchMedia
+  really is an external store, and it gives an explicit server snapshot.
+- `Header` now derives "is the menu open" from the pathname it was opened on,
+  instead of an effect that closes it after paint.
+- `RouteTransition` uses a ref for `firstPaint` — nothing renders from it, so
+  state only cost an extra render.
+
+The rest defer a single frame via `requestAnimationFrame`, which is honest: the
+values genuinely aren't knowable during SSR.
+
+## What each interaction actually does
+
+Verified by `npm run verify:interactions` (13 assertions, all passing) rather
+than by eye:
+
+| Route | Interaction | Asserted |
+|---|---|---|
+| `/services` | Scope builder | Pieces seat via shared `layoutId`; estimate is live; phases *overlap* (8w + 7w → 12w, not 15w); send carries params |
+| `/contact` | Prefill + gate | Scope arrives from the builder; unconfigured state is declared, never faked |
+| `/` | Mega-menu | Both columns render; Esc closes |
+| `/labs` | Tessellation | Pieces drop, and the canvas is sampled for lit pixels to prove they paint |
+| `/about` | Team board | Card drags loose (7/8), reassemble seats all (8/8) |
+| `/industries` | Filter | Grid narrows 12 → 2 with layout reorder |
+
 ## Open / needs input
 
 - **Brand PNGs are absent.** `5.png`, `7.png`, `8.png`, `10.png` were never on

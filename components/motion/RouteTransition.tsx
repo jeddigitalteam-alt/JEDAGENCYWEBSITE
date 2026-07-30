@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SeamPanels from "@/components/motion/SeamPanels";
 import { PIECE_A, PIECE_B, VIEWBOX } from "@/components/brand/puzzle-paths";
 import { useIntro } from "@/components/motion/intro-context";
@@ -23,26 +23,33 @@ export function RouteTransition() {
   const { shouldRun, introDone } = useIntro();
   const [open, setOpen] = useState(true);
   const [active, setActive] = useState(false);
-  const [firstPaint, setFirstPaint] = useState(true);
+  // A ref, not state: nothing renders differently because of it, so making it
+  // state would only cause an extra render on mount.
+  const firstPaint = useRef(true);
 
   useEffect(() => {
     // Don't fire on the initial render, or while the intro loader is on screen.
-    if (firstPaint) {
-      setFirstPaint(false);
+    if (firstPaint.current) {
+      firstPaint.current = false;
       return;
     }
     if (reduced) return;
     if (shouldRun === true && !introDone) return;
 
-    setActive(true);
-    setOpen(false);
-
-    // Part the panels on the next frame so the closed state paints first.
-    const raf = requestAnimationFrame(() => setOpen(true));
-    const done = setTimeout(() => setActive(false), DUR * 1000 + 120);
+    // Two frames: the first mounts the panels closed, the second parts them —
+    // so the covered state actually paints before the reveal starts. Both run
+    // in callbacks rather than the effect body.
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      setActive(true);
+      setOpen(false);
+      second = requestAnimationFrame(() => setOpen(true));
+    });
+    const done = setTimeout(() => setActive(false), DUR * 1000 + 160);
 
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
       clearTimeout(done);
     };
     // Intentionally keyed on pathname only.

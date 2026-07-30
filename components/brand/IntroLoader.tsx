@@ -61,8 +61,10 @@ export function IntroLoader() {
 
     if (reduced) {
       // Static mark, brief hold, clear. No draw, no lock travel.
-      setCount(100);
-      setLocked(true);
+      at(() => {
+        setCount(100);
+        setLocked(true);
+      }, 0);
       at(() => {
         setCleared(true);
         markIntroDone();
