@@ -89,7 +89,7 @@ export function Header() {
             className="h-7 w-7 text-blue transition-transform duration-500 group-hover:rotate-45"
             style={{ transitionTimingFunction: "cubic-bezier(.16,1,.3,1)" }}
           />
-          <span className="display text-step-1 lowercase leading-none">
+          <span className="wordmark text-step-1 lowercase leading-none">
             {SITE.wordmark}
           </span>
         </Link>

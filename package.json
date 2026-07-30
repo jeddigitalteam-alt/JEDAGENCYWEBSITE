@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/gen-gilroy-css.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/gen-gilroy-css.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "gen:gilroy": "node scripts/gen-gilroy-css.mjs",
     "gen:logo": "node scripts/gen-logo.mjs",
     "gen:placeholders": "node scripts/gen-placeholders.mjs",
     "shoot:loader": "node scripts/shoot-loader.mjs",

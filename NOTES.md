@@ -163,6 +163,33 @@ than by eye:
 | `/about` | Team board | Card drags loose (7/8), reassemble seats all (8/8) |
 | `/industries` | Filter | Grid narrows 12 → 2 with layout reorder |
 
+## The wordmark: Gilroy
+
+The "puzzle" logo — header lockup and the large footer wordmark — is set in
+Gilroy via the `.wordmark` class. Headlines stay on `.display` (Instrument
+Serif); this is the logo only.
+
+Gilroy is **commercial** (Radomir Tinkov), not on Google Fonts, so it can't come
+through `next/font/google`, and self-hosting it publicly needs a **webfont**
+licence — a desktop licence doesn't cover serving the files. No files were
+supplied and they aren't ours to redistribute, so `public/fonts/gilroy/` ships
+with a README and nothing else.
+
+**`app/gilroy.css` is generated**, not hand-written. `scripts/gen-gilroy-css.mjs`
+runs on `prebuild`/`predev` and emits a `url()` source only for files it can
+actually see. The reason is concrete: the first version hard-coded
+`url("/fonts/gilroy/Gilroy-Bold.woff2")`, and because the file doesn't exist that
+produced **a 404 on every route in the site** — which fails the §8 "no console
+errors" floor. Now a missing face carries `local()` alone, makes no network
+request, and falls through cleanly.
+
+Drop `Gilroy-Regular.woff2` and `Gilroy-Bold.woff2` into `public/fonts/gilroy/`,
+rebuild, and it self-hosts. No code change.
+
+Fallback while absent: `local()` picks up an installed desktop copy if the
+visitor has one; otherwise **Geist**, chosen because it's a geometric grotesque
+and degrades toward Gilroy's character rather than to the serif.
+
 ## Open / needs input
 
 - **Brand PNGs are absent.** `5.png`, `7.png`, `8.png`, `10.png` were never on

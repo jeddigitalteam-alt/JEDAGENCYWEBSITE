@@ -113,6 +113,14 @@ for (const [width, tag] of WIDTHS) {
   });
   const page = await ctx.newPage();
   await page.goto(base + "/", { waitUntil: "load" });
+  // The keyboard checks below need React to have hydrated and attached its
+  // document-level listeners. Without this the ⌘K assertion is a coin flip.
+  await page.waitForFunction(
+    () => document.body.dataset.customCursor === "on",
+    null,
+    { timeout: 10000 },
+  );
+  await page.waitForTimeout(200);
 
   await page.keyboard.press("Tab");
   const firstFocus = await page.evaluate(() => {

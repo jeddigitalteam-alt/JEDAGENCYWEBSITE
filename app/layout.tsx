@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+// Generated from the files actually present in public/fonts/gilroy/ — see
+// scripts/gen-gilroy-css.mjs.
+import "./gilroy.css";
 import { IntroProvider } from "@/components/motion/intro-context";
 import IntroLoader from "@/components/brand/IntroLoader";
 import RouteTransition from "@/components/motion/RouteTransition";

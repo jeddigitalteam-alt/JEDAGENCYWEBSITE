@@ -1,0 +1,30 @@
+/* GENERATED FILE — do not edit by hand.
+ * Written by scripts/gen-gilroy-css.mjs on prebuild/predev.
+ *
+ * Present:  none
+ * Missing:  Gilroy-Regular.woff2, Gilroy-Bold.woff2
+ *
+ * Missing files carry local() only — no url(), so no 404. The wordmark
+ * falls back to Geist until they are added. See public/fonts/gilroy/README.md.
+ */
+
+@font-face {
+  font-family: "Gilroy";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local("Gilroy Regular"),
+    local("Gilroy-Regular"),
+    local("Gilroy");
+}
+
+@font-face {
+  font-family: "Gilroy";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Gilroy Bold"),
+    local("Gilroy-Bold");
+}

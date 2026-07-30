@@ -146,6 +146,25 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* Gilroy's @font-face rules live in app/gilroy.css, which is GENERATED from
+   whatever is actually present in public/fonts/gilroy/ (see
+   scripts/gen-gilroy-css.mjs, wired to prebuild/predev). Declaring a url()
+   source for a file that isn't there costs a 404 on every single route, so the
+   generator only emits url() sources for files it can see. */
+
+/**
+ * The wordmark. Used for the "puzzle" lockup in the header and the large
+ * footer wordmark — the logo, not headlines. Headlines stay on `.display`.
+ */
+.wordmark {
+  font-family:
+    "Gilroy", var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  /* Geometric lowercase needs pulling in slightly, more so at display sizes. */
+  letter-spacing: -0.03em;
+  font-feature-settings: "kern" 1;
+}
+
 /* Marquee track is duplicated once in markup and shifts by exactly -50%,
    so the loop is seamless whatever the item widths are. */
 @keyframes marquee {

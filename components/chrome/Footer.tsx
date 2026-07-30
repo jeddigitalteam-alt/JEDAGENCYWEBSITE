@@ -117,7 +117,7 @@ export function Footer() {
               <path d={PIECE_B} />
             </svg>
             <span
-              className="display select-none text-[18vw] lowercase leading-[0.75]"
+              className="wordmark select-none text-[18vw] lowercase leading-[0.75]"
               aria-hidden="true"
             >
               {SITE.wordmark}
