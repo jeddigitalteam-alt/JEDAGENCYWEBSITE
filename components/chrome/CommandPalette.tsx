@@ -52,6 +52,17 @@ export function CommandPalette() {
     };
   }, []);
 
+  /* Announce open/closed so chrome that has to stay put while the palette is up
+     — the sticky header — can pin itself without reaching into this component's
+     state. Attribute rather than event, so a listener mounting late still reads
+     the correct value. */
+  useEffect(() => {
+    document.documentElement.dataset.paletteOpen = open ? "true" : "false";
+    document.dispatchEvent(
+      new CustomEvent("puzzle:palette-state", { detail: { open } }),
+    );
+  }, [open]);
+
   // Focus only — the query/index reset happens where the palette is opened, so
   // this effect touches the DOM rather than cascading more renders.
   useEffect(() => {

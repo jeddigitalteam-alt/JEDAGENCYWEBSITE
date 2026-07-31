@@ -8,6 +8,7 @@ import { IntroProvider } from "@/components/motion/intro-context";
 import IntroLoader from "@/components/brand/IntroLoader";
 import RouteTransition from "@/components/motion/RouteTransition";
 import SmoothScroll from "@/components/motion/SmoothScroll";
+import ScrollToTop from "@/components/motion/ScrollToTop";
 import Header from "@/components/chrome/Header";
 import Footer from "@/components/chrome/Footer";
 import Cursor from "@/components/chrome/Cursor";
@@ -77,6 +78,7 @@ export default function RootLayout({
             Skip to content
           </a>
           <SmoothScroll />
+          <ScrollToTop />
           <IntroLoader />
           <RouteTransition />
           <Cursor />

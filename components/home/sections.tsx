@@ -32,20 +32,34 @@ export function SelectedWork() {
       </div>
 
       <div className="grid gap-x-6 gap-y-14 md:grid-cols-2">
-        {shown.map((study, i) => (
-          <div key={study.slug} className={i % 3 === 0 ? "md:col-span-2" : ""}>
-            <WorkTile
-              study={study}
-              index={i}
-              priority={i === 0}
-              sizes={
-                i % 3 === 0
-                  ? "(min-width: 768px) 100vw, 100vw"
-                  : "(min-width: 768px) 50vw, 100vw"
-              }
-            />
-          </div>
-        ))}
+        {shown.map((study, i) => {
+          const featured = i % 3 === 0;
+          return (
+            <div key={study.slug} className={featured ? "md:col-span-2" : ""}>
+              <WorkTile
+                study={study}
+                index={i}
+                priority={i === 0}
+                sizes={
+                  featured
+                    ? "(min-width: 768px) 100vw, 100vw"
+                    : "(min-width: 768px) 50vw, 100vw"
+                }
+                /* The featured tile runs the full width of the page, so a fixed
+                   4:3 box grows past the height of the viewport on any wide
+                   monitor — 115% at 1440px, 281% at 3440px. The ratio gives it
+                   a banner shape from lg up, and the max-height is the ceiling
+                   that ultrawide displays need, where even 2:1 is still taller
+                   than the screen. Below lg it stays 4:3, untouched. */
+                frameClassName={
+                  featured
+                    ? "lg:aspect-[16/9] lg:max-h-[82vh] 2xl:aspect-[2/1]"
+                    : ""
+                }
+              />
+            </div>
+          );
+        })}
       </div>
     </section>
   );

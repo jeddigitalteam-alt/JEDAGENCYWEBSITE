@@ -21,12 +21,20 @@ export function WorkTile({
   priority = false,
   sizes = "(min-width: 1024px) 50vw, 100vw",
   videoSrc,
+  frameClassName = "",
 }: {
   study: CaseStudy;
   index: number;
   priority?: boolean;
   sizes?: string;
   videoSrc?: string;
+  /**
+   * Extra classes for the image frame. Used by the full-width featured tile to
+   * widen its aspect ratio on large screens — at a fixed 4:3 a full-bleed tile
+   * is taller than the viewport on any wide monitor. Defaults to nothing, so
+   * every other tile keeps the plain 4:3 box.
+   */
+  frameClassName?: string;
 }) {
   const reduced = useReducedMotion();
   const [hovered, setHovered] = useState(false);
@@ -51,7 +59,9 @@ export function WorkTile({
       onFocus={onEnter}
       onBlur={onLeave}
     >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-ink-raised">
+      <div
+        className={`relative aspect-[4/3] overflow-hidden rounded-xl bg-ink-raised ${frameClassName}`}
+      >
         <motion.div
           className="absolute inset-0"
           animate={{ scale: hovered && !reduced ? 1.04 : 1 }}

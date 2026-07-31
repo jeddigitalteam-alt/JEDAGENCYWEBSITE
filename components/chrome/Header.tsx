@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -8,6 +8,11 @@ import { PRIMARY_NAV, SITE } from "@/lib/site";
 import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+
+/** Always shown within this distance of the top, whichever way you are going. */
+const TOP_ZONE = 64;
+/** Ignore movement smaller than this, so trackpad jitter cannot toggle it. */
+const TOLERANCE = 10;
 
 export function Header() {
   const pathname = usePathname();
@@ -55,8 +60,56 @@ export function Header() {
 
   const openItem = PRIMARY_NAV.find((n) => n.label === openLabel);
 
+  /* --- hide going down, reveal coming up -------------------------------
+     Compares against the last position that actually moved the header, so a
+     run of sub-TOLERANCE deltas accumulates instead of being discarded — that
+     is what stops a trackpad twitch flickering it. Reads window.scrollY, which
+     Lenis drives, so smooth scrolling is already accounted for. */
+  const reduced = useReducedMotion();
+  const [hidden, setHidden] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const lastY = useRef(0);
+
+  useEffect(() => {
+    lastY.current = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y <= TOP_ZONE) {
+        lastY.current = y;
+        setHidden(false);
+        return;
+      }
+      const delta = y - lastY.current;
+      if (Math.abs(delta) < TOLERANCE) return;
+      lastY.current = y;
+      setHidden(delta > 0);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* The palette is the mobile menu, so the header stays put while it is open.
+     No initial read is needed: both mount together in the root layout and the
+     palette always starts closed, so the only transitions come from the event. */
+  useEffect(() => {
+    const onState = (e: Event) =>
+      setPaletteOpen(Boolean((e as CustomEvent).detail?.open));
+    document.addEventListener("puzzle:palette-state", onState);
+    return () => document.removeEventListener("puzzle:palette-state", onState);
+  }, []);
+
+  // An open mega-menu or palette pins it regardless of scroll direction.
+  const pinned = Boolean(openLabel) || paletteOpen;
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
+    <motion.header
+      className="fixed inset-x-0 top-0 z-50"
+      initial={false}
+      animate={{ y: hidden && !pinned ? "-100%" : "0%" }}
+      transition={
+        reduced ? { duration: 0 } : { duration: 0.34, ease: EASE }
+      }
+    >
       {/* Backdrop is rendered OUTSIDE the hover wrapper on purpose. Inside it,
           this full-viewport element would count as part of the wrapper's hover
           region and the panel could never close on mouse-leave. */}
@@ -233,7 +286,7 @@ export function Header() {
           Menu
         </button>
       </div>
-    </header>
+    </motion.header>
   );
 }
 
