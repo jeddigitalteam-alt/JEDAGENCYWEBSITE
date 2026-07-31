@@ -10,6 +10,16 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const SPRING = { type: "spring", stiffness: 420, damping: 32, mass: 0.7 } as const;
 
 /**
+ * The services the board can build a scope from.
+ *
+ * Retainer is deliberately excluded: it is a standing arrangement rather than a
+ * scoped piece of work, so it has no meaningful phase estimate to add to the
+ * board. Every count on this component derives from this list, so the shelf,
+ * the "picked / total" counter and the estimate all stay in agreement.
+ */
+const SCOPE_SERVICES = SERVICES.filter((s) => s.slug !== "retainer");
+
+/**
  * "Build your scope."
  *
  * Service tiles snap into a board as pieces. `layoutId` does the physical part:
@@ -24,7 +34,7 @@ export function ScopeBuilder() {
   const [picked, setPicked] = useState<string[]>([]);
 
   const estimate = useMemo(() => estimateScope(picked), [picked]);
-  const available = SERVICES.filter((s) => !picked.includes(s.slug));
+  const available = SCOPE_SERVICES.filter((s) => !picked.includes(s.slug));
 
   const toggle = (slug: string) =>
     setPicked((p) =>
@@ -91,14 +101,14 @@ export function ScopeBuilder() {
             <p className="mono text-content-dim">Your scope</p>
             <p className="mono tabular-nums text-content-dim">
               {String(picked.length).padStart(2, "0")} /{" "}
-              {String(SERVICES.length).padStart(2, "0")}
+              {String(SCOPE_SERVICES.length).padStart(2, "0")}
             </p>
           </div>
 
           <ul className="mt-5 grid min-h-[13rem] content-start gap-2">
             <AnimatePresence mode="popLayout">
               {picked.map((slug, i) => {
-                const s = SERVICES.find((x) => x.slug === slug)!;
+                const s = SCOPE_SERVICES.find((x) => x.slug === slug)!;
                 return (
                   <motion.li
                     key={slug}

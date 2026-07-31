@@ -1,14 +1,13 @@
 /**
  * Case studies.
  *
- * LEVANT is the real, fully written one. The rest are credible placeholders —
- * they carry honest metadata and copy but no invented client outcomes.
+ * Every entry here is a real project with real artwork. LEVANT is the only one
+ * written up in full; the other two carry factual metadata and no invented
+ * client outcomes. The demo entries that used to pad this list have been
+ * removed, so counts shown around the site are genuine.
  *
  * IMAGE PATHS ARE CENTRALISED HERE ON PURPOSE. Swapping an asset means editing
  * the path here and nothing else — every tile, rail and hero reads from it.
- *
- * LEVANT now carries real supplied artwork. The remaining entries still point
- * at generated placeholders at the correct aspect ratio.
  */
 
 export interface Chapter {
@@ -165,127 +164,6 @@ export const WORK: CaseStudy[] = [
     thumb: "/work/bespoke-garden-decor/home.png",
     hero: "/work/bespoke-garden-decor/products.png",
     heroPosition: "center 78%",
-  },
-  {
-    slug: "meridian-health",
-    client: "Meridian Health",
-    sector: "Patient software",
-    year: "2025",
-    scope: ["Product design", "Design system"],
-    summary: "A referral tool redesigned around the interrupted session.",
-    industries: ["healthcare", "saas"],
-    thumb: "/work/placeholder/meridian.jpg",
-    hero: "/work/placeholder/meridian.jpg",
-  },
-  {
-    slug: "northbank",
-    client: "Northbank",
-    sector: "Business banking",
-    year: "2024",
-    scope: ["Brand identity", "Web design"],
-    summary: "An identity built to make fees legible rather than invisible.",
-    industries: ["fintech", "b2b"],
-    thumb: "/work/placeholder/northbank.jpg",
-    hero: "/work/placeholder/northbank.jpg",
-  },
-  {
-    slug: "kestrel",
-    client: "Kestrel",
-    sector: "Developer tooling",
-    year: "2025",
-    scope: ["Web design", "Web development"],
-    summary: "Docs treated as the primary brand surface, not an afterthought.",
-    industries: ["saas", "ai"],
-    thumb: "/work/placeholder/kestrel.jpg",
-    hero: "/work/placeholder/kestrel.jpg",
-  },
-  {
-    slug: "atlas-freight",
-    client: "Atlas Freight",
-    sector: "Logistics",
-    year: "2024",
-    scope: ["Digital product design"],
-    summary: "A dispatch board that four different roles can read at a glance.",
-    industries: ["b2b"],
-    thumb: "/work/placeholder/atlas.jpg",
-    hero: "/work/placeholder/atlas.jpg",
-  },
-  {
-    slug: "harbour-goods",
-    client: "Harbour Goods",
-    sector: "Homeware retail",
-    year: "2024",
-    scope: ["E-commerce build", "Motion"],
-    summary: "Product photography given room to do the selling.",
-    industries: ["ecommerce"],
-    thumb: "/work/placeholder/harbour.jpg",
-    hero: "/work/placeholder/harbour.jpg",
-  },
-  {
-    slug: "orbit-labs",
-    client: "Orbit Labs",
-    sector: "Applied research",
-    year: "2025",
-    scope: ["AI design", "Web design"],
-    summary: "An evaluation surface that makes model failure visible.",
-    industries: ["ai"],
-    thumb: "/work/placeholder/orbit.jpg",
-    hero: "/work/placeholder/orbit.jpg",
-  },
-  {
-    slug: "pellum",
-    client: "Pellum",
-    sector: "Payments",
-    year: "2024",
-    scope: ["Brand identity", "Web development"],
-    summary: "A payments brand that survives being set at 11px.",
-    industries: ["fintech"],
-    thumb: "/work/placeholder/pellum.jpg",
-    hero: "/work/placeholder/pellum.jpg",
-  },
-  {
-    slug: "fieldwork",
-    client: "Fieldwork",
-    sector: "Research platform",
-    year: "2023",
-    scope: ["Digital product design", "Design system"],
-    summary: "Twelve product teams, one component library they actually use.",
-    industries: ["saas", "b2b"],
-    thumb: "/work/placeholder/fieldwork.jpg",
-    hero: "/work/placeholder/fieldwork.jpg",
-  },
-  {
-    slug: "sable-court",
-    client: "Sable Court",
-    sector: "Racquet sports",
-    year: "2023",
-    scope: ["Brand identity", "Motion"],
-    summary: "A club rebrand that reads from the back of the stand.",
-    industries: ["sports"],
-    thumb: "/work/placeholder/sable.jpg",
-    hero: "/work/placeholder/sable.jpg",
-  },
-  {
-    slug: "verity",
-    client: "Verity",
-    sector: "Insurance",
-    year: "2023",
-    scope: ["Web design", "Web development"],
-    summary: "Policy documents made readable without losing precision.",
-    industries: ["fintech", "b2b"],
-    thumb: "/work/placeholder/verity.jpg",
-    hero: "/work/placeholder/verity.jpg",
-  },
-  {
-    slug: "ground-station",
-    client: "Ground Station",
-    sector: "Climate data",
-    year: "2025",
-    scope: ["Digital product design", "AI design"],
-    summary: "Forecast uncertainty shown as a range, never a single number.",
-    industries: ["ai", "saas"],
-    thumb: "/work/placeholder/ground.jpg",
-    hero: "/work/placeholder/ground.jpg",
   },
 ];
 

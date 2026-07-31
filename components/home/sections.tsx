@@ -21,11 +21,7 @@ export function SelectedWork() {
       <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
         <div>
           <Eyebrow>Selected work</Eyebrow>
-          <SectionHeading
-            roman="Things we"
-            italic="finished"
-            className="mt-4"
-          />
+          <SectionHeading roman="Recent" italic="work" className="mt-4" />
         </div>
         <Link
           href="/work"

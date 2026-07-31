@@ -16,13 +16,6 @@ const PROJECT_TYPES = [
   "Retainer",
   "Something else",
 ];
-const BUDGETS = [
-  "Under £25k",
-  "£25k – £50k",
-  "£50k – £100k",
-  "£100k+",
-  "Not sure yet",
-];
 const TIMELINES = [
   "As soon as possible",
   "Next quarter",
@@ -30,13 +23,15 @@ const TIMELINES = [
   "Just exploring",
 ];
 
-const STEPS = ["Project", "Budget", "Timeline", "Details"] as const;
+/* Every step index, the progress readout, the dots and the next/back buttons
+   all derive from this array, so a stage is added or removed here and nowhere
+   else. We do not ask about budget. */
+const STEPS = ["Project", "Timeline", "Details"] as const;
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 interface FormState {
   projectType: string;
-  budget: string;
   timeline: string;
   name: string;
   email: string;
@@ -66,7 +61,6 @@ export function ContactForm() {
   const [touched, setTouched] = useState(false);
   const [form, setForm] = useState<FormState>({
     projectType: scopeNames[0] ?? "",
-    budget: "",
     timeline: scopeWeeks ? "As soon as possible" : "",
     name: "",
     email: "",
@@ -87,7 +81,6 @@ export function ContactForm() {
 
   const canAdvance = [
     Boolean(form.projectType),
-    Boolean(form.budget),
     Boolean(form.timeline),
     detailsValid,
   ][step];
@@ -116,7 +109,6 @@ export function ContactForm() {
           email: form.email,
           message: form.message,
           projectType: form.projectType,
-          budget: form.budget,
           timeline: form.timeline,
           scope: scopeNames.join(", ") || "—",
           estimatedWeeks: scopeWeeks ?? "—",
@@ -211,22 +203,13 @@ export function ContactForm() {
           ) : null}
           {step === 1 ? (
             <Choices
-              legend="Roughly what budget?"
-              hint="A range is fine. It tells us what shape of team to propose."
-              options={BUDGETS}
-              value={form.budget}
-              onChange={(v) => set("budget", v)}
-            />
-          ) : null}
-          {step === 2 ? (
-            <Choices
               legend="When do you need it?"
               options={TIMELINES}
               value={form.timeline}
               onChange={(v) => set("timeline", v)}
             />
           ) : null}
-          {step === 3 ? (
+          {step === 2 ? (
             <fieldset className="grid gap-5">
               <legend className="display text-step-2">
                 Who are we talking to?
