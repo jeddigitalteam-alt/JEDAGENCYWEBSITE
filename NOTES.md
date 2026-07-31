@@ -57,15 +57,24 @@ All three via `next/font/google`, self-hosted, `display: swap`. No CDN links.
 `public/logo.svg`, `public/icon.svg` and the loader all read from it.
 
 `scripts/gen-logo.mjs` regenerates the static SVGs from the TS source
-(`npm run gen:logo`) so the files cannot drift from the component. Verified the
-two subpaths share the seam: A carries `343.5 343.6`, B carries `342.3 344.1`, and
-the locked state is the path data untransformed. No per-piece transform survives
-the lock animation — it ends on exactly `x: 0, y: 0`.
+(`npm run gen:logo`) so the files cannot drift from the component. No per-piece
+transform survives the lock animation — it ends on exactly `x: 0, y: 0`.
+
+The geometry is the corrected artwork in `public/Puzzle Logo.svg`, remapped out
+of its native 714 box into the canonical 1000 box by a single uniform scale
+(1.687434) applied to both pieces, so the remap cannot disturb the seam and the
+mark keeps the on-screen size it had before. The pieces **do not touch**: they
+are cut from one path and held apart by `SEAM_GAP` (31.75 units). Tab and socket
+are inverse shapes about a shared centre — socket radius = tab radius + the full
+gap — so the band holds its width all the way round the tab rather than pinching
+at the flanks. It widens at the neck of the tab, which is intended.
 
 ## The signature: the seam
 
-The mark's defining feature is the single continuous line where the pieces meet,
-not the pieces. So one blue line is a persistent site object that changes role:
+The mark's defining feature is the band where the pieces separate, not the
+pieces. It reads as background rather than ink, so the mark needs no second
+colour and `currentColor` still drives the whole thing. That band is echoed as a
+blue line elsewhere on the site, a persistent object that changes role:
 
 - loader → the seam the pieces lock along
 - route change → the diagonal the wipe parts on (`SeamPanels`, shared component)
