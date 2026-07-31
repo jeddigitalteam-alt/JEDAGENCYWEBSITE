@@ -53,8 +53,23 @@ All three via `next/font/google`, self-hosted, `display: swap`. No CDN links.
 
 ## The mark
 
-`components/brand/puzzle-paths.ts` is the single source of truth. `PuzzleMark.tsx`,
-`public/logo.svg`, `public/icon.svg` and the loader all read from it.
+There are **two** marks, deliberately kept apart:
+
+| | site logo | intro loader |
+|---|---|---|
+| geometry | `components/brand/puzzle-paths.ts` | `components/brand/puzzle-loader-paths.ts` |
+| component | `components/brand/PuzzleSiteLogo.tsx` | `components/brand/IntroLoader.tsx` |
+| treatment | solid blue + white keyline | stroke-only outline on ink |
+| pieces | held apart by `SEAM_GAP` | locked, edge to edge |
+
+The loader geometry is a frozen copy taken at commit `f9b998f`, before the logo
+was rebuilt from the corrected artwork. It is duplicated rather than imported on
+purpose: **editing the site logo must have zero visual effect on the loader.**
+Verified by replacing both site pieces with triangles and confirming the
+loader's rendered path data hashed identically.
+
+`puzzle-paths.ts` is the source of truth for the site logo only.
+`PuzzleSiteLogo.tsx`, `public/logo.svg` and `public/icon.svg` read from it.
 
 `scripts/gen-logo.mjs` regenerates the static SVGs from the TS source
 (`npm run gen:logo`) so the files cannot drift from the component. No per-piece

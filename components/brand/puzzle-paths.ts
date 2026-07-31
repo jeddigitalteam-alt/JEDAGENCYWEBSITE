@@ -43,6 +43,30 @@ export const PIECE_B =
 export const PIECES = [PIECE_A, PIECE_B] as const;
 
 /**
+ * White keyline, as drawn by PuzzleSiteLogo.
+ *
+ * The visible halo is one SEAM_GAP thick, which is exactly what the source
+ * artwork carries. A centred stroke shows half its width outside the contour,
+ * so the stroke itself is twice that. The consequence worth knowing: each
+ * piece's halo reaches precisely as far as the other piece's contour, so the
+ * two halos close the seam completely and it is painted white rather than left
+ * as exposed background.
+ */
+export const KEYLINE_HALO = SEAM_GAP;
+export const KEYLINE_STROKE = SEAM_GAP * 2;
+
+/**
+ * VIEWBOX widened to contain the halo, which overhangs the mark's bounding box
+ * by KEYLINE_HALO on every side. Drawing the keyline inside the plain 1000 box
+ * would clip it at the four diamond points.
+ *
+ * The mark spans [30, 969.4]; a round join carries the halo a full KEYLINE_HALO
+ * out from each diamond tip, so the artwork spans [-1.75, 1001.15]. Four units
+ * of margin covers that and costs 0.8% of drawn size against the plain box.
+ */
+export const LOGO_VIEWBOX = "-4 -4 1008 1008";
+
+/**
  * The seam runs down-right at ~45°, direction ≈ (1,1)/√2. The normal is
  * therefore (1,-1)/√2 — piece A separates up-right, piece B down-left. Used
  * only by the loader's lock animation.

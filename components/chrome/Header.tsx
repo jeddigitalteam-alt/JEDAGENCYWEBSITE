@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PRIMARY_NAV, SITE } from "@/lib/site";
-import PuzzleMark from "@/components/brand/PuzzleMark";
+import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -81,8 +81,7 @@ export function Header() {
           aria-label={`${SITE.name} — home`}
           onFocus={close}
         >
-          <PuzzleMark
-            variant="solid"
+          <PuzzleSiteLogo
             className="h-7 w-7 text-blue transition-transform duration-500 group-hover:rotate-45"
             style={{ transitionTimingFunction: "cubic-bezier(.16,1,.3,1)" }}
           />

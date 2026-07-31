@@ -18,11 +18,18 @@ export function SeamPanels({
   open,
   duration = 0.45,
   className = "",
+  angleDeg = SEAM_ANGLE_DEG,
 }: {
   /** `false` = covering the viewport, `true` = split apart. */
   open: boolean;
   duration?: number;
   className?: string;
+  /**
+   * Seam angle in degrees. Defaults to the site-wide value. The intro loader
+   * passes its own frozen constant so that retuning the site mark cannot move
+   * the loader — see components/brand/puzzle-loader-paths.ts.
+   */
+  angleDeg?: number;
 }) {
   const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -36,7 +43,7 @@ export function SeamPanels({
         style={{
           width: "300vmax",
           height: "300vmax",
-          transform: `translate(-50%, -50%) rotate(${SEAM_ANGLE_DEG}deg)`,
+          transform: `translate(-50%, -50%) rotate(${angleDeg}deg)`,
         }}
       >
         <motion.div

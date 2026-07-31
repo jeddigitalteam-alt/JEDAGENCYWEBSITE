@@ -5,11 +5,27 @@ import { useEffect, useRef, useState } from "react";
 import { useIntro } from "@/components/motion/intro-context";
 import SeamPanels from "@/components/motion/SeamPanels";
 import {
-  PIECE_A,
-  PIECE_B,
-  PIECE_OFFSETS,
-  VIEWBOX,
-} from "@/components/brand/puzzle-paths";
+  LOADER_PIECE_A,
+  LOADER_PIECE_B,
+  LOADER_PIECE_OFFSETS,
+  LOADER_SEAM_ANGLE_DEG,
+  LOADER_VIEWBOX,
+} from "@/components/brand/puzzle-loader-paths";
+
+/**
+ * ============================================================================
+ *  LOADER ARTWORK LOCKED — DO NOT MODIFY WHEN EDITING THE SITE LOGO
+ * ============================================================================
+ *
+ * This component draws the LOADER mark, not the site logo. Its geometry comes
+ * from ./puzzle-loader-paths, a frozen copy that nothing else imports, so the
+ * site logo (./PuzzleSiteLogo + ./puzzle-paths) can be changed freely without
+ * touching what renders here.
+ *
+ * Locked: shape, stroke, animation, timing, positioning, and how the pieces
+ * connect. The pieces are stroke-only outlines on ink and they lock edge to
+ * edge — do NOT give them the site logo's blue fill or white keyline.
+ */
 
 /* --- timing -------------------------------------------------------------
    Hero is cued at CLEAR_AT (1.75s) and the overlay is pointer-events-none
@@ -87,7 +103,11 @@ export function IntroLoader() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[100]">
-      <SeamPanels open={cleared} duration={reduced ? 0.01 : CLEAR_DUR} />
+      <SeamPanels
+        open={cleared}
+        duration={reduced ? 0.01 : CLEAR_DUR}
+        angleDeg={LOADER_SEAM_ANGLE_DEG}
+      />
 
       {/* Mark sits above the panels and is deliberately NOT rotated. */}
       <motion.div
@@ -96,7 +116,7 @@ export function IntroLoader() {
         transition={{ duration: 0.3, ease: EASE_LOCK }}
       >
         <svg
-          viewBox={VIEWBOX}
+          viewBox={LOADER_VIEWBOX}
           className="w-[min(52vw,30rem)] text-blue"
           fill="none"
           stroke="currentColor"
@@ -106,23 +126,37 @@ export function IntroLoader() {
           role="img"
           aria-label="Puzzle"
         >
-          {[PIECE_A, PIECE_B].map((d, i) => (
+          {[LOADER_PIECE_A, LOADER_PIECE_B].map((d, i) => (
             <motion.g
               key={i}
               initial={
                 reduced
                   ? false
-                  : { x: PIECE_OFFSETS[i].x, y: PIECE_OFFSETS[i].y }
+                  : {
+                      x: LOADER_PIECE_OFFSETS[i].x,
+                      y: LOADER_PIECE_OFFSETS[i].y,
+                    }
               }
               animate={
                 locked
                   ? {
                       // Overshoot slightly past the seam, then settle on
                       // exactly 0 — never a residual offset.
-                      x: [PIECE_OFFSETS[i].x, PIECE_OFFSETS[i].x * -0.07, 0],
-                      y: [PIECE_OFFSETS[i].y, PIECE_OFFSETS[i].y * -0.07, 0],
+                      x: [
+                        LOADER_PIECE_OFFSETS[i].x,
+                        LOADER_PIECE_OFFSETS[i].x * -0.07,
+                        0,
+                      ],
+                      y: [
+                        LOADER_PIECE_OFFSETS[i].y,
+                        LOADER_PIECE_OFFSETS[i].y * -0.07,
+                        0,
+                      ],
                     }
-                  : { x: PIECE_OFFSETS[i].x, y: PIECE_OFFSETS[i].y }
+                  : {
+                      x: LOADER_PIECE_OFFSETS[i].x,
+                      y: LOADER_PIECE_OFFSETS[i].y,
+                    }
               }
               transition={{
                 duration: reduced ? 0 : LOCK_DUR,
