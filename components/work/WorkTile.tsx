@@ -22,6 +22,7 @@ export function WorkTile({
   sizes = "(min-width: 1024px) 50vw, 100vw",
   videoSrc,
   frameClassName = "",
+  imagePosition,
 }: {
   study: CaseStudy;
   index: number;
@@ -35,6 +36,12 @@ export function WorkTile({
    * every other tile keeps the plain 4:3 box.
    */
   frameClassName?: string;
+  /**
+   * `object-position` for the thumbnail. Only needed where the frame is much
+   * wider than the source and a blind centre crop leaves the subject sitting
+   * off-centre. Omit to centre.
+   */
+  imagePosition?: string;
 }) {
   const reduced = useReducedMotion();
   const [hovered, setHovered] = useState(false);
@@ -75,6 +82,7 @@ export function WorkTile({
             priority={priority}
             loading={priority ? undefined : "lazy"}
             className="object-cover"
+            style={imagePosition ? { objectPosition: imagePosition } : undefined}
           />
         </motion.div>
 

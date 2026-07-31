@@ -103,9 +103,6 @@ export function WorkRail() {
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                     draggable={false}
                   />
-                  <span className="mono absolute left-4 top-4 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur-sm">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
                 </div>
                 <div className="mt-4 flex items-baseline justify-between gap-4">
                   <h2 className="display text-step-1 transition-colors group-hover:text-blue">
@@ -132,24 +129,6 @@ export function WorkRail() {
             animate={{ width: `${((active + 1) / WORK.length) * 100}%` }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           />
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => goTo(active - 1)}
-            disabled={active === 0}
-            aria-label="Previous project"
-            className="mono rounded-full border border-rule px-4 py-2 transition-colors enabled:hover:border-blue enabled:hover:text-blue disabled:opacity-40"
-          >
-            ←
-          </button>
-          <button
-            onClick={() => goTo(active + 1)}
-            disabled={active === WORK.length - 1}
-            aria-label="Next project"
-            className="mono rounded-full border border-rule px-4 py-2 transition-colors enabled:hover:border-blue enabled:hover:text-blue disabled:opacity-40"
-          >
-            →
-          </button>
         </div>
       </div>
     </div>

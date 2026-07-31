@@ -83,22 +83,8 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
       "They pushed back on our brief twice. Both times they were right, and it saved us a quarter.",
-    name: "Elena Marsh",
+    name: "Richard",
     role: "Founder",
-    project: "LEVANT",
-  },
-  {
-    quote:
-      "The design system arrived with contrast ratios already documented. Our accessibility audit took a day instead of a month.",
-    name: "Sam Idowu",
-    role: "Head of Product",
-    project: "Meridian Health",
-  },
-  {
-    quote:
-      "We asked for a homepage. They pointed out our pricing page was the actual problem.",
-    name: "Rob Vance",
-    role: "CEO",
-    project: "Kestrel",
+    project: "Bespoke Garden Decor",
   },
 ];

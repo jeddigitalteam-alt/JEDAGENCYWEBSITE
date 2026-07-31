@@ -9,12 +9,10 @@ export const SITE = {
   location: "London, UK",
   latitude: "51.5074° N",
   timezone: "Europe/London",
-  address: ["Unit 4, Bevenden Street", "London N1 6BH", "United Kingdom"],
+  address: ["Hampshire", "United Kingdom"],
   social: [
     { label: "Instagram", href: "https://instagram.com" },
     { label: "LinkedIn", href: "https://linkedin.com" },
-    { label: "Are.na", href: "https://are.na" },
-    { label: "GitHub", href: "https://github.com" },
   ],
 } as const;
 
@@ -81,15 +79,12 @@ export const ALL_ROUTES: NavLink[] = [
 ];
 
 /** Placeholder client names for the marquee. Real logos still needed. */
+/**
+ * Real clients only. The marquee repeats this list to fill its track — see
+ * ClientRail — so three names is enough to loop seamlessly.
+ */
 export const CLIENTS = [
   "LEVANT",
-  "Northbank",
-  "Meridian",
-  "Kestrel",
-  "Atlas Freight",
-  "Harbour Goods",
-  "Orbit Labs",
-  "Pellum",
-  "Fieldwork",
-  "Verity",
+  "SOUTH DOWNS PLANT & MACHINERY",
+  "BESPOKE GARDEN DECOR",
 ] as const;

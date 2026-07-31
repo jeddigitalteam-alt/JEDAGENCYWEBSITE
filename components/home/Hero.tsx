@@ -41,9 +41,12 @@ export function Hero() {
   // so nothing flashes in front of the loader.
   const show = shouldRun === false || introDone;
 
+  /* 135% rather than 110%: the reveal masks now extend below the baseline to
+     clear descenders (see the h1), so the line has further to travel before it
+     is genuinely out of sight. */
   const rise = {
-    initial: { y: "110%" },
-    animate: show ? { y: "0%" } : { y: "110%" },
+    initial: { y: "135%" },
+    animate: show ? { y: "0%" } : { y: "135%" },
   };
 
   return (
@@ -142,8 +145,14 @@ export function Hero() {
         <span>51.5074° N</span>
       </motion.div>
 
+      {/* Each line sits in its own overflow-hidden mask so it can rise into
+          view. `.display` runs a 0.92 line-height, so that mask is shorter than
+          the type's real ink extent and it was slicing the descender off
+          "together". The padding drops the clip edge below the baseline and the
+          matching negative margin takes the space straight back, so the mask
+          gets taller without the headline's spacing or size moving at all. */}
       <h1 className="display relative z-10 max-w-[22ch] text-hero">
-        <span className="block overflow-hidden">
+        <span className="block overflow-hidden pb-[0.22em] -mb-[0.22em]">
           <motion.span
             className="block"
             {...rise}
@@ -152,7 +161,7 @@ export function Hero() {
             We build brands
           </motion.span>
         </span>
-        <span className="block overflow-hidden">
+        <span className="block overflow-hidden pb-[0.22em] -mb-[0.22em]">
           <motion.span
             className="block"
             {...rise}

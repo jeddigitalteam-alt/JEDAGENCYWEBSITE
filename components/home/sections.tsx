@@ -56,6 +56,13 @@ export function SelectedWork() {
                     ? "lg:aspect-[16/9] lg:max-h-[82vh] 2xl:aspect-[2/1]"
                     : ""
                 }
+                /* The banner crop is much wider than the source, so a blind
+                   centre left the campaign lock-up sitting high. 45% puts its
+                   measured centre of mass on the middle of the frame. At the
+                   4:3 crop used below lg the source is almost the same ratio,
+                   so this moves it by a fraction of a percent — tablet and
+                   mobile are effectively untouched. */
+                imagePosition={featured ? "center 45%" : undefined}
               />
             </div>
           );
@@ -74,7 +81,13 @@ export function SelectedWork() {
  */
 export function ClientRail() {
   const reduced = useReducedMotion();
-  const items = [...CLIENTS, ...CLIENTS];
+  /* The track translates by exactly -50%, so the second half has to mirror the
+     first. Two passes of the client list per half: that keeps the first half
+     wider than any viewport (so the seam never shows) and keeps the total track
+     close to the width it had with the old ten-name list, which is what holds
+     the 38s animation at the same apparent speed. */
+  const half = [...CLIENTS, ...CLIENTS];
+  const items = [...half, ...half];
 
   return (
     <section
