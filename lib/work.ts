@@ -23,6 +23,20 @@ export interface Swatch {
   note: string;
 }
 
+/** One screen inside the device showcase on a case study. */
+export interface DeviceScreen {
+  src: string;
+  /** Short label — announced on change and shown beside the controls. */
+  label: string;
+  alt: string;
+  /**
+   * `object-position` for the 16:10 screen crop. These are real captures at
+   * their own ratios, so each one is placed by hand to keep its subject inside
+   * the aperture rather than centred blindly.
+   */
+  position?: string;
+}
+
 export interface CaseStudy {
   slug: string;
   client: string;
@@ -37,11 +51,22 @@ export interface CaseStudy {
   hero: string;
   /**
    * `object-position` for the 16:9 hero crop. Only needed where the source is
-   * not already 16:9 and centring would cut the subject — LEVANT's hero is
-   * square, so it is pulled down to keep the devices and the wordmark in frame.
-   * Omit to centre.
+   * not already 16:9 and centring would cut the subject. Ignored when
+   * `heroAspect` is set, because nothing is being cropped.
    */
   heroPosition?: string;
+  /**
+   * Native aspect ratio of the hero artwork, e.g. "1 / 1".
+   *
+   * Set this where the whole composition has to survive rather than be cropped
+   * to the default 16:9 band. The hero then renders as a centred plate at the
+   * artwork's own ratio, capped by viewport height, so the image is complete
+   * with no letterbox bars inside the frame and no distortion. Omit for the
+   * standard full-bleed 16:9 crop.
+   */
+  heroAspect?: string;
+  /** Screens shown inside the device showcase. */
+  screens?: DeviceScreen[];
   /** Set only on fully built case studies. */
   full?: boolean;
   headline?: { roman: string; italic: string };
@@ -69,7 +94,35 @@ export const WORK: CaseStudy[] = [
     industries: ["sports", "ecommerce"],
     thumb: "/work/levant/thumb-campaign.png",
     hero: "/work/levant/hero-devices-clay.png",
-    heroPosition: "center 35%",
+    // Square artwork — the monitor, laptop and wordmark all have to survive.
+    heroAspect: "1 / 1",
+    screens: [
+      {
+        src: "/work/levant/screen-home.png",
+        label: "Home",
+        alt: "LEVANT home page — the 001 drop announcement",
+        // Top-aligned so the site's own nav is whole rather than sliced; the
+        // dead black below the fold is what gets dropped instead.
+        position: "center top",
+      },
+      {
+        src: "/work/levant/screen-gallery.png",
+        label: "Gallery",
+        alt: "LEVANT product gallery — back view of the 001 performance top",
+        // Portrait capture, so roughly half of it fits the aperture. Framed on
+        // the arced back print with the gallery arrows still showing, which is
+        // what makes it read as a page rather than a photograph.
+        position: "center 12%",
+      },
+      {
+        src: "/work/levant/screen-editorial.png",
+        label: "Editorial",
+        alt: "LEVANT editorial section — pull quote over clay-court photography",
+        // Top-aligned to keep the pull quote. Framed on the photograph alone it
+        // stopped reading as a web page at all.
+        position: "center top",
+      },
+    ],
     full: true,
     headline: { roman: "Play like you", italic: "mean it" },
     chapters: [

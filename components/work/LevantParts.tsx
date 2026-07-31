@@ -1,9 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import type { Chapter, Swatch } from "@/lib/work";
+import { useCallback, useEffect, useState } from "react";
+import type { Chapter, DeviceScreen, Swatch } from "@/lib/work";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -68,53 +68,86 @@ export function ChapterNav({ chapters }: { chapters: Chapter[] }) {
   );
 }
 
-/* ------------------------------------------------------- device mockup */
+/* ---------------------------------------------------- device showcase */
 
 /**
- * iMac frame whose contents scroll as the page scrolls.
+ * iMac frame showing real screens from the build, one at a time.
  *
- * The inner image is taller than the screen aperture; scroll progress across
- * the section maps to its Y offset, so the PDP appears to be scrolled inside
- * the device. Under reduced motion the image simply sits at the top.
+ * The frame is deliberately inert: bezel, stand and the 16:10 aperture never
+ * move, and only the screen inside changes. Screens crossfade rather than
+ * slide, so nothing appears to leave the device.
+ *
+ * Driven by explicit controls rather than scroll position. Each screen is a
+ * separate capture at its own aspect ratio, so there is nothing continuous to
+ * map scroll onto, and an arrow the reader can press behaves identically on a
+ * phone — where scroll-linked timing is the least predictable.
+ *
+ * Captures are cropped to the aperture with `object-cover` and a per-screen
+ * `objectPosition`; they are never scaled to fit, so none of them distorts.
  */
-export function DeviceMockup({
-  src,
-  alt,
+export function DeviceShowcase({
+  screens,
   caption,
 }: {
-  src: string;
-  alt: string;
+  screens: DeviceScreen[];
   caption: string;
 }) {
   const reduced = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-  // -68% leaves the last screenful visible rather than scrolling past the end.
-  const y = useTransform(scrollYProgress, [0.1, 0.9], ["0%", "-68%"]);
+  const [index, setIndex] = useState(0);
+  const count = screens.length;
+
+  const go = useCallback(
+    (step: number) => setIndex((i) => (i + step + count) % count),
+    [count],
+  );
+
+  const current = screens[index];
 
   return (
-    <figure ref={ref} className="mt-12">
+    <figure className="mt-12">
       <div className="mx-auto max-w-4xl">
-        {/* bezel */}
+        {/* bezel — fixed */}
         <div className="rounded-2xl border border-rule bg-ink-raised p-3 md:p-4">
-          <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-ink">
-            <motion.div
-              className="absolute inset-x-0 top-0"
-              style={reduced ? undefined : { y }}
-            >
-              <Image
-                src={src}
-                alt={alt}
-                width={1200}
-                height={3000}
-                sizes="(min-width: 768px) 56rem, 100vw"
-                className="w-full"
-              />
-            </motion.div>
-          </div>
+          <motion.div
+            className="relative aspect-[16/10] cursor-grab overflow-hidden rounded-lg bg-ink active:cursor-grabbing"
+            /* Swipe on touch. `pan-y` keeps vertical page scrolling with the
+               finger; the lock stops a scroll gesture registering as a swipe. */
+            style={{ touchAction: "pan-y" }}
+            drag={reduced ? false : "x"}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.06}
+            dragDirectionLock
+            dragMomentum={false}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -48) go(1);
+              else if (info.offset.x > 48) go(-1);
+            }}
+            role="group"
+            aria-roledescription="carousel"
+            aria-label={`${current.label} — screen ${index + 1} of ${count}`}
+          >
+            {screens.map((s, i) => (
+              <motion.div
+                key={s.src}
+                className="absolute inset-0"
+                initial={false}
+                animate={{ opacity: i === index ? 1 : 0 }}
+                transition={{ duration: reduced ? 0 : 0.45, ease: EASE }}
+                aria-hidden={i !== index}
+              >
+                <Image
+                  src={s.src}
+                  alt={s.alt}
+                  fill
+                  sizes="(min-width: 768px) 56rem, 100vw"
+                  className="object-cover"
+                  style={s.position ? { objectPosition: s.position } : undefined}
+                  priority={i === 0}
+                  draggable={false}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
         {/* stand */}
         <div
@@ -126,8 +159,34 @@ export function DeviceMockup({
           aria-hidden="true"
         />
       </div>
-      <figcaption className="mono mt-6 text-center text-content-dim">
-        {caption}
+
+      <figcaption className="mt-6">
+        <div className="flex items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Previous screen"
+            className="mono rounded-full border border-rule px-4 py-2 transition-colors hover:border-blue hover:text-blue"
+          >
+            ←
+          </button>
+          <span className="mono text-content-dim" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}{" "}
+            — {current.label}
+          </span>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Next screen"
+            className="mono rounded-full border border-rule px-4 py-2 transition-colors hover:border-blue hover:text-blue"
+          >
+            →
+          </button>
+        </div>
+        <p className="mono mt-3 text-center text-content-dim">{caption}</p>
+        <span className="sr-only" role="status" aria-live="polite">
+          {current.label} — screen {index + 1} of {count}
+        </span>
       </figcaption>
     </figure>
   );

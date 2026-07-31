@@ -6,7 +6,7 @@ import { WORK, getCase } from "@/lib/work";
 import { Eyebrow } from "@/components/ui/primitives";
 import {
   ChapterNav,
-  DeviceMockup,
+  DeviceShowcase,
   PaletteReveal,
 } from "@/components/work/LevantParts";
 
@@ -56,19 +56,46 @@ export default async function CaseStudyPage({
   return (
     <article className="pb-24 pt-24 md:pt-28">
       {/* hero */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden">
-        <Image
-          src={study.hero}
-          alt={`${study.client} — ${study.summary}`}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-          style={
-            study.heroPosition ? { objectPosition: study.heroPosition } : undefined
-          }
-        />
-      </div>
+      {study.heroAspect ? (
+        /* Whole-artwork hero. The frame takes the image's own ratio, so the
+           composition arrives complete — nothing cropped, no bars inside the
+           frame — and is capped against viewport height so a near-square
+           source cannot push the headline off the screen. */
+        <div className="px-5 md:px-8">
+          <div
+            className="relative mx-auto w-full overflow-hidden"
+            style={{
+              aspectRatio: study.heroAspect,
+              maxWidth: "min(100%, 78vh)",
+            }}
+          >
+            <Image
+              src={study.hero}
+              alt={`${study.client} — ${study.summary}`}
+              fill
+              priority
+              sizes="(min-width: 768px) 78vh, 100vw"
+              className="object-contain"
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="relative aspect-[16/9] w-full overflow-hidden">
+          <Image
+            src={study.hero}
+            alt={`${study.client} — ${study.summary}`}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+            style={
+              study.heroPosition
+                ? { objectPosition: study.heroPosition }
+                : undefined
+            }
+          />
+        </div>
+      )}
 
       <header className="px-5 pt-12 md:px-8 md:pt-16">
         <Eyebrow>
@@ -174,11 +201,12 @@ export default async function CaseStudyPage({
                 </p>
               </div>
 
-              <DeviceMockup
-                src="/work/levant/pdp-scroll.jpg"
-                alt="LEVANT product detail page, scrolling within an iMac frame"
-                caption="Product detail page — scrolls with the section"
-              />
+              {study.screens ? (
+                <DeviceShowcase
+                  screens={study.screens}
+                  caption="Screens from the build — drag, or use the arrows"
+                />
+              ) : null}
             </section>
 
             <section id="outcome" className="mt-20 scroll-mt-28">
