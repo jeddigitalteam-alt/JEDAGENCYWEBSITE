@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SITE } from "@/lib/site";
-import { PIECE_A, PIECE_B, VIEWBOX } from "@/components/brand/puzzle-paths";
+import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 
 function LondonClock() {
   const [time, setTime] = useState<string | null>(null);
@@ -107,15 +107,7 @@ export function Footer() {
         {/* Large interlocking wordmark — the mark's seam runs through the type. */}
         <div className="relative">
           <div className="flex items-end gap-3 md:gap-6">
-            <svg
-              viewBox={VIEWBOX}
-              className="h-[12vw] w-[12vw] shrink-0 text-blue"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d={PIECE_A} />
-              <path d={PIECE_B} />
-            </svg>
+            <PuzzleSiteLogo className="h-[12vw] w-[12vw] shrink-0 text-blue" />
             <span
               className="wordmark select-none text-[18vw] lowercase leading-[0.75]"
               aria-hidden="true"
