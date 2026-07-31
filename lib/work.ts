@@ -4,10 +4,11 @@
  * LEVANT is the real, fully written one. The rest are credible placeholders —
  * they carry honest metadata and copy but no invented client outcomes.
  *
- * IMAGE PATHS ARE CENTRALISED HERE ON PURPOSE. The four brand PNGs from the
- * brief were not available at build time, so every `image` below points at a
- * generated placeholder at the correct aspect ratio. Swapping in the real
- * assets means replacing files in public/work/ and editing nothing else.
+ * IMAGE PATHS ARE CENTRALISED HERE ON PURPOSE. Swapping an asset means editing
+ * the path here and nothing else — every tile, rail and hero reads from it.
+ *
+ * LEVANT now carries real supplied artwork. The remaining entries still point
+ * at generated placeholders at the correct aspect ratio.
  */
 
 export interface Chapter {
@@ -34,6 +35,13 @@ export interface CaseStudy {
   industries: string[];
   thumb: string;
   hero: string;
+  /**
+   * `object-position` for the 16:9 hero crop. Only needed where the source is
+   * not already 16:9 and centring would cut the subject — LEVANT's hero is
+   * square, so it is pulled down to keep the devices and the wordmark in frame.
+   * Omit to centre.
+   */
+  heroPosition?: string;
   /** Set only on fully built case studies. */
   full?: boolean;
   headline?: { roman: string; italic: string };
@@ -59,8 +67,9 @@ export const WORK: CaseStudy[] = [
     summary:
       "Performance tennis apparel, taken from a name to an inaugural drop that sold through in nine days.",
     industries: ["sports", "ecommerce"],
-    thumb: "/work/levant/thumb.jpg",
-    hero: "/work/levant/hero.jpg",
+    thumb: "/work/levant/thumb-campaign.png",
+    hero: "/work/levant/hero-devices-clay.png",
+    heroPosition: "center 35%",
     full: true,
     headline: { roman: "Play like you", italic: "mean it" },
     chapters: [
@@ -77,6 +86,32 @@ export const WORK: CaseStudy[] = [
       { label: "Return rate", value: "4.1%" },
       { label: "LCP, mobile", value: "1.2s" },
     ],
+  },
+  {
+    slug: "south-downs",
+    client: "South Downs Plant & Machinery",
+    sector: "Plant and machinery",
+    year: "2025",
+    scope: ["Web design", "Web development"],
+    summary:
+      "A searchable stock catalogue and an export enquiry route, for a dealer selling worldwide.",
+    industries: ["b2b", "ecommerce"],
+    thumb: "/work/south-downs/home.png",
+    hero: "/work/south-downs/export-loading.png",
+    heroPosition: "center 38%",
+  },
+  {
+    slug: "bespoke-garden-decor",
+    client: "Bespoke Garden Decor",
+    sector: "Made-to-measure timber",
+    year: "2025",
+    scope: ["Web design", "Web development"],
+    summary:
+      "A made-to-measure workshop given a product range you can actually browse before enquiring.",
+    industries: ["ecommerce", "b2b"],
+    thumb: "/work/bespoke-garden-decor/home.png",
+    hero: "/work/bespoke-garden-decor/products.png",
+    heroPosition: "center 78%",
   },
   {
     slug: "meridian-health",

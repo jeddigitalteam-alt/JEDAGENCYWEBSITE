@@ -64,6 +64,9 @@ export default async function CaseStudyPage({
           priority
           sizes="100vw"
           className="object-cover"
+          style={
+            study.heroPosition ? { objectPosition: study.heroPosition } : undefined
+          }
         />
       </div>
 
