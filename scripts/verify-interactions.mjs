@@ -80,7 +80,9 @@ check(
 /* ---------------------------------------------------------------- labs */
 await page.goto(`${base}/labs`, { waitUntil: "load" });
 await page.waitForTimeout(500);
-const canvas = page.locator("canvas");
+// Labs now carries several canvas experiments; these assertions are about the
+// tessellation generator, which is the first one on the page.
+const canvas = page.locator("canvas").first();
 const box = await canvas.boundingBox();
 if (box) {
   for (const dx of [0.35, 0.5, 0.65]) {

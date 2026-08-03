@@ -61,6 +61,43 @@ export default async function IndustryPage({
         </ul>
       </section>
 
+      {/* Both optional — sectors that carry no capabilities/audience data render
+          exactly as they did before. */}
+      {industry.capabilities ? (
+        <section className="mt-20">
+          <Eyebrow as="h2">What we do here</Eyebrow>
+          <ul className="mt-6 max-w-3xl border-t border-rule">
+            {industry.capabilities.map((c) => (
+              <li
+                key={c}
+                className="flex items-start gap-4 border-b border-rule py-4"
+              >
+                <span className="mono mt-1 shrink-0 text-blue" aria-hidden="true">
+                  ▸
+                </span>
+                <span className="text-step-0">{c}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {industry.audience ? (
+        <section className="mt-20">
+          <Eyebrow as="h2">Who we work with</Eyebrow>
+          <ul className="mt-6 flex max-w-4xl flex-wrap gap-3">
+            {industry.audience.map((a) => (
+              <li
+                key={a}
+                className="mono rounded-full border border-rule px-5 py-2.5 text-content-dim"
+              >
+                {a}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="mt-20">
         <Eyebrow as="h2">
           {related.length ? `Work in ${industry.name}` : "Related work"}

@@ -5,6 +5,12 @@ export interface Industry {
   intro: string;
   /** What we've learned working here. Specific, not flattering. */
   notes: string[];
+  /**
+   * Optional. Where a sector needs it spelled out, the shared industry page
+   * renders these two extra sections; sectors that omit them are unchanged.
+   */
+  capabilities?: string[];
+  audience?: string[];
 }
 
 export const INDUSTRIES: Industry[] = [
@@ -45,15 +51,36 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    slug: "healthcare",
-    name: "Healthcare",
-    summary: "Interfaces used while distracted, tired or worried.",
+    slug: "machinery",
+    name: "Machinery",
+    summary: "Digital work built for serious machinery businesses.",
     intro:
-      "Accessibility is not a checklist here — it is the operating condition. Assume poor lighting, interruption and a shared device.",
+      "Brands, websites and digital tools for plant, machinery and equipment companies. The work is turning technical detail into something a buyer can act on — credibly, and without having to phone first.",
     notes: [
-      "Design for the interrupted session. Save state constantly.",
-      "AA contrast is a floor, not a target.",
-      "Plain language survives translation and stress. Jargon does not.",
+      "Stock changes daily. A catalogue nobody can update stops being true within a week.",
+      "Buyers compare on specification. Put the numbers where they can be scanned, not inside a PDF.",
+      "Most enquiries start on a phone, outdoors, on bad signal. That is the design target.",
+    ],
+    capabilities: [
+      "Brand identity",
+      "Website design and development",
+      "Stock and catalogue sites",
+      "Product and equipment pages",
+      "Enquiry and lead-generation journeys",
+      "Dealer and distributor platforms",
+      "Search and filtering",
+      "Photography and motion",
+      "Ongoing digital support",
+    ],
+    audience: [
+      "Plant and machinery dealers",
+      "Forklift and materials handling",
+      "Equipment rental",
+      "Agricultural machinery",
+      "Heavy lifting and logistics",
+      "Industrial manufacturers",
+      "Parts and service businesses",
+      "Specialist engineering",
     ],
   },
   {

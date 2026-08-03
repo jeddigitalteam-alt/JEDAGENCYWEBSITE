@@ -7,7 +7,7 @@ import CaseGrid from "@/components/industries/CaseGrid";
 export const metadata: Metadata = {
   title: "Industries",
   description:
-    "Sectors we know well — AI, e-commerce, fintech, healthcare, sports, SaaS and B2B — and what we've learned working in each.",
+    "Sectors we know well — AI, e-commerce, fintech, machinery, sports, SaaS and B2B — and what we've learned working in each.",
 };
 
 export default function IndustriesPage() {

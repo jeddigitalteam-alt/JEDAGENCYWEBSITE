@@ -147,7 +147,7 @@ export const WORK: CaseStudy[] = [
     scope: ["Web design", "Web development"],
     summary:
       "A searchable stock catalogue and an export enquiry route, for a dealer selling worldwide.",
-    industries: ["b2b", "ecommerce"],
+    industries: ["machinery", "b2b", "ecommerce"],
     thumb: "/work/south-downs/home.png",
     hero: "/work/south-downs/export-loading.png",
     heroPosition: "center 38%",
