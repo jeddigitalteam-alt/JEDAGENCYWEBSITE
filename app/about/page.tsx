@@ -5,7 +5,7 @@ import TeamBoard from "@/components/about/TeamBoard";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Puzzle is an eight-person design studio in London. Senior throughout, small on purpose.",
+    "Puzzle is an eight-person design studio in Hampshire. Senior throughout, small on purpose.",
 };
 
 export default function AboutPage() {
@@ -18,7 +18,7 @@ export default function AboutPage() {
         </h1>
         <div className="mt-8 grid max-w-4xl gap-5 text-step-1 text-content-dim">
           <p>
-            Puzzle is a design studio in London. We started in 2019 because the
+            Puzzle is a design studio in Hampshire. We started in 2019 because the
             work we cared about kept getting handed off halfway — designed by
             one team, built by another, and diluted at the seam.
           </p>

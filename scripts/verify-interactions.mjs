@@ -161,10 +161,14 @@ if (await reassemble.isEnabled()) {
 /* ----------------------------------------------------- industries filter */
 await page.goto(`${base}/industries`, { waitUntil: "load" });
 await page.waitForTimeout(400);
-const before = await page.locator('button[data-cursor="View"]').count();
+// Count the cards themselves, not the clickable ones: only studies with a
+// written case study are interactive now, so counting buttons would measure
+// clickability rather than whether the filter narrowed the grid.
+const cards = page.locator("ul[data-case-grid] > li");
+const before = await cards.count();
 await page.getByRole("button", { name: /^Sports/ }).click();
 await page.waitForTimeout(700);
-const after = await page.locator('button[data-cursor="View"]').count();
+const after = await cards.count();
 check(after > 0 && after < before, `filter narrows the grid (${before} → ${after})`);
 await page.screenshot({ path: join(out, "industries-filtered.png") });
 

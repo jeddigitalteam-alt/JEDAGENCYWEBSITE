@@ -105,8 +105,10 @@ export function ClientRail() {
           ))}
         </ul>
       ) : (
-        <div className="group relative flex overflow-hidden">
-          <div className="flex animate-none [animation-play-state:running] group-hover:[animation-play-state:paused] motion-safe:animate-[marquee_38s_linear_infinite]">
+        <div className="relative flex overflow-hidden">
+          {/* Runs continuously — no hover/focus pause. The track must never
+              stall while the pointer crosses it. */}
+          <div className="flex animate-none motion-safe:animate-[marquee_38s_linear_infinite]">
             {items.map((c, i) => (
               <span
                 key={`${c}-${i}`}

@@ -133,18 +133,6 @@ export function Hero() {
       />
 
       {/* ------------------------------------------------------ content --- */}
-      {/* eyebrow */}
-      <motion.div
-        className="mono relative z-10 flex items-baseline gap-3 text-content-dim"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: show ? 1 : 0 }}
-        transition={{ duration: 0.5, delay: 0.15, ease: EASE }}
-      >
-        <span>London, UK</span>
-        <span aria-hidden="true" className="h-px w-8 bg-rule" />
-        <span>51.5074° N</span>
-      </motion.div>
-
       {/* Each line sits in its own overflow-hidden mask so it can rise into
           view. `.display` runs a 0.92 line-height, so that mask is shorter than
           the type's real ink extent and it was slicing the descender off
@@ -158,7 +146,7 @@ export function Hero() {
             {...rise}
             transition={{ duration: 0.9, delay: 0.05, ease: EASE }}
           >
-            We build brands
+            The missing piece
           </motion.span>
         </span>
         <span className="block overflow-hidden pb-[0.22em] -mb-[0.22em]">
@@ -167,7 +155,7 @@ export function Hero() {
             {...rise}
             transition={{ duration: 0.9, delay: 0.14, ease: EASE }}
           >
-            that <em>fit together</em>
+            for <em>every brand.</em>
           </motion.span>
         </span>
       </h1>
@@ -179,7 +167,7 @@ export function Hero() {
           animate={show ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
         >
-          A design studio in London. Identity, websites and product work for
+          A design studio in Hampshire. Identity, websites and product work for
           companies that would rather be understood than admired.
         </motion.p>
 

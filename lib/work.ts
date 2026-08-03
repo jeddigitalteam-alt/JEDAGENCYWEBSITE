@@ -171,4 +171,17 @@ export function getCase(slug: string) {
   return WORK.find((w) => w.slug === slug);
 }
 
+/**
+ * Whether a study has a case-study page behind it.
+ *
+ * Only written-up studies get a route, so everything else shows as a static
+ * card: no link, no pointer affordance, and not reachable by keyboard. This is
+ * the single source for that decision — tiles, the rail, the industries grid
+ * and `generateStaticParams` all read it, so a card can never advertise a page
+ * that does not exist.
+ */
+export function hasCaseStudy(study: CaseStudy) {
+  return study.full === true;
+}
+
 export const LEVANT = WORK[0];

@@ -19,7 +19,6 @@ const ROUTES = [
   "/",
   "/work",
   "/work/levant",
-  "/work/south-downs",
   "/services",
   "/services/brand-identity",
   "/industries",

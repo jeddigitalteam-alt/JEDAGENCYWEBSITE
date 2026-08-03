@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { SITE } from "@/lib/site";
 import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 
-function LondonClock() {
+function StudioClock() {
   const [time, setTime] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ function LondonClock() {
   // Rendered null on the server — a server-rendered clock would hydrate wrong.
   return (
     <span className="mono tabular-nums text-content-dim">
-      {time ? `${time} London` : "— London"}
+      {time ? `${time} Hampshire` : "— Hampshire"}
     </span>
   );
 }
@@ -121,7 +121,7 @@ export function Footer() {
           <p className="mono text-content-dim">
             © {new Date().getFullYear()} {SITE.name}
           </p>
-          <LondonClock />
+          <StudioClock />
           <a
             href={`mailto:${SITE.email}`}
             className="mono transition-colors hover:text-blue"

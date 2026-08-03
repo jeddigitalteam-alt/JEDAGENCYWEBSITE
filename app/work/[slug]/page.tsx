@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { WORK, getCase } from "@/lib/work";
+import { WORK, getCase, hasCaseStudy } from "@/lib/work";
 import { Eyebrow } from "@/components/ui/primitives";
 import {
   ChapterNav,
@@ -10,8 +10,13 @@ import {
   PaletteReveal,
 } from "@/components/work/LevantParts";
 
+/**
+ * Only written-up studies have a page. The rest appear as static cards in the
+ * grids and deliberately have no route — requesting one 404s (see below), so a
+ * hand-typed URL cannot reach a half-empty case study.
+ */
 export function generateStaticParams() {
-  return WORK.map((w) => ({ slug: w.slug }));
+  return WORK.filter(hasCaseStudy).map((w) => ({ slug: w.slug }));
 }
 
 export async function generateMetadata({
@@ -49,7 +54,9 @@ export default async function CaseStudyPage({
 }) {
   const { slug } = await params;
   const study = getCase(slug);
-  if (!study) notFound();
+  // No written case study means no page — same rule as generateStaticParams,
+  // so a hand-typed URL 404s rather than rendering an empty shell.
+  if (!study || !hasCaseStudy(study)) notFound();
 
   const isLevant = study.full === true;
 

@@ -44,19 +44,19 @@ const SITE = "https://puzzle.studio";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Puzzle — design studio, London",
+    default: "Puzzle — design studio, Hampshire",
     template: "%s — Puzzle",
   },
   description:
-    "Puzzle is a London design studio. We build brand identities, websites and digital products that fit together.",
+    "Puzzle is a Hampshire design studio. We build brand identities, websites and digital products that fit together.",
   openGraph: {
     type: "website",
     siteName: "Puzzle",
     locale: "en_GB",
     url: SITE,
-    title: "Puzzle — design studio, London",
+    title: "Puzzle — design studio, Hampshire",
     description:
-      "Puzzle is a London design studio. We build brand identities, websites and digital products that fit together.",
+      "Puzzle is a Hampshire design studio. We build brand identities, websites and digital products that fit together.",
   },
   twitter: { card: "summary_large_image" },
   icons: { icon: "/icon.svg" },

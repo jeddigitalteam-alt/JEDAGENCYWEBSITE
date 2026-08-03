@@ -6,8 +6,7 @@ export const SITE = {
   /** Wordmark is set lowercase. */
   wordmark: "puzzle",
   email: "hello@puzzle.studio",
-  location: "London, UK",
-  latitude: "51.5074° N",
+  location: "Hampshire, UK",
   timezone: "Europe/London",
   address: ["Hampshire", "United Kingdom"],
   social: [

@@ -5,8 +5,31 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { INDUSTRIES } from "@/lib/industries";
-import { WORK, type CaseStudy } from "@/lib/work";
+import { WORK, hasCaseStudy, type CaseStudy } from "@/lib/work";
 import { Eyebrow } from "@/components/ui/primitives";
+
+/**
+ * A grid card. Only a button where the study has a case-study page to open —
+ * otherwise an inert div, so it carries no pointer affordance and takes no
+ * focus, while looking exactly the same.
+ */
+function GridCard({
+  study,
+  onOpen,
+  children,
+}: {
+  study: CaseStudy;
+  onOpen: () => void;
+  children: React.ReactNode;
+}) {
+  if (!hasCaseStudy(study))
+    return <div className="w-full text-left">{children}</div>;
+  return (
+    <button onClick={onOpen} data-cursor="View" className="group w-full text-left">
+      {children}
+    </button>
+  );
+}
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -78,7 +101,14 @@ export function CaseGrid() {
         })}
       </div>
 
-      <motion.ul layout={!reduced} className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <motion.ul
+        layout={!reduced}
+        /* Stable hook for verify-interactions: the cards are no longer all
+           buttons, so the filter test counts list items here rather than
+           clickable elements. No visual effect. */
+        data-case-grid=""
+        className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+      >
         <AnimatePresence mode="popLayout">
           {shown.map((study) => (
             <motion.li
@@ -89,11 +119,10 @@ export function CaseGrid() {
               exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.4, ease: EASE }}
             >
-              <button
-                onClick={() => open(study)}
-                data-cursor="View"
-                className="group w-full text-left"
-              >
+              {/* A button only where there is a page to open. Studies without
+                  one render as a plain div: not focusable, no pointer
+                  affordance, visually identical. See hasCaseStudy. */}
+              <GridCard study={study} onOpen={() => open(study)}>
                 <motion.div
                   layoutId={reduced ? undefined : `case-${study.slug}`}
                   className="relative aspect-[4/3] overflow-hidden rounded-xl bg-ink-raised"
@@ -113,7 +142,7 @@ export function CaseGrid() {
                 <p className="mono mt-1 text-content-dim">
                   {study.sector} — {study.year}
                 </p>
-              </button>
+              </GridCard>
             </motion.li>
           ))}
         </AnimatePresence>

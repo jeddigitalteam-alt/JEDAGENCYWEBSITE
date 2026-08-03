@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import type { CaseStudy } from "@/lib/work";
+import { hasCaseStudy, type CaseStudy } from "@/lib/work";
 
 /**
  * Work tile. Plays a silent looping video on hover where one exists, and
@@ -56,16 +56,28 @@ export function WorkTile({
     videoRef.current?.pause();
   };
 
+  /* Studies without a case-study page render as a plain <div>: no href, no
+     data-cursor, no hover handlers and no `group`, so the image never scales
+     and the title never turns blue. Nothing that implies navigation survives,
+     and there is no tab stop — but the card itself is visually identical. */
+  const linked = hasCaseStudy(study);
+  const Wrapper = linked ? Link : "div";
+  const wrapperProps = linked
+    ? {
+        href: `/work/${study.slug}`,
+        "data-cursor": "View",
+        className: "group block",
+        onMouseEnter: onEnter,
+        onMouseLeave: onLeave,
+        onFocus: onEnter,
+        onBlur: onLeave,
+      }
+    : { className: "block" };
+
   return (
-    <Link
-      href={`/work/${study.slug}`}
-      data-cursor="View"
-      className="group block"
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      onFocus={onEnter}
-      onBlur={onLeave}
-    >
+    // @ts-expect-error — Link and "div" accept different prop shapes; the two
+    // branches above each build the correct one for their element.
+    <Wrapper {...wrapperProps}>
       <div
         className={`relative aspect-[4/3] overflow-hidden rounded-xl bg-ink-raised ${frameClassName}`}
       >
@@ -117,7 +129,7 @@ export function WorkTile({
       <p className="mt-2 max-w-[52ch] text-step--1 text-content-dim">
         {study.summary}
       </p>
-    </Link>
+    </Wrapper>
   );
 }
 

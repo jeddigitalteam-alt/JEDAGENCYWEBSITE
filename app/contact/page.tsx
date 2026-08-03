@@ -7,7 +7,7 @@ import ContactForm from "@/components/contact/ContactForm";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Tell us what you're trying to do. Puzzle is a design studio in London — we reply within two working days.",
+    "Tell us what you're trying to do. Puzzle is a design studio in Hampshire — we reply within two working days.",
 };
 
 export default function ContactPage() {
@@ -51,11 +51,8 @@ export default function ContactPage() {
                 </span>
               ))}
             </address>
-            <p className="mono mt-4 text-content-dim">
-              {SITE.latitude} — nearest tube, Old Street
-            </p>
             <a
-              href="https://www.openstreetmap.org/?mlat=51.5074&mlon=-0.0878#map=16/51.5074/-0.0878"
+              href="https://www.openstreetmap.org/search?query=Hampshire%2C%20United%20Kingdom"
               target="_blank"
               rel="noreferrer noopener"
               className="mono mt-4 inline-flex rounded-full border border-rule px-4 py-2 transition-colors hover:border-blue hover:text-blue"

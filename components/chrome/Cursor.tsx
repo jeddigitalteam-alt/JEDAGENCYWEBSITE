@@ -1,50 +1,56 @@
 "use client";
 
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { motion, useMotionValue } from "motion/react";
 import { useEffect, useState } from "react";
+import { PIECE_A, PIECE_B, VIEWBOX } from "@/components/brand/puzzle-paths";
 import { useFinePointer, useReducedMotionPref } from "@/lib/hooks/useMediaQuery";
 
+/** Resting size in px. Small enough to track, large enough to read as the mark. */
+const SIZE = 18;
+/** Size over anything clickable — the only interaction feedback it carries. */
+const SIZE_ACTIVE = 26;
+
 /**
- * Custom cursor: a blue disc that magnetises to links and becomes a labelled
- * disc over work tiles.
+ * Custom cursor: the Puzzle mark itself, following the pointer.
  *
- * Only mounts on fine-pointer devices that aren't asking for reduced motion.
- * Any element can set the label via `data-cursor="VIEW"`; nothing depends on
- * the cursor existing, so touch users lose nothing.
+ * Geometry is imported from ./brand/puzzle-paths, the same source the header and
+ * footer logos use, so the cursor can never drift from the logo. Nothing here
+ * modifies it.
+ *
+ * Position is written straight to motion values with no spring. A spring would
+ * make the mark lag the pointer, which is both a trailing effect and harder to
+ * aim with — a cursor has to sit exactly where the pointer is. Only the size
+ * animates, and only between two values.
+ *
+ * Only mounts on fine-pointer devices that aren't asking for reduced motion, so
+ * touch and mobile keep the native cursor behaviour and lose nothing: every
+ * affordance is still carried by the elements themselves.
  */
 export function Cursor() {
   const fine = useFinePointer();
   const reduced = useReducedMotionPref();
   const enabled = fine && !reduced;
-  const [label, setLabel] = useState<string | null>(null);
   const [active, setActive] = useState(false);
 
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const sx = useSpring(x, { stiffness: 900, damping: 45, mass: 0.4 });
-  const sy = useSpring(y, { stiffness: 900, damping: 45, mass: 0.4 });
 
   useEffect(() => {
     if (!enabled) return;
 
-    // NB: this flag is `customCursor`, not `cursor`. `data-cursor` is the
-    // per-element *label* attribute, and setting it on <body> made
-    // closest("[data-cursor]") match the body from anywhere on the page — so
-    // every hover rendered a disc labelled "on".
+    // NB: `customCursor`, not `cursor`. `data-cursor` is the per-element label
+    // attribute and must never be set on <body> — see globals.css.
     document.body.dataset.customCursor = "on";
 
     const onMove = (e: PointerEvent) => {
       x.set(e.clientX);
       y.set(e.clientY);
-      const el = (e.target as HTMLElement)?.closest<HTMLElement>(
-        "[data-cursor], a, button",
+      setActive(
+        !!(e.target as HTMLElement)?.closest("[data-cursor], a, button"),
       );
-      setActive(!!el);
-      setLabel(el?.dataset?.cursor ?? null);
     };
     const onLeave = () => {
       setActive(false);
-      setLabel(null);
       x.set(-100);
       y.set(-100);
     };
@@ -61,26 +67,19 @@ export function Cursor() {
   if (!enabled) return null;
 
   return (
-    <motion.div
-      className="pointer-events-none fixed left-0 top-0 z-[80] grid place-items-center rounded-full"
-      style={{ x: sx, y: sy, translateX: "-50%", translateY: "-50%" }}
-      animate={{
-        width: label ? 88 : active ? 44 : 12,
-        height: label ? 88 : active ? 44 : 12,
-        backgroundColor: label ? "var(--blue)" : "transparent",
-        borderWidth: label ? 0 : 1.5,
-      }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    <motion.svg
+      viewBox={VIEWBOX}
+      className="pointer-events-none fixed left-0 top-0 z-[80] text-blue"
+      style={{ x, y, translateX: "-50%", translateY: "-50%" }}
+      animate={{ width: active ? SIZE_ACTIVE : SIZE, height: active ? SIZE_ACTIVE : SIZE }}
+      transition={{ type: "spring", stiffness: 500, damping: 34 }}
+      fill="currentColor"
       aria-hidden="true"
+      focusable="false"
     >
-      <span
-        className="absolute inset-0 rounded-full border-blue"
-        style={{ borderWidth: label ? 0 : 1.5, borderStyle: "solid" }}
-      />
-      {label ? (
-        <span className="mono text-ink">{label}</span>
-      ) : null}
-    </motion.div>
+      <path d={PIECE_A} />
+      <path d={PIECE_B} />
+    </motion.svg>
   );
 }
 

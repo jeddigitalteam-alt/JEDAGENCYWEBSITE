@@ -7,7 +7,7 @@ import ScopeBuilder from "@/components/services/ScopeBuilder";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Brand identity, web design, web development, digital product design, motion, AI design and retainers — from a London studio.",
+    "Brand identity, web design, web development, digital product design, motion, AI design and retainers — from a Hampshire studio.",
 };
 
 export default function ServicesPage() {

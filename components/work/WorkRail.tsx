@@ -4,7 +4,36 @@ import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { WORK } from "@/lib/work";
+import { WORK, hasCaseStudy, type CaseStudy } from "@/lib/work";
+
+/**
+ * A rail card. Wraps its contents in a link only when the study actually has a
+ * case-study page; otherwise it is an inert div, so nothing about it advertises
+ * navigation and keyboard users cannot tab into it.
+ */
+function RailCard({
+  study,
+  onFocus,
+  children,
+}: {
+  study: CaseStudy;
+  onFocus: () => void;
+  children: React.ReactNode;
+}) {
+  if (!hasCaseStudy(study)) return <div className="block">{children}</div>;
+  return (
+    <Link
+      href={`/work/${study.slug}`}
+      data-cursor="View"
+      className="group block"
+      onFocus={onFocus}
+      // Native drag would fight the rail's own drag gesture.
+      draggable={false}
+    >
+      {children}
+    </Link>
+  );
+}
 
 /**
  * Horizontal work rail with drag inertia, keyboard support and a mono index.
@@ -84,13 +113,12 @@ export function WorkRail() {
               key={study.slug}
               className="w-[78vw] shrink-0 sm:w-[46vw] lg:w-[32vw]"
             >
-              <Link
-                href={`/work/${study.slug}`}
-                data-cursor="View"
-                className="group block"
+              {/* Only studies with a page become links. The rest are static
+                  cards: no href, no data-cursor, no `group` (so no hover
+                  colour) and no tab stop. See hasCaseStudy in lib/work. */}
+              <RailCard
+                study={study}
                 onFocus={() => setActive(i)}
-                // Native drag would fight the rail's own drag gesture.
-                draggable={false}
               >
                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-ink-raised">
                   <Image
@@ -113,7 +141,7 @@ export function WorkRail() {
                   </span>
                 </div>
                 <p className="mono mt-1 text-content-dim">{study.sector}</p>
-              </Link>
+              </RailCard>
             </li>
           ))}
         </motion.ul>
