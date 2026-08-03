@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { resetScroll } from "./lenis-instance";
 
 /**
  * Every navigation starts at the top.
@@ -25,6 +26,10 @@ export function ScrollToTop() {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Belt and braces: the inline script in the document head already sets this
+    // before first paint, which is the only place early enough to beat the
+    // browser's own restore on reload. Re-asserting it here keeps the setting
+    // correct if anything later puts it back to "auto".
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
@@ -33,7 +38,14 @@ export function ScrollToTop() {
   useEffect(() => {
     // An explicit anchor is a deliberate destination — leave it alone.
     if (window.location.hash) return;
-    window.scrollTo(0, 0);
+
+    // Reset once now, then again on the next frame. The first call handles the
+    // common case; the second lands after the incoming route has painted and
+    // its real height is known, which is what stops a long page (the Levant
+    // case study is the tallest) from settling back to the old offset.
+    resetScroll();
+    const raf = requestAnimationFrame(resetScroll);
+    return () => cancelAnimationFrame(raf);
   }, [pathname]);
 
   return null;

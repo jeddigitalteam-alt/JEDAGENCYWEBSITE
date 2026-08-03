@@ -50,24 +50,37 @@ export function IntroLoader() {
   const [locked, setLocked] = useState(false);
   const [cleared, setCleared] = useState(false);
   const [removed, setRemoved] = useState(false);
-  const [count, setCount] = useState(0);
   const rafRef = useRef<number | null>(null);
+  const countRef = useRef<HTMLSpanElement>(null);
+  const statusRef = useRef<HTMLSpanElement>(null);
 
-  /* Numeric counter, eased so it decelerates like a real load rather than
-     ticking linearly. */
+  /* Paint the counter straight into the DOM. Held out of React state on
+     purpose: as state this set 60 times a second, and every one of those
+     re-rendered this component and reconciled the whole SVG — both animated
+     groups and both paths — for the entire first second of the animation,
+     which is exactly the window the pieces are drawing in. Writing the text
+     node directly costs nothing and looks identical. */
+  const paintCount = (v: number) => {
+    if (countRef.current)
+      countRef.current.textContent = `Loading ${String(v).padStart(3, "0")}`;
+    if (statusRef.current && v === 100) statusRef.current.textContent = "Loaded";
+  };
+
   useEffect(() => {
     if (shouldRun !== true || reduced) return;
     const start = performance.now();
     const tick = (now: number) => {
       const t = Math.min((now - start) / COUNTER_MS, 1);
+      // Eased so it decelerates like a real load rather than ticking linearly.
       const eased = 1 - Math.pow(1 - t, 3);
-      setCount(Math.round(eased * 100));
+      paintCount(Math.round(eased * 100));
       if (t < 1) rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
+    // paintCount only touches refs, so it is not a dependency.
   }, [shouldRun, reduced]);
 
   useEffect(() => {
@@ -78,7 +91,7 @@ export function IntroLoader() {
     if (reduced) {
       // Static mark, brief hold, clear. No draw, no lock travel.
       at(() => {
-        setCount(100);
+        paintCount(100);
         setLocked(true);
       }, 0);
       at(() => {
@@ -98,11 +111,20 @@ export function IntroLoader() {
     return () => timers.forEach(clearTimeout);
   }, [shouldRun, reduced, markIntroDone]);
 
-  // `null` = the client hasn't decided yet; render nothing rather than flash.
-  if (shouldRun !== true || removed) return null;
+  /* Rendered for `null` (the client has not decided yet) as well as `true`.
+     Returning null while undecided meant the server sent no loader at all, so
+     the homepage painted first and stayed on screen for the best part of a
+     second before the loader mounted and covered it — a flash of the site,
+     then a jump into the animation. The overlay is now in the very first
+     frame; the only case that must not see it is a visitor who has already
+     had the intro this session, and the inline script in the document has
+     already marked that on <html> before this paints. */
+  if (shouldRun === false || removed) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100]">
+    <div
+      className="pointer-events-none fixed inset-0 z-[100] [html[data-intro-seen]_&]:hidden"
+    >
       <SeamPanels
         open={cleared}
         duration={reduced ? 0.01 : CLEAR_DUR}
@@ -129,6 +151,10 @@ export function IntroLoader() {
           {[LOADER_PIECE_A, LOADER_PIECE_B].map((d, i) => (
             <motion.g
               key={i}
+              /* Only transform and opacity animate here, so declaring it lets
+                 the compositor hold the pieces on their own layers instead of
+                 re-rasterising them behind main-thread work. */
+              style={{ willChange: "transform" }}
               initial={
                 reduced
                   ? false
@@ -139,29 +165,22 @@ export function IntroLoader() {
               }
               animate={
                 locked
-                  ? {
-                      // Overshoot slightly past the seam, then settle on
-                      // exactly 0 — never a residual offset.
-                      x: [
-                        LOADER_PIECE_OFFSETS[i].x,
-                        LOADER_PIECE_OFFSETS[i].x * -0.07,
-                        0,
-                      ],
-                      y: [
-                        LOADER_PIECE_OFFSETS[i].y,
-                        LOADER_PIECE_OFFSETS[i].y * -0.07,
-                        0,
-                      ],
-                    }
+                  ? { x: 0, y: 0 }
                   : {
                       x: LOADER_PIECE_OFFSETS[i].x,
                       y: LOADER_PIECE_OFFSETS[i].y,
                     }
               }
+              /* Monotonic close along the seam normal, no overshoot.
+                 This previously ran through a keyframe at -0.07 of the start
+                 offset, which carried each piece past the seam and made the two
+                 solids visibly cross before settling back onto 0. Travelling
+                 straight to 0 on a decelerating curve removes that crossing;
+                 EASE_LOCK is cubic-bezier(0.16, 1, 0.3, 1), whose control
+                 points are all within [0,1], so it cannot overshoot either. */
               transition={{
                 duration: reduced ? 0 : LOCK_DUR,
                 ease: EASE_LOCK,
-                times: [0, 0.72, 1],
               }}
             >
               <motion.path
@@ -185,9 +204,13 @@ export function IntroLoader() {
         animate={{ opacity: cleared ? 0 : 1 }}
         transition={{ duration: 0.2 }}
       >
-        <span aria-hidden="true">Loading {String(count).padStart(3, "0")}</span>
-        <span className="sr-only" role="status" aria-live="polite">
-          {count === 100 ? "Loaded" : "Loading"}
+        {/* Both text nodes are written by paintCount via these refs, so the
+            counter never re-renders the component while the mark animates. */}
+        <span ref={countRef} aria-hidden="true">
+          Loading 000
+        </span>
+        <span ref={statusRef} className="sr-only" role="status" aria-live="polite">
+          Loading
         </span>
       </motion.div>
     </div>

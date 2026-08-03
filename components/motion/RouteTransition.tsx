@@ -23,18 +23,26 @@ export function RouteTransition() {
   const { shouldRun, introDone } = useIntro();
   const [open, setOpen] = useState(true);
   const [active, setActive] = useState(false);
-  // A ref, not state: nothing renders differently because of it, so making it
-  // state would only cause an extra render on mount.
-  const firstPaint = useRef(true);
+  /* The route this effect last acted on. Comparing the path is what makes the
+     effect idempotent: a boolean "first paint" flag is consumed by its first
+     run, so a second run for the same mount (React Strict Mode double-invokes
+     effects in dev, and it is on by default with the app router) would fall
+     straight through and play a route transition over the intro loader. A
+     repeated run for the same pathname now exits instead. */
+  const lastPath = useRef<string | null>(null);
 
   useEffect(() => {
-    // Don't fire on the initial render, or while the intro loader is on screen.
-    if (firstPaint.current) {
-      firstPaint.current = false;
-      return;
-    }
+    // Same route as the last run — either the initial mount or a re-invocation.
+    if (lastPath.current === pathname) return;
+    const isInitial = lastPath.current === null;
+    lastPath.current = pathname;
+    if (isInitial) return;
     if (reduced) return;
-    if (shouldRun === true && !introDone) return;
+    /* `shouldRun` is null until the client has decided whether the intro plays.
+       Testing `=== true` treated "undecided" as "no intro", which is the state
+       during the exact window the loader is starting up, so this must block on
+       anything that is not a settled "the intro is not running". */
+    if (shouldRun !== false && !introDone) return;
 
     // Two frames: the first mounts the panels closed, the second parts them —
     // so the covered state actually paints before the reveal starts. Both run
