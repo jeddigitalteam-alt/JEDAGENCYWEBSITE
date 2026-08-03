@@ -1,53 +1,43 @@
 import {
-  KEYLINE_STROKE,
-  LOGO_VIEWBOX,
-  PIECE_A,
-  PIECE_B,
-} from "./puzzle-paths";
+  SITE_MARK_BLUE,
+  SITE_MARK_KEYLINE,
+  SITE_MARK_PATH,
+  SITE_MARK_VIEWBOX,
+} from "./puzzle-site-mark";
 
 export interface PuzzleSiteLogoProps extends React.SVGProps<SVGSVGElement> {
   /**
    * Colour of the keyline. White is the brand treatment and is deliberately a
    * literal colour rather than `currentColor` — the keyline has to stay white
-   * on the ink background, where `currentColor` is the blue of the fill.
+   * against the ink background, where `currentColor` is the blue of the body.
    */
   keyline?: string;
   /**
    * Accessible label. Omit for decorative instances — the mark is then hidden
    * from assistive tech rather than announced twice alongside the "puzzle"
-   * wordmark it usually sits next to.
+   * wordmark it sits next to.
    */
   title?: string;
 }
 
 /**
- * The Puzzle SITE LOGO: two solid blue pieces carrying a white keyline.
+ * The Puzzle SITE LOGO: the single piece, blue body under a white keyline.
  *
- * This is the logo, and only the logo. The intro loader draws its own frozen
- * artwork from ./puzzle-loader-paths via ./IntroLoader — changing anything here
- * has no effect on it.
+ * One component owns the mark for both the header and the footer, so the two
+ * can never drift apart. Geometry comes from ./puzzle-site-mark, traced from
+ * the supplied artwork.
  *
- * How the keyline is drawn, and why this structure:
+ * NOT the loader. The intro loader draws its own frozen two-piece artwork from
+ * ./puzzle-loader-paths via ./IntroLoader; changing anything here has no effect
+ * on it.
  *
- * Both pieces are stroked white first, then both are filled blue on top. The
- * fill covers the inner half of every stroke, so a centred stroke of
- * KEYLINE_STROKE reads as a KEYLINE_HALO-thick outline sitting outside the
- * contour. The white is real paint in the artwork, never background showing
- * through, so it survives on ink, on white, and on any photo behind it.
+ * The keyline is a centred stroke drawn under the fill via `paint-order`, so
+ * its inner half is covered and it reads as an outline sitting outside the
+ * contour. One path means one shape, so there is no second piece whose stroke
+ * could shave the neighbouring fill — this is a single stroke-then-fill.
  *
- * Strokes and fills are in two passes rather than per-path `paint-order`
- * because the pieces sit one SEAM_GAP apart, which is exactly how far each
- * halo reaches. With `paint-order` the second piece's stroke is laid down
- * after the first piece's fill and would shave a half-pixel of white off the
- * neighbouring blue edge. Two passes make the order explicit: all white, then
- * all blue.
- *
- * That same reach is what closes the seam. Each halo spans the full gap, so the
- * central tab-and-socket connection is painted white rather than left as a
- * background-coloured slot, and the two pieces stay visually distinct.
- *
- * Colour comes from `currentColor`, so the caller sets it with a text utility
- * (`text-blue`) and the mark works in normal and inverted sections alike.
+ * The blue is fixed to the artwork's own value rather than `currentColor`: the
+ * brief was that the mark match the supplied file exactly.
  */
 export function PuzzleSiteLogo({
   keyline = "#ffffff",
@@ -56,32 +46,22 @@ export function PuzzleSiteLogo({
 }: PuzzleSiteLogoProps) {
   return (
     <svg
-      viewBox={LOGO_VIEWBOX}
+      viewBox={SITE_MARK_VIEWBOX}
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       focusable="false"
       {...props}
     >
       {title ? <title>{title}</title> : null}
-
-      {/* Pass 1 — the keyline. Round joins so the halo turns the four diamond
-          points cleanly instead of throwing long mitre spikes. */}
-      <g
-        fill="none"
+      <path
+        d={SITE_MARK_PATH}
+        fill={SITE_MARK_BLUE}
         stroke={keyline}
-        strokeWidth={KEYLINE_STROKE}
+        strokeWidth={SITE_MARK_KEYLINE}
         strokeLinejoin="round"
         strokeLinecap="round"
-      >
-        <path d={PIECE_A} />
-        <path d={PIECE_B} />
-      </g>
-
-      {/* Pass 2 — the blue. Covers the inner half of both strokes. */}
-      <g fill="currentColor">
-        <path d={PIECE_A} />
-        <path d={PIECE_B} />
-      </g>
+        paintOrder="stroke"
+      />
     </svg>
   );
 }

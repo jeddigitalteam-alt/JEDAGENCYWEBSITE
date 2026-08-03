@@ -2,7 +2,12 @@
 
 import { motion, useMotionValue } from "motion/react";
 import { useEffect, useState } from "react";
-import { PIECE_A, PIECE_B, VIEWBOX } from "@/components/brand/puzzle-paths";
+import {
+  SITE_MARK_BLUE,
+  SITE_MARK_KEYLINE,
+  SITE_MARK_PATH,
+  SITE_MARK_VIEWBOX,
+} from "@/components/brand/puzzle-site-mark";
 import { useFinePointer, useReducedMotionPref } from "@/lib/hooks/useMediaQuery";
 
 /** Resting size in px. Small enough to track, large enough to read as the mark. */
@@ -11,11 +16,12 @@ const SIZE = 18;
 const SIZE_ACTIVE = 26;
 
 /**
- * Custom cursor: the Puzzle mark itself, following the pointer.
+ * Custom cursor: the Puzzle site mark itself, following the pointer.
  *
- * Geometry is imported from ./brand/puzzle-paths, the same source the header and
- * footer logos use, so the cursor can never drift from the logo. Nothing here
- * modifies it.
+ * Geometry is imported from ./brand/puzzle-site-mark, the same single source the
+ * header and footer logos use, so the cursor can never drift from the logo. It
+ * is deliberately NOT the loader's artwork, which lives in puzzle-loader-paths
+ * and is untouched by anything here.
  *
  * Position is written straight to motion values with no spring. A spring would
  * make the mark lag the pointer, which is both a trailing effect and harder to
@@ -68,17 +74,26 @@ export function Cursor() {
 
   return (
     <motion.svg
-      viewBox={VIEWBOX}
-      className="pointer-events-none fixed left-0 top-0 z-[80] text-blue"
+      viewBox={SITE_MARK_VIEWBOX}
+      className="pointer-events-none fixed left-0 top-0 z-[80]"
       style={{ x, y, translateX: "-50%", translateY: "-50%" }}
-      animate={{ width: active ? SIZE_ACTIVE : SIZE, height: active ? SIZE_ACTIVE : SIZE }}
+      animate={{
+        width: active ? SIZE_ACTIVE : SIZE,
+        height: active ? SIZE_ACTIVE : SIZE,
+      }}
       transition={{ type: "spring", stiffness: 500, damping: 34 }}
-      fill="currentColor"
       aria-hidden="true"
       focusable="false"
     >
-      <path d={PIECE_A} />
-      <path d={PIECE_B} />
+      <path
+        d={SITE_MARK_PATH}
+        fill={SITE_MARK_BLUE}
+        stroke="#ffffff"
+        strokeWidth={SITE_MARK_KEYLINE}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        paintOrder="stroke"
+      />
     </motion.svg>
   );
 }
