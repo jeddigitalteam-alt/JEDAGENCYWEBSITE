@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SERVICES } from "@/lib/services";
 import { Eyebrow } from "@/components/ui/primitives";
 import ScopeBuilder from "@/components/services/ScopeBuilder";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -15,9 +16,12 @@ export default function ServicesPage() {
     <>
       <section className="px-5 pt-32 md:px-8 md:pt-40">
         <Eyebrow>Services</Eyebrow>
-        <h1 className="display mt-4 max-w-[18ch] text-step-5">
-          Seven ways we <em>can help</em>
-        </h1>
+        <RevealHeading
+        as="h1"
+        className="display mt-4 max-w-[18ch] text-step-5"
+        roman="Seven ways we"
+        italic="can help"
+      />
         <p className="mt-6 max-w-[54ch] text-step-0 text-content-dim">
           Most projects use two or three of these together. If you already know
           the shape of the work, build it on the board below and send it over.

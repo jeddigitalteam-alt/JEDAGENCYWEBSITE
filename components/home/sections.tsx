@@ -2,7 +2,11 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import {
+  useScrollAssembly,
+  type AssemblyPlan,
+} from "@/components/home/use-scroll-assembly";
 import { CLIENTS } from "@/lib/site";
 import { TESTIMONIALS } from "@/lib/team";
 import { ARTICLES } from "@/lib/articles";
@@ -184,52 +188,218 @@ export function FitNotes() {
 
 /* -------------------------------------------------------------- articles */
 
-export function ArticlesTeaser() {
-  const shown = ARTICLES.slice(0, 3);
-  return (
-    <section data-invert className="bg-surface px-5 py-24 text-content md:px-8 md:py-32">
-      <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <Eyebrow>Writing</Eyebrow>
-          <SectionHeading
-            roman="Opinions we’re"
-            italic="willing to defend"
-            className="mt-4 max-w-[20ch]"
-          />
-        </div>
-        <Link
-          href="/articles"
-          className="mono rounded-full border border-rule px-5 py-2.5 transition-colors hover:border-blue hover:text-blue"
-        >
-          All articles
-        </Link>
-      </div>
+/**
+ * Six panels, six different routes in.
+ *
+ * The top row comes from beyond the left and right edges with opposite rake and
+ * one arrival straight up from below the fold; the bottom row comes from the
+ * lower corners with the rake reversed, and its middle card arrives from far
+ * below *oversized*, shrinking into its cell rather than growing into it. No
+ * two cards share a direction, an angle or a scale, so the six never read as
+ * one group sliding.
+ *
+ * The rows overlap slightly in time rather than running one after the other,
+ * which keeps the whole thing one gesture instead of two.
+ *
+ * Distances are viewport units, so the flight is as long on an ultrawide as it
+ * is on a laptop. Below `md` the grid stacks, so the cards alternate
+ * left/right down the column on shorter arcs, and each one takes its progress
+ * from its own slot — see `ownPace` in the hook.
+ */
+const ASSEMBLY: AssemblyPlan = {
+  /* Progress opens as the zone's top passes three quarters of the way down the
+     screen — the moment the empty frame first shows — and closes with roughly a
+     quarter of the pin still to run, so the finished section is held before the
+     stage lets go. */
+  start: 0.72,
+  pin: 0.62,
+  /* The extra height and the pin both hang off this attribute, so removing it
+     the moment the flight lands turns the section back into an ordinary block
+     of its own height — no runway to scroll back through. */
+  collapse: { attr: "data-pin-zone", stage: "[data-pin-stage]" },
+  flights: [
+    /* The heading is not in this plan. It has the site's line-by-line masked
+       reveal instead, the same as every other heading — see RevealHeading — so
+       the eyebrow and the "All articles" button stay put around it exactly as
+       they do in every other section. Only the cards fly. */
 
-      <ul className="grid gap-px overflow-hidden rounded-xl border border-rule bg-rule md:grid-cols-3">
-        {shown.map((a) => (
-          <li key={a.slug} className="bg-surface">
-            <Link
-              href={`/articles/${a.slug}`}
-              className="group flex h-full flex-col justify-between p-6"
-            >
-              <div>
-                <p className="mono text-content-dim">
-                  {a.readingMinutes} min read
-                </p>
-                <h3 className="display mt-4 text-step-2 transition-colors group-hover:text-blue">
-                  {a.title}
-                </h3>
-                <p className="mt-3 text-step--1 text-content-dim">
-                  {a.standfirst}
-                </p>
-              </div>
-              <time dateTime={a.datetime} className="mono mt-8 text-content-dim">
-                {a.date}
-              </time>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
+    /* --- top row ---------------------------------------------------- */
+    {
+      select: "[data-flight=card-0]",
+      x: -70,
+      y: -8,
+      rotate: -17,
+      scale: 0.68,
+      opacity: 0.12,
+      at: 0,
+      span: 0.66,
+      lift: true,
+      ownPace: true,
+      narrow: { x: -80, y: 0, rotate: -13, scale: 0.76, opacity: 0.15 },
+    },
+    {
+      select: "[data-flight=card-1]",
+      x: 6,
+      y: 50,
+      rotate: 14,
+      scale: 0.65,
+      opacity: 0.15,
+      at: 0.08,
+      span: 0.66,
+      lift: true,
+      ownPace: true,
+      narrow: { x: 80, y: 6, rotate: 12, scale: 0.76 },
+    },
+    {
+      select: "[data-flight=card-2]",
+      x: 68,
+      y: -14,
+      rotate: 24,
+      scale: 0.74,
+      opacity: 0.1,
+      at: 0.16,
+      span: 0.66,
+      lift: true,
+      ownPace: true,
+      narrow: { x: -80, y: -4, rotate: -15, scale: 0.76, opacity: 0.15 },
+    },
+
+    /* --- bottom row ------------------------------------------------- */
+    {
+      select: "[data-flight=card-3]",
+      x: -62,
+      y: 30,
+      rotate: 20,
+      scale: 0.7,
+      opacity: 0.12,
+      at: 0.14,
+      span: 0.66,
+      lift: true,
+      ownPace: true,
+      narrow: { x: 80, y: 4, rotate: 14, scale: 0.76, opacity: 0.15 },
+    },
+    {
+      /* The one that comes in too big and settles down to size. */
+      select: "[data-flight=card-4]",
+      x: -4,
+      y: 66,
+      rotate: -12,
+      scale: 1.16,
+      opacity: 0.14,
+      at: 0.22,
+      span: 0.66,
+      lift: true,
+      ownPace: true,
+      /* Not oversized on a phone: a full-width card at 1.16 would be wider
+         than the screen, and clipping it would read as a mistake. */
+      narrow: { x: -80, y: 0, rotate: -12, scale: 0.78, opacity: 0.15 },
+    },
+    {
+      select: "[data-flight=card-5]",
+      x: 64,
+      y: 34,
+      rotate: -22,
+      scale: 0.72,
+      opacity: 0.1,
+      at: 0.3,
+      span: 0.66,
+      lift: true,
+      ownPace: true,
+      narrow: { x: 80, y: -4, rotate: 16, scale: 0.76, opacity: 0.15 },
+    },
+  ],
+};
+
+export function ArticlesTeaser() {
+  /* Every article the studio has published. Six is the whole of lib/articles —
+     if a seventh is written, this shows five and the newest, which is the
+     right behaviour for a teaser; the grid is three-up so the count wants to
+     stay a multiple of three. */
+  const shown = ARTICLES.slice(0, 6);
+  const zoneRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  useScrollAssembly(zoneRef, ASSEMBLY, !reduced);
+
+  return (
+    /* The scroll zone. Taller than the stage inside it, which is what buys the
+       assembly its distance; the stage un-sticks normally at the bottom, so
+       the page keeps scrolling straight on into the footer.
+       The pin is conditional on the viewport being tall enough to hold two
+       rows of cards plus the heading. On a short laptop it would pin a stage
+       taller than the screen and hold the bottom row below the fold for the
+       whole sequence, so there the section stays in normal flow and takes its
+       progress from its own entry instead — same flight, no pinning. Same
+       below `md`, where the grid stacks. */
+    <div
+      ref={zoneRef}
+      data-invert
+      data-pin-zone
+      className="relative bg-surface text-content"
+    >
+      <section
+        data-pin-stage
+        /* `clip` rather than `hidden`: it keeps a card that is still 70vw away
+           from widening the page, without creating a scroll container that
+           focus could scroll inside. */
+        className="flex flex-col justify-center overflow-clip px-5 py-24 md:px-8 md:py-20"
+      >
+        {/* Above the panels, so one passing behind the title never obscures
+            it — and the title stays legible for the whole flight. */}
+        <div className="relative z-10 mb-12 flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <Eyebrow>Writing</Eyebrow>
+            <SectionHeading
+              roman="Opinions we’re"
+              italic="willing to defend"
+              className="mt-4 max-w-[20ch]"
+            />
+          </div>
+          <Link
+            href="/articles"
+            className="mono rounded-full border border-rule px-5 py-2.5 transition-colors hover:border-blue hover:text-blue"
+          >
+            All articles
+          </Link>
+        </div>
+
+        {/* The frame stays put throughout: the cells keep their surface and
+            the hairline grid exactly where the design has them, and the panels
+            fly out of the frame and back into it. No clipping here — a panel
+            has to be able to leave — which changes nothing at rest, because a
+            cell is the same colour as the page behind it. */}
+        <ul className="grid gap-px rounded-xl border border-rule bg-rule md:grid-cols-3">
+          {shown.map((a, i) => (
+            <li key={a.slug} className="bg-surface">
+              <Link
+                href={`/articles/${a.slug}`}
+                data-flight={`card-${i}`}
+                /* `bg-surface` is what makes the card a panel once it is off
+                   its cell. At rest it covers the cell exactly, so it is
+                   invisible — same colour, same box. */
+                className="group flex h-full flex-col justify-between bg-surface p-6"
+              >
+                <div>
+                  <p className="mono text-content-dim">
+                    {a.readingMinutes} min read
+                  </p>
+                  <h3 className="display mt-4 text-step-2 transition-colors group-hover:text-blue">
+                    {a.title}
+                  </h3>
+                  <p className="mt-3 text-step--1 text-content-dim">
+                    {a.standfirst}
+                  </p>
+                </div>
+                <time
+                  dateTime={a.datetime}
+                  className="mono mt-8 text-content-dim"
+                >
+                  {a.date}
+                </time>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   );
 }

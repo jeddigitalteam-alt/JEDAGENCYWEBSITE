@@ -273,3 +273,39 @@ body {
   outline: 2px solid var(--blue);
   outline-offset: 4px;
 }
+
+/* Pinned scroll stage — the homepage articles assembly.
+ *
+ * Only pin where there is room for the whole composition: the heading plus two
+ * rows of cards. Pinning a stage taller than the screen would hold the bottom
+ * row below the fold for the entire sequence, so on a short laptop, and below
+ * `md` where the grid stacks, the section stays in ordinary flow and takes its
+ * progress from its own entry instead. Expressed here rather than as a Tailwind
+ * arbitrary variant because a two-condition media query does not survive the
+ * class-name round trip cleanly. */
+/* Pinned scroll stage — the homepage articles assembly.
+ *
+ * The extra height and the pin hang off `data-pin-zone`, and the hook removes
+ * that attribute the instant the assembly lands. What is left is a section one
+ * viewport tall: its own composition, not a runway. Scrolling back up through
+ * it then costs a screen rather than three, and reduced motion never has the
+ * attribute in the first place.
+ *
+ * `min-height` deliberately sits outside that, on the stage itself. It is what
+ * centres the composition, so dropping it at the same moment would slide the
+ * heading and cards up inside a stage whose top edge the scroll compensation is
+ * holding still — a measured 41.5px lurch at the exact moment everything is
+ * supposed to be invisible. Keeping it means the collapse changes the section's
+ * position in the document and nothing else at all. */
+@media (min-width: 768px) and (min-height: 820px) {
+  [data-pin-zone] {
+    height: 200svh;
+  }
+  [data-pin-zone] [data-pin-stage] {
+    position: sticky;
+    top: 0;
+  }
+  [data-pin-stage] {
+    min-height: 100svh;
+  }
+}

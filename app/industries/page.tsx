@@ -3,6 +3,7 @@ import Link from "next/link";
 import { INDUSTRIES } from "@/lib/industries";
 import { Eyebrow } from "@/components/ui/primitives";
 import CaseGrid from "@/components/industries/CaseGrid";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export const metadata: Metadata = {
   title: "Industries",
@@ -15,9 +16,12 @@ export default function IndustriesPage() {
     <>
       <section className="px-5 pt-32 md:px-8 md:pt-40">
         <Eyebrow>Industries</Eyebrow>
-        <h1 className="display mt-4 max-w-[20ch] text-step-5">
-          Sectors we’ve <em>already made the mistakes in</em>
-        </h1>
+        <RevealHeading
+        as="h1"
+        className="display mt-4 max-w-[20ch] text-step-5"
+        roman="Sectors we’ve"
+        italic="already made the mistakes in"
+      />
         <p className="mt-6 max-w-[54ch] text-step-0 text-content-dim">
           Domain knowledge mostly means knowing which shortcuts are expensive.
           Here’s where we have it.

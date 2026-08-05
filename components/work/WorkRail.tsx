@@ -146,19 +146,6 @@ export function WorkRail() {
           ))}
         </motion.ul>
       </div>
-
-      <div className="mt-6 flex items-center gap-4 px-5 md:px-8">
-        <span className="mono tabular-nums text-content-dim">
-          {String(active + 1).padStart(2, "0")} / {WORK.length}
-        </span>
-        <div className="h-px flex-1 bg-rule">
-          <motion.div
-            className="h-px bg-blue"
-            animate={{ width: `${((active + 1) / WORK.length) * 100}%` }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          />
-        </div>
-      </div>
     </div>
   );
 }

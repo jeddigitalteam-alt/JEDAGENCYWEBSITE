@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SITE } from "@/lib/site";
 import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
@@ -37,22 +38,42 @@ function StudioClock() {
   );
 }
 
+/**
+ * Routes where the footer's "Start a project" pitch is redundant, because the
+ * page IS that. One variant, decided from the pathname, rather than a second
+ * copy of the footer: everything else — navigation, social, address, wordmark,
+ * clock, email — is identical, and the columns simply reflow to fill the space
+ * the pitch left behind.
+ */
+const NO_PITCH = new Set(["/contact"]);
+
 export function Footer() {
+  const pathname = usePathname();
+  const pitch = !NO_PITCH.has(pathname);
+
   return (
     <footer className="border-t border-rule bg-surface px-5 pb-8 pt-16 md:px-8 md:pt-24">
       <div className="flex flex-col gap-12">
-        <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
-          <div>
-            <p className="display max-w-[16ch] text-step-3">
-              Have something that <em>needs to fit</em>?
-            </p>
-            <Link
-              href="/contact"
-              className="mono mt-6 inline-flex rounded-full bg-coral px-6 py-3 text-ink transition-colors hover:bg-paper"
-            >
-              Start a project
-            </Link>
-          </div>
+        <div
+          className={
+            pitch
+              ? "grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]"
+              : "grid gap-10 sm:grid-cols-2"
+          }
+        >
+          {pitch ? (
+            <div>
+              <p className="display max-w-[16ch] text-step-3">
+                Have something that <em>needs to fit</em>?
+              </p>
+              <Link
+                href="/contact"
+                className="mono mt-6 inline-flex rounded-full bg-coral px-6 py-3 text-ink transition-colors hover:bg-paper"
+              >
+                Start a project
+              </Link>
+            </div>
+          ) : null}
 
           <nav aria-label="Footer">
             <p className="mono mb-4 text-content-dim">Studio</p>
@@ -61,7 +82,7 @@ export function Footer() {
                 ["Work", "/work"],
                 ["Services", "/services"],
                 ["Industries", "/industries"],
-                ["How we work", "/how-we-work"],
+                ["How we work", "/work#how-we-work"],
                 ["About", "/about"],
                 ["Labs", "/labs"],
                 ["Articles", "/articles"],

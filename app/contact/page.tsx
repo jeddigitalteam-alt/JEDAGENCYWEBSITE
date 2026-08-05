@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { SITE } from "@/lib/site";
 import { Eyebrow } from "@/components/ui/primitives";
 import ContactForm from "@/components/contact/ContactForm";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -14,9 +15,12 @@ export default function ContactPage() {
   return (
     <section className="px-5 pb-24 pt-32 md:px-8 md:pt-40">
       <Eyebrow>Contact</Eyebrow>
-      <h1 className="display mt-4 max-w-[18ch] text-step-5">
-        Tell us what you’re <em>trying to do</em>
-      </h1>
+      <RevealHeading
+        as="h1"
+        className="display mt-4 max-w-[18ch] text-step-5"
+        roman="Tell us what you’re"
+        italic="trying to do"
+      />
       <p className="mt-6 max-w-[54ch] text-step-0 text-content-dim">
         Four short steps. We read everything and reply within two working days,
         including the ones we’re not right for.

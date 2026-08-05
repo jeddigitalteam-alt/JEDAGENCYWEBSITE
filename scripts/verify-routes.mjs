@@ -23,7 +23,7 @@ const ROUTES = [
   "/services/brand-identity",
   "/industries",
   "/industries/sports",
-  "/how-we-work",
+  // /how-we-work now 308s to /work#how-we-work — it is not a page any more.
   "/about",
   "/labs",
   "/articles",

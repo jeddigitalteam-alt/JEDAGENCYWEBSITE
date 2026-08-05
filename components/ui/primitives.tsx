@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 /** Mono micro-label. The LEVANT voice, used as the site-wide labelling system. */
 export function Eyebrow({
@@ -14,28 +15,35 @@ export function Eyebrow({
   return <As className={`mono text-content-dim ${className}`}>{children}</As>;
 }
 
-/** Section heading: roman + italic mix is the type signature. */
+/**
+ * Section heading: roman + italic mix is the type signature.
+ *
+ * Rendered through RevealHeading, so every section heading on the site gets the
+ * line-by-line masked entrance. Pass `reveal={false}` where the heading already
+ * has an entrance of its own.
+ */
 export function SectionHeading({
   roman,
   italic,
   className = "",
   id,
+  reveal,
 }: {
   roman: string;
   italic?: string;
   className?: string;
   id?: string;
+  reveal?: boolean;
 }) {
   return (
-    <h2 id={id} className={`display text-step-4 ${className}`}>
-      {roman}
-      {italic ? (
-        <>
-          {" "}
-          <em>{italic}</em>
-        </>
-      ) : null}
-    </h2>
+    <RevealHeading
+      as="h2"
+      id={id}
+      roman={roman}
+      italic={italic}
+      reveal={reveal}
+      className={`display text-step-4 ${className}`}
+    />
   );
 }
 
@@ -49,6 +57,15 @@ const variants: Record<ButtonVariant, string> = {
   primary: "bg-coral text-ink hover:bg-paper",
   ghost: "border border-rule text-content hover:border-blue hover:text-blue",
 };
+
+/**
+ * The button's own classes, for the rare case where the pill has to sit on
+ * something other than a <button> or a <Link> — the hero pairs it with a prompt
+ * inside one link, so the pill is a span there. Exported rather than copied so
+ * there is still one definition of what a button looks like.
+ */
+export const buttonClass = (variant: ButtonVariant = "ghost") =>
+  `${base} ${variants[variant]}`;
 
 export function Button({
   variant = "ghost",

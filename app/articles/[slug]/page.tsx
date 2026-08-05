@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ARTICLES, getArticle } from "@/lib/articles";
 import { Eyebrow } from "@/components/ui/primitives";
 import ReadingProgress from "@/components/articles/ReadingProgress";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
@@ -49,7 +50,11 @@ export default async function ArticlePage({
           <Eyebrow>
             {article.readingMinutes} min read — {article.author}
           </Eyebrow>
-          <h1 className="display mt-4 text-step-4">{article.title}</h1>
+          <RevealHeading
+            as="h1"
+            className="display mt-4 text-step-4"
+            roman={article.title}
+          />
           <p className="mt-6 text-step-1 text-content-dim">
             {article.standfirst}
           </p>

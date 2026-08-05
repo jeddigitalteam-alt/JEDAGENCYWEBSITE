@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SERVICES, getService } from "@/lib/services";
 import { Eyebrow } from "@/components/ui/primitives";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export function generateStaticParams() {
   return SERVICES.map((s) => ({ slug: s.slug }));
@@ -37,9 +38,12 @@ export default async function ServicePage({
   return (
     <article className="px-5 pb-24 pt-32 md:px-8 md:pt-40">
       <Eyebrow>Services</Eyebrow>
-      <h1 className="display mt-4 max-w-[18ch] text-step-5">
-        {service.headline.roman} <em>{service.headline.italic}</em>
-      </h1>
+      <RevealHeading
+        as="h1"
+        className="display mt-4 max-w-[18ch] text-step-5"
+        roman={service.headline.roman}
+        italic={service.headline.italic}
+      />
       <p className="mt-8 max-w-[56ch] text-step-1 text-content-dim">
         {service.intro}
       </p>

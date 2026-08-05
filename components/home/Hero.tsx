@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
+import Link from "next/link";
+import { buttonClass } from "@/components/ui/primitives";
 import { useIntro } from "@/components/motion/intro-context";
 import { useParallaxLayers } from "@/lib/hooks/useParallax";
 import { PIECE_A, PIECE_B, VIEWBOX } from "@/components/brand/puzzle-paths";
@@ -139,7 +141,11 @@ export function Hero() {
           "together". The padding drops the clip edge below the baseline and the
           matching negative margin takes the space straight back, so the mask
           gets taller without the headline's spacing or size moving at all. */}
-      <h1 className="display relative z-10 max-w-[22ch] text-hero">
+      {/* Headline and its call to action are one flex child, not two: the
+          section is `justify-between`, so a sibling here would be pushed to the
+          middle of the hero instead of sitting under the type. */}
+      <div className="relative z-10">
+      <h1 className="display max-w-[22ch] text-hero">
         <span className="block overflow-hidden pb-[0.22em] -mb-[0.22em]">
           <motion.span
             className="block"
@@ -159,6 +165,41 @@ export function Hero() {
           </motion.span>
         </span>
       </h1>
+
+        {/* The one CTA in the hero. Cued off the same `show` as the headline
+            and delayed behind both of its lines, so it lands as the last beat
+            of the same entrance rather than reading as a separate element.
+
+            Prompt and button are one link, not two: a second anchor to the same
+            place would give screen readers a duplicate destination and split
+            the hover state across two elements. As one, the row is a single tab
+            stop, the arrow answers to the same hover, and the pill keeps the
+            shared button styling via `buttonClass`. */}
+        <motion.div
+          className="mt-8 md:mt-10"
+          initial={{ opacity: 0, y: 14 }}
+          animate={show ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+          transition={{ duration: 0.7, delay: 0.28, ease: EASE }}
+        >
+          <Link
+            href="/contact"
+            /* Stacks on narrow screens so the prompt sits above the button
+               rather than squeezing it; side by side and centred from sm up. */
+            className="group inline-flex flex-col items-start gap-3 rounded-full sm:flex-row sm:items-center sm:gap-5"
+          >
+            <span className="mono text-paper">
+              Get a free quote
+              <span
+                aria-hidden="true"
+                className="ml-2 inline-block transition-transform duration-300 group-hover:translate-x-1"
+              >
+                →
+              </span>
+            </span>
+            <span className={buttonClass("primary")}>Start a project</span>
+          </Link>
+        </motion.div>
+      </div>
 
       <div className="relative z-10 flex items-end justify-between gap-6">
         <motion.p

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WORK, getCase, hasCaseStudy } from "@/lib/work";
 import { Eyebrow } from "@/components/ui/primitives";
+import RevealHeading from "@/components/motion/RevealHeading";
 import {
   ChapterNav,
   DeviceShowcase,
@@ -36,6 +37,12 @@ export async function generateMetadata({
       images: [{ url: study.hero }],
     },
   };
+}
+
+/** "3 / 2" -> 1.5. The ratio has to be a number to size the frame's cap. */
+function ratioOf(aspect: string) {
+  const [w, h] = aspect.split("/").map((n) => Number(n.trim()));
+  return h > 0 && w > 0 ? w / h : 1;
 }
 
 function Meta({ label, value }: { label: string; value: string }) {
@@ -73,7 +80,15 @@ export default async function CaseStudyPage({
             className="relative mx-auto w-full overflow-hidden"
             style={{
               aspectRatio: study.heroAspect,
-              maxWidth: "min(100%, 78vh)",
+              /* The frame is width-driven, so the height cap has to be written
+                 as a width: ratio x N vh. A square hero at 78 gives exactly the
+                 78vh it always had; the 3:2 Levant artwork at 88 comes out
+                 132vh wide and 88vh tall, which is the whole opening screen
+                 bar the header, uncropped and undistorted. `min(100%, …)`
+                 hands the narrow case back to the page gutter. */
+              maxWidth: `min(100%, calc(${ratioOf(study.heroAspect)} * ${
+                study.heroViewport ?? 78
+              }vh))`,
             }}
           >
             <Image
@@ -81,7 +96,7 @@ export default async function CaseStudyPage({
               alt={`${study.client} — ${study.summary}`}
               fill
               priority
-              sizes="(min-width: 768px) 78vh, 100vw"
+              sizes="(min-width: 768px) 90vw, 100vw"
               className="object-contain"
             />
           </div>
@@ -108,15 +123,12 @@ export default async function CaseStudyPage({
         <Eyebrow>
           {study.client} — {study.year}
         </Eyebrow>
-        <h1 className="display mt-4 max-w-[16ch] text-step-5">
-          {study.headline ? (
-            <>
-              {study.headline.roman} <em>{study.headline.italic}</em>
-            </>
-          ) : (
-            study.client
-          )}
-        </h1>
+        <RevealHeading
+          as="h1"
+          className="display mt-4 max-w-[16ch] text-step-5"
+          roman={study.headline ? study.headline.roman : study.client}
+          italic={study.headline?.italic}
+        />
 
         <dl className="mt-12 grid gap-6 border-t border-rule pt-6 sm:grid-cols-2 lg:grid-cols-4">
           <Meta label="Client" value={study.client} />

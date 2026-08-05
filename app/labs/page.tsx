@@ -7,6 +7,7 @@ import TypeLab from "@/components/labs/TypeLab";
 import SignalCanvas from "@/components/labs/SignalCanvas";
 import NodeField from "@/components/labs/NodeField";
 import ScrollAssembly from "@/components/labs/ScrollAssembly";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export const metadata: Metadata = {
   title: "Labs",
@@ -19,9 +20,12 @@ export default function LabsPage() {
     <div className="pb-24 pt-32 md:pt-40">
       <header className="px-5 md:px-8">
         <Eyebrow>Labs</Eyebrow>
-        <h1 className="display mt-4 max-w-[20ch] text-step-5">
-          Things we build to <em>find out</em>
-        </h1>
+        <RevealHeading
+        as="h1"
+        className="display mt-4 max-w-[20ch] text-step-5"
+        roman="Things we build to"
+        italic="find out"
+      />
         <p className="mt-6 max-w-[54ch] text-step-0 text-content-dim">
           Six experiments you can actually operate. Drag them, break them,
           reset them — nothing here is a screensaver.

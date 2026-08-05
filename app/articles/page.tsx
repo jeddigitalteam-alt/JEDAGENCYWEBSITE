@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ARTICLES } from "@/lib/articles";
 import { Eyebrow } from "@/components/ui/primitives";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export const metadata: Metadata = {
   title: "Articles",
@@ -13,9 +14,12 @@ export default function ArticlesPage() {
   return (
     <section className="px-5 pb-24 pt-32 md:px-8 md:pt-40">
       <Eyebrow>Articles — {ARTICLES.length}</Eyebrow>
-      <h1 className="display mt-4 max-w-[20ch] text-step-5">
-        Opinions we’re <em>willing to defend</em>
-      </h1>
+      <RevealHeading
+        as="h1"
+        className="display mt-4 max-w-[20ch] text-step-5"
+        roman="Opinions we’re"
+        italic="willing to defend"
+      />
 
       <ul className="mt-16 border-t border-rule">
         {ARTICLES.map((a) => (

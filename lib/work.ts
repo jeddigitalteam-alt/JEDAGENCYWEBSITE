@@ -64,6 +64,15 @@ export interface CaseStudy {
    * standard full-bleed 16:9 crop.
    */
   heroAspect?: string;
+  /**
+   * Share of the viewport height an `heroAspect` hero should fill, 0–100.
+   *
+   * The cap has to be expressed as a width, because the frame's width is what
+   * drives its height through the aspect ratio — so the page turns this into
+   * `ratio x N vh`. Defaults to 78, which is what a square hero was already
+   * using; raise it where the artwork is the point of the opening.
+   */
+  heroViewport?: number;
   /** Screens shown inside the device showcase. */
   screens?: DeviceScreen[];
   /** Set only on fully built case studies. */
@@ -92,9 +101,10 @@ export const WORK: CaseStudy[] = [
       "Performance tennis apparel, taken from a name to an inaugural drop that sold through in nine days.",
     industries: ["sports", "ecommerce"],
     thumb: "/work/levant/thumb-campaign.png",
-    hero: "/work/levant/hero-devices-clay.png",
-    // Square artwork — the monitor, laptop and wordmark all have to survive.
-    heroAspect: "1 / 1",
+    hero: "/work/levant/hero-editorial.png",
+    // 1536x1024 artwork, shown whole and given most of the first screen.
+    heroAspect: "3 / 2",
+    heroViewport: 88,
     screens: [
       {
         src: "/work/levant/screen-home.png",

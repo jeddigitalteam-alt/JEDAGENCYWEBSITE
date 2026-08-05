@@ -5,6 +5,7 @@ import { INDUSTRIES, getIndustry } from "@/lib/industries";
 import { WORK } from "@/lib/work";
 import { Eyebrow } from "@/components/ui/primitives";
 import WorkTile from "@/components/work/WorkTile";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export function generateStaticParams() {
   return INDUSTRIES.map((i) => ({ slug: i.slug }));
@@ -42,7 +43,11 @@ export default async function IndustryPage({
   return (
     <article className="px-5 pb-24 pt-32 md:px-8 md:pt-40">
       <Eyebrow>Industries</Eyebrow>
-      <h1 className="display mt-4 max-w-[16ch] text-step-5">{industry.name}</h1>
+      <RevealHeading
+        as="h1"
+        className="display mt-4 max-w-[16ch] text-step-5"
+        roman={industry.name}
+      />
       <p className="mt-8 max-w-[56ch] text-step-1 text-content-dim">
         {industry.intro}
       </p>

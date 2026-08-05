@@ -6,7 +6,7 @@ export const SITE = {
   /** Wordmark is set lowercase. */
   wordmark: "puzzle",
   email: "hello@puzzle.studio",
-  location: "Hampshire, UK",
+  location: "Hampshire, UK",
   timezone: "Europe/London",
   address: ["Hampshire", "United Kingdom"],
   social: [
@@ -50,7 +50,8 @@ export const PRIMARY_NAV: {
       },
     ],
   },
-  { label: "How we work", href: "/how-we-work" },
+  /* "How we work" is no longer a top-level destination: the process lives on
+     the work page, under the projects it produced. */
   { label: "About", href: "/about" },
   { label: "Labs", href: "/labs" },
   { label: "Articles", href: "/articles" },
@@ -62,7 +63,8 @@ export const ALL_ROUTES: NavLink[] = [
   { label: "Work", href: "/work" },
   { label: "Services", href: "/services" },
   { label: "Industries", href: "/industries" },
-  { label: "How we work", href: "/how-we-work" },
+  // Still findable by name in the palette — it just resolves to the section.
+  { label: "How we work", href: "/work#how-we-work" },
   { label: "About", href: "/about" },
   { label: "Labs", href: "/labs" },
   { label: "Articles", href: "/articles" },

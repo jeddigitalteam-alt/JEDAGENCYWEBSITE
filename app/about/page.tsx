@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Eyebrow } from "@/components/ui/primitives";
 import TeamBoard from "@/components/about/TeamBoard";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 export const metadata: Metadata = {
   title: "About",
@@ -13,9 +14,12 @@ export default function AboutPage() {
     <>
       <section className="px-5 pt-32 md:px-8 md:pt-40">
         <Eyebrow>About</Eyebrow>
-        <h1 className="display mt-4 max-w-[18ch] text-step-5">
-          Eight people who <em>finish things</em>
-        </h1>
+        <RevealHeading
+        as="h1"
+        className="display mt-4 max-w-[18ch] text-step-5"
+        roman="Eight people who"
+        italic="finish things"
+      />
         <div className="mt-8 grid max-w-4xl gap-5 text-step-1 text-content-dim">
           <p>
             Puzzle is a design studio in Hampshire. We started in 2019 because the
