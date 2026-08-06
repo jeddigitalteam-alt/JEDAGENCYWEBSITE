@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useReducedMotionPref } from "@/lib/hooks/useMediaQuery";
 import { Eyebrow } from "@/components/ui/primitives";
 
 const STEPS = [
@@ -38,88 +38,125 @@ const STEPS = [
 ];
 
 /**
- * Horizontal process timeline. Vertical page scroll across a tall section maps
- * to horizontal travel, and each step's piece seats into the previous one as it
- * arrives — the numbers are earned here because this genuinely is a sequence.
+ * How long one full pass of the five cards takes.
  *
- * Under reduced motion this becomes an ordinary vertical list. Scroll-jacking a
- * user who asked for less motion is exactly the wrong move.
+ * Set to travel at the services marquee's speed rather than to a round number,
+ * so the two rails read as one interaction: that one covers 2828px of card in
+ * 56s, or about 50px a second. Five process cards at `34vw + 1rem` come to
+ * 2528px on a 1440px viewport, which is 50s at the same pace.
+ */
+const CYCLE_S = 50;
+
+/**
+ * The five process stages, running as a continuous marquee.
+ *
+ * This used to be scroll-driven: a 420vh section whose vertical progress was
+ * mapped to horizontal travel, with a progress bar and a "keep scrolling"
+ * prompt. That is gone entirely — the cards, their copy, their numbering and
+ * their size are untouched, but they now move on their own, exactly as the
+ * homepage service cards do.
+ *
+ * The loop is the same trick as that rail: render the five cards twice and
+ * translate the track by exactly -50%, so the moment it wraps, copy two sits
+ * precisely where copy one began and there is nothing to see. That only holds
+ * if half the track is exactly one copy, which is why the spacing is a right
+ * margin on every card rather than a flex `gap` — a gap falls between items
+ * only, so a ten-card track would carry nine gaps and half of it would land a
+ * few pixels short of a copy, once every cycle, forever.
+ *
+ * It is a CSS animation on a transform: no per-frame React, no wheel or touch
+ * handling of ours, so vertical scrolling is untouched. It does not pause on
+ * hover — only when the section is nowhere near the viewport, and under reduced
+ * motion, where it becomes an ordinary scrollable row of the five real cards.
  */
 export function ProcessTimeline() {
-  const reduced = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref });
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-72%"]);
-  const progress = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const reduced = useReducedMotionPref();
+  const sectionRef = useRef<HTMLElement>(null);
+  const [near, setNear] = useState(true);
 
-  if (reduced) {
-    return (
-      <section className="px-5 py-20 md:px-8">
-        <ol className="grid gap-6">
-          {STEPS.map((s) => (
-            <li
-              key={s.n}
-              className="rounded-xl border border-rule bg-ink-raised p-6"
-            >
-              <p className="mono text-blue">{s.n}</p>
-              <h3 className="display mt-3 text-step-2">{s.title}</h3>
-              <p className="mt-3 max-w-[52ch] text-step--1 text-content-dim">
-                {s.body}
-              </p>
-              <p className="mono mt-4 text-content-dim">Output — {s.out}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
+  /* Stop the compositor animating a strip nobody can see. Toggled by an
+     observer, so this is two state changes a page rather than one a frame. */
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => setNear(entries[0]?.isIntersecting ?? true),
+      { rootMargin: "300px 0px" },
     );
-  }
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  /* One copy for real, one to cover the wrap. Under reduced motion there is no
+     wrap to cover, so the duplicates are not rendered at all. */
+  const copies = reduced ? [0] : [0, 1];
 
   return (
-    <div ref={ref} className="relative h-[420vh]">
-      <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden">
-        <div className="px-5 md:px-8">
-          <Eyebrow>How we work</Eyebrow>
-        </div>
-
-        <motion.ol style={{ x }} className="mt-8 flex w-max gap-4 px-5 md:px-8">
-          {STEPS.map((s, i) => (
-            <li
-              key={s.n}
-              className="relative w-[80vw] shrink-0 sm:w-[52vw] lg:w-[34vw]"
-            >
-              <div className="h-full rounded-2xl border border-rule bg-ink-raised p-6 md:p-8">
-                <div className="flex items-baseline justify-between">
-                  <span className="display text-step-4 text-blue">{s.n}</span>
-                  <span className="mono text-content-dim">
-                    {i + 1} / {STEPS.length}
-                  </span>
-                </div>
-                <h3 className="display mt-6 text-step-2">{s.title}</h3>
-                <p className="mt-4 text-step--1 text-content-dim">{s.body}</p>
-                <p className="mono mt-8 border-t border-rule pt-4 text-content-dim">
-                  Output — {s.out}
-                </p>
-              </div>
-
-              {/* knob + socket: each card seats into the next */}
-              {i < STEPS.length - 1 ? (
-                <span
-                  aria-hidden="true"
-                  className="absolute -right-2 top-1/2 h-10 w-4 -translate-y-1/2 rounded-r-full border-y border-r border-rule bg-ink-raised"
-                />
-              ) : null}
-            </li>
-          ))}
-        </motion.ol>
-
-        <div className="mt-10 px-5 md:px-8">
-          <div className="h-px w-full bg-rule">
-            <motion.div className="h-px bg-blue" style={{ width: progress }} />
-          </div>
-          <p className="mono mt-3 text-content-dim">Keep scrolling</p>
-        </div>
+    <section ref={sectionRef} className="py-16 md:py-20">
+      <div className="px-5 md:px-8">
+        <Eyebrow>How we work</Eyebrow>
       </div>
-    </div>
+
+      {/* `overflow-hidden` is what keeps the second copy off the page's own
+          scroll width. Under reduced motion the same box becomes an ordinary
+          scroller, gutter and all. */}
+      <div className="mt-8 overflow-hidden motion-reduce:overflow-x-auto motion-reduce:overscroll-x-contain motion-reduce:px-5 motion-reduce:[scrollbar-width:none] md:motion-reduce:px-8 [&::-webkit-scrollbar]:hidden">
+        <ol
+          /* No padding of its own: the -50% wrap is measured against the
+             track's whole width, so a gutter here would offset the seam. The
+             reduced-motion gutter lives on the scroller above instead. */
+          className="flex w-max motion-safe:animate-[marquee_var(--cycle)_linear_infinite]"
+          style={{
+            ["--cycle" as string]: `${CYCLE_S}s`,
+            animationPlayState: near ? "running" : "paused",
+          }}
+        >
+          {copies.flatMap((copy) =>
+            STEPS.map((s, i) => {
+              /* The second copy is scenery: hidden from assistive technology so
+                 the five stages are announced once. Nothing inside a card is
+                 focusable, so there is no tab order to correct. */
+              const ghost = copy === 1;
+              return (
+                <li
+                  key={`${copy}-${s.n}`}
+                  aria-hidden={ghost || undefined}
+                  /* Right margin, not gap — see the note above the component.
+                     4 is the width the `gap-4` between these cards had. */
+                  className="relative mr-4 w-[80vw] shrink-0 sm:w-[52vw] lg:w-[34vw]"
+                >
+                  <div className="h-full rounded-2xl border border-rule bg-ink-raised p-6 md:p-8">
+                    <div className="flex items-baseline justify-between">
+                      <span className="display text-step-4 text-blue">
+                        {s.n}
+                      </span>
+                      <span className="mono text-content-dim">
+                        {i + 1} / {STEPS.length}
+                      </span>
+                    </div>
+                    <h3 className="display mt-6 text-step-2">{s.title}</h3>
+                    <p className="mt-4 text-step--1 text-content-dim">
+                      {s.body}
+                    </p>
+                    <p className="mono mt-8 border-t border-rule pt-4 text-content-dim">
+                      Output — {s.out}
+                    </p>
+                  </div>
+
+                  {/* knob + socket: each card seats into the next */}
+                  {i < STEPS.length - 1 ? (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -right-2 top-1/2 h-10 w-4 -translate-y-1/2 rounded-r-full border-y border-r border-rule bg-ink-raised"
+                    />
+                  ) : null}
+                </li>
+              );
+            }),
+          )}
+        </ol>
+      </div>
+    </section>
   );
 }
 

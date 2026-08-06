@@ -14,17 +14,27 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   return (
     <>
-      <section className="px-5 pt-32 md:px-8 md:pt-40">
+      {/* The board opens the page: someone who already knows the shape of the
+          work can start building it without reading the list first. It carries
+          the page's top padding and its h1 as a result — the list below keeps
+          its own copy exactly, one heading level down, so the outline still
+          runs h1 then h2 rather than starting at h2. */}
+      <ScopeBuilder atTop />
+
+      <section className="px-5 py-24 md:px-8 md:py-32">
         <Eyebrow>Services</Eyebrow>
         <RevealHeading
-        as="h1"
+        as="h2"
         className="display mt-4 max-w-[18ch] text-step-5"
         roman="Seven ways we"
         italic="can help"
       />
         <p className="mt-6 max-w-[54ch] text-step-0 text-content-dim">
+          {/* "below" was pointing at the board when the board sat underneath
+              this list. It is now above it — one word, so the sentence stays
+              true after the reorder. */}
           Most projects use two or three of these together. If you already know
-          the shape of the work, build it on the board below and send it over.
+          the shape of the work, build it on the board above and send it over.
         </p>
 
         <ul className="mt-16 border-t border-rule">
@@ -54,8 +64,6 @@ export default function ServicesPage() {
           ))}
         </ul>
       </section>
-
-      <ScopeBuilder />
     </>
   );
 }

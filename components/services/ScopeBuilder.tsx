@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { SERVICES, estimateScope } from "@/lib/services";
 import { Eyebrow } from "@/components/ui/primitives";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const SPRING = { type: "spring", stiffness: 420, damping: 32, mass: 0.7 } as const;
@@ -27,8 +28,14 @@ const SCOPE_SERVICES = SERVICES.filter((s) => s.slug !== "retainer");
  * object moving rather than two crossfading. The estimate updates live and the
  * same numbers are handed to the contact form via query params, so the scope
  * the user built is the scope that arrives in the inbox.
+ *
+ * `atTop` is the only thing that varies: it is the opening section of the
+ * services page now, so it takes the page's top padding to clear the fixed
+ * header and its heading becomes the page's h1. Nothing about the board — the
+ * options, the estimate, the layout animation or the hand-off to the contact
+ * form — depends on it.
  */
-export function ScopeBuilder() {
+export function ScopeBuilder({ atTop = false }: { atTop?: boolean }) {
   const router = useRouter();
   const reduced = useReducedMotion();
   const [picked, setPicked] = useState<string[]>([]);
@@ -50,11 +57,20 @@ export function ScopeBuilder() {
   };
 
   return (
-    <section className="px-5 py-24 md:px-8 md:py-32">
+    <section
+      className={
+        atTop
+          ? "px-5 pb-24 pt-32 md:px-8 md:pb-32 md:pt-40"
+          : "px-5 py-24 md:px-8 md:py-32"
+      }
+    >
       <Eyebrow>Build your scope</Eyebrow>
-      <h2 className="display mt-4 max-w-[20ch] text-step-4">
-        Pick the pieces. We’ll <em>tell you the shape</em>
-      </h2>
+      <RevealHeading
+        as={atTop ? "h1" : "h2"}
+        className="display mt-4 max-w-[20ch] text-step-4"
+        roman="Pick the pieces. We’ll"
+        italic="tell you the shape"
+      />
       <p className="mt-6 max-w-[54ch] text-step-0 text-content-dim">
         Select the work you think you need. The board fills in as you go and the
         estimate updates — phases from different services overlap, so the total

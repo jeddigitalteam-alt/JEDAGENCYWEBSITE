@@ -9,6 +9,27 @@ export interface Article {
   author: string;
   /** Paragraphs. Plain strings — no CMS yet. */
   body: string[];
+  /**
+   * Generated artwork for the piece, if one exists.
+   *
+   * All of them are 1536x1024 — 3:2 — and each is an editorial poster carrying
+   * its own lettering, so the card frames them at their native ratio and
+   * nothing is cropped away. The homepage teaser shows the articles that have
+   * artwork and no others: an image is the entry ticket, so a card can never
+   * appear with an empty or borrowed picture. Every article stays on
+   * /articles and keeps its own page regardless.
+   *
+   * Files live under a plain lowercase path keyed by slug — the folder they
+   * arrived in has a literal `&` in its name, which Next 404s in a static
+   * route.
+   */
+  image?: string;
+  /**
+   * What the artwork shows — not the title, which the card already prints
+   * beside it as a heading. Describing the picture instead of repeating the
+   * headline is what makes it worth announcing at all.
+   */
+  imageAlt?: string;
 }
 
 export const ARTICLES: Article[] = [
@@ -28,6 +49,9 @@ export const ARTICLES: Article[] = [
       "The fix is not glamorous. Design the dense view first, at real data volume, with the worst-case string lengths. If it holds, the sparse views will be easy. If you design the sparse view first, you will spend the rest of the project discovering that your layout cannot survive information.",
       "There is a second-order effect. Interfaces designed around the tenth visit tend to reward familiarity — keyboard paths, stable positions, predictable density. Interfaces designed around the first visit tend to reward novelty, and novelty is a cost once you have already learned the tool.",
     ],
+    image: "/articles/the-tenth-screen.png",
+    imageAlt:
+      "A phone lying flat with a whole landscape growing out of its screen — a path, a staircase and a figure walking towards a sunset",
   },
   {
     slug: "motion-that-earns-it",
@@ -45,6 +69,9 @@ export const ARTICLES: Article[] = [
       "Duration follows from purpose. Acknowledgement wants to be fast — 120 to 200ms, barely perceived. Explanation wants to be slow enough to follow, usually 300 to 500ms, and it wants a curve that decelerates so the eye can land on the end state.",
       "The one animation almost every site under-invests in is the one between pages. It is the only moment where the user genuinely loses their place, and it is usually a hard cut.",
     ],
+    image: "/articles/motion-that-earns-it.png",
+    imageAlt:
+      "A figure leaping out of a phone screen through a burst of blue and orange paint, against the words MOTION THAT EARNS IT",
   },
   {
     slug: "contrast-is-not-a-checkbox",
@@ -78,6 +105,9 @@ export const ARTICLES: Article[] = [
       "The diagnostic question is unglamorous: can three people who use the product describe it in one sentence, and do those sentences agree? If not, the work is positioning and product clarity, and the visual identity should wait until there is something settled to express.",
       "This is not an argument against rebrands. It is an argument for sequencing. The studios that produce identity work with real staying power are usually the ones that insisted on getting the sentence right first.",
     ],
+    image: "/articles/what-a-rebrand-cannot-fix.png",
+    imageAlt:
+      "A torn paper poster of a blue puzzle piece taped to a wall, with new logo, new colours and new font each crossed out",
   },
   {
     slug: "designing-for-models-that-are-wrong",
@@ -112,6 +142,9 @@ export const ARTICLES: Article[] = [
       "The briefs that produce mediocre work list adjectives. Modern, bold, premium, human. These are not constraints; they are moods, and every option satisfies them, which means the brief eliminates nothing.",
       "We now spend the first week of most projects rewriting the brief with the client. It is the least billable and highest-leverage week of the engagement.",
     ],
+    image: "/articles/the-brief-is-the-deliverable.png",
+    imageAlt:
+      "A completed brief standing in a cardboard box on a conveyor belt, the box marked HANDLE WITH CLARITY",
   },
 ];
 

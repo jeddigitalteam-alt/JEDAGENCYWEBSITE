@@ -20,7 +20,7 @@ const DUR = 0.45;
 export function RouteTransition() {
   const pathname = usePathname();
   const reduced = useReducedMotion();
-  const { shouldRun, introDone } = useIntro();
+  const { shouldRun, introDone, uncover } = useIntro();
   const [open, setOpen] = useState(true);
   const [active, setActive] = useState(false);
   /* The route this effect last acted on. Comparing the path is what makes the
@@ -36,13 +36,17 @@ export function RouteTransition() {
     if (lastPath.current === pathname) return;
     const isInitial = lastPath.current === null;
     lastPath.current = pathname;
+    /* The provider raises the veil on every route change, because it has to do
+       so before the arriving page renders and cannot know yet whether this
+       transition will actually play. Every path that does not play one has to
+       put it back down, or entrances on the new page would wait forever. */
     if (isInitial) return;
-    if (reduced) return;
+    if (reduced) return uncover();
     /* `shouldRun` is null until the client has decided whether the intro plays.
        Testing `=== true` treated "undecided" as "no intro", which is the state
        during the exact window the loader is starting up, so this must block on
        anything that is not a settled "the intro is not running". */
-    if (shouldRun !== false && !introDone) return;
+    if (shouldRun !== false && !introDone) return uncover();
 
     // Two frames: the first mounts the panels closed, the second parts them —
     // so the covered state actually paints before the reveal starts. Both run
@@ -53,7 +57,13 @@ export function RouteTransition() {
       setOpen(false);
       second = requestAnimationFrame(() => setOpen(true));
     });
-    const done = setTimeout(() => setActive(false), DUR * 1000 + 160);
+    /* The panels are fully parted at DUR; the page is the reader's again from
+       here, so this is the moment entrances on the new route are cleared to
+       start. Uncovering with the same timer keeps the two in step. */
+    const done = setTimeout(() => {
+      setActive(false);
+      uncover();
+    }, DUR * 1000 + 160);
 
     return () => {
       cancelAnimationFrame(first);

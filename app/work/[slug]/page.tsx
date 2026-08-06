@@ -145,9 +145,15 @@ export default async function CaseStudyPage({
           <div className="max-w-3xl">
             <section id="brief" className="scroll-mt-28">
               <Eyebrow as="h2">01 — The brief</Eyebrow>
-              <p className="display mt-4 text-step-3">
-                A tennis brand with <em>no history</em> to trade on
-              </p>
+              <RevealHeading
+                as="p"
+                className="display mt-4 text-step-3"
+                parts={[
+                  { text: "A tennis brand with" },
+                  { text: "no history", em: true },
+                  { text: "to trade on" },
+                ]}
+              />
               <div className="mt-6 grid gap-5 text-step-0 text-content-dim">
                 <p>
                   LEVANT came to us with a factory, a fabric contract and a
@@ -166,9 +172,12 @@ export default async function CaseStudyPage({
 
             <section id="identity" className="mt-20 scroll-mt-28">
               <Eyebrow as="h2">02 — Identity</Eyebrow>
-              <p className="display mt-4 text-step-3">
-                Type that behaves like <em>kit labelling</em>
-              </p>
+              <RevealHeading
+                as="p"
+                className="display mt-4 text-step-3"
+                roman="Type that behaves like"
+                italic="kit labelling"
+              />
               <div className="mt-6 grid gap-5 text-step-0 text-content-dim">
                 <p>
                   The identity is built on a contrast: a high-contrast serif for
@@ -190,9 +199,12 @@ export default async function CaseStudyPage({
 
             <section id="palette" className="mt-20 scroll-mt-28">
               <Eyebrow as="h2">03 — Palette</Eyebrow>
-              <p className="display mt-4 text-step-3">
-                Colour taken from the <em>surface</em>
-              </p>
+              <RevealHeading
+                as="p"
+                className="display mt-4 text-step-3"
+                roman="Colour taken from the"
+                italic="surface"
+              />
               <p className="mt-6 text-step-0 text-content-dim">
                 The palette is pulled from clay-court photography rather than
                 invented. Clay carries the campaign, near-black carries the kit,
@@ -204,9 +216,12 @@ export default async function CaseStudyPage({
 
             <section id="product" className="mt-20 scroll-mt-28">
               <Eyebrow as="h2">04 — Product pages</Eyebrow>
-              <p className="display mt-4 text-step-3">
-                Every question answered <em>above the fold</em>
-              </p>
+              <RevealHeading
+                as="p"
+                className="display mt-4 text-step-3"
+                roman="Every question answered"
+                italic="above the fold"
+              />
               <div className="mt-6 grid gap-5 text-step-0 text-content-dim">
                 <p>
                   The product page is the whole business. Ours leads with the
@@ -230,22 +245,28 @@ export default async function CaseStudyPage({
 
             <section id="outcome" className="mt-20 scroll-mt-28">
               <Eyebrow as="h2">05 — Outcome</Eyebrow>
-              <p className="display mt-4 text-step-3">
-                Sold through in <em>nine days</em>
-              </p>
+              <RevealHeading
+                as="p"
+                className="display mt-4 text-step-3"
+                roman="A launch that"
+                italic="delivered"
+              />
               <dl className="mt-8 grid gap-px overflow-hidden rounded-xl border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-4">
-                {study.metrics?.map((m) => (
-                  <div key={m.label} className="bg-surface p-5">
-                    <dd className="display text-step-3">{m.value}</dd>
-                    <dt className="mono mt-2 text-content-dim">{m.label}</dt>
+                {study.outcomes?.map((o) => (
+                  <div key={o.n} className="bg-surface p-5">
+                    <dd className="display text-step-3">{o.n}</dd>
+                    <dt className="mono mt-2 text-content-dim">{o.label}</dt>
                   </div>
                 ))}
               </dl>
               <p className="mt-8 text-step-0 text-content-dim">
-                The inaugural drop cleared in nine days. More usefully, the
-                return rate came in at 4.1% against a category average closer to
-                twelve — which we attribute to the size guide and the fit copy
-                more than anything visual.
+                The store launched on schedule and has been extended since
+                without a rebuild — identity, components and content model were
+                all built to carry more than the first drop. The part we would
+                point to is the buying journey: fit, fabric and what a garment
+                is actually for are answered on the page rather than buried in a
+                modal, which takes the hesitation out of checkout and the
+                uncertainty out of what arrives.
               </p>
             </section>
           </div>

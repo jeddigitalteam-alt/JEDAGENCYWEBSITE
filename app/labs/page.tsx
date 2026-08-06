@@ -87,9 +87,12 @@ export default function LabsPage() {
       <section className="mt-28 md:mt-36">
         <div className="px-5 md:px-8">
           <p className="mono text-content-dim">Labs — 06</p>
-          <h2 className="display mt-3 max-w-[18ch] text-step-4">
-            Scroll <em>assembly</em>
-          </h2>
+          <RevealHeading
+            as="h2"
+            className="display mt-3 max-w-[18ch] text-step-4"
+            roman="Scroll"
+            italic="assembly"
+          />
           <p className="mt-4 max-w-[56ch] text-step-0 text-content-dim">
             Twelve fragments, one resolved block. The sequence is tied to scroll
             position, so going back up takes it apart again.

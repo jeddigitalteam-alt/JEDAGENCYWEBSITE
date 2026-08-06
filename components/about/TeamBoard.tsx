@@ -4,6 +4,7 @@ import { animate, motion, useMotionValue, useReducedMotion } from "motion/react"
 import { useEffect, useRef, useState } from "react";
 import { TEAM, type Person } from "@/lib/team";
 import { Eyebrow } from "@/components/ui/primitives";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 const SPRING = { type: "spring", stiffness: 300, damping: 26, mass: 0.8 } as const;
 /** Within this distance of home, a released card seats itself. */
@@ -50,9 +51,12 @@ export function TeamBoard() {
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <Eyebrow>The studio — {TEAM.length} people</Eyebrow>
-          <h2 className="display mt-4 max-w-[18ch] text-step-4">
-            Small on purpose, <em>senior throughout</em>
-          </h2>
+          <RevealHeading
+            as="h2"
+            className="display mt-4 max-w-[18ch] text-step-4"
+            roman="Small on purpose,"
+            italic="senior throughout"
+          />
         </div>
         <div className="flex items-center gap-4">
           <span className="mono tabular-nums text-content-dim">

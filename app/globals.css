@@ -276,13 +276,18 @@ body {
 
 /* Pinned scroll stage — the homepage articles assembly.
  *
- * Only pin where there is room for the whole composition: the heading plus two
- * rows of cards. Pinning a stage taller than the screen would hold the bottom
- * row below the fold for the entire sequence, so on a short laptop, and below
- * `md` where the grid stacks, the section stays in ordinary flow and takes its
- * progress from its own entry instead. Expressed here rather than as a Tailwind
- * arbitrary variant because a two-condition media query does not survive the
- * class-name round trip cleanly. */
+ * Only pin where there is room for the whole composition: the heading plus one
+ * row of cards. Pinning a stage taller than the screen would hold the bottom of
+ * it below the fold for the entire sequence, so on a short laptop, and anywhere
+ * the grid is not four across — two up from `md`, stacked below it — the
+ * section stays in ordinary flow and takes its progress from its own entry
+ * instead. Same flight either way; the pin is what it is scrolled against.
+ *
+ * The width threshold is `xl` rather than `md` because the cards carry artwork:
+ * two of these side by side stand about 1.7 screens tall, four across fit
+ * inside one. Expressed here rather than as a Tailwind arbitrary variant
+ * because a two-condition media query does not survive the class-name round
+ * trip cleanly. */
 /* Pinned scroll stage — the homepage articles assembly.
  *
  * The extra height and the pin hang off `data-pin-zone`, and the hook removes
@@ -297,7 +302,7 @@ body {
  * holding still — a measured 41.5px lurch at the exact moment everything is
  * supposed to be invisible. Keeping it means the collapse changes the section's
  * position in the document and nothing else at all. */
-@media (min-width: 768px) and (min-height: 820px) {
+@media (min-width: 1280px) and (min-height: 820px) {
   [data-pin-zone] {
     height: 200svh;
   }

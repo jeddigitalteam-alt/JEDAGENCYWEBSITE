@@ -80,7 +80,15 @@ export interface CaseStudy {
   headline?: { roman: string; italic: string };
   chapters?: Chapter[];
   palette?: Swatch[];
-  metrics?: { label: string; value: string }[];
+  /**
+   * Outcome tiles for a case study.
+   *
+   * Deliberately achievements rather than analytics: a numbered claim about the
+   * work, not a client's commercial performance. Sell-through, order values,
+   * return rates and the like are the client's data to publish, not ours — so
+   * nothing here is a figure taken out of their account.
+   */
+  outcomes?: { n: string; label: string }[];
 }
 
 export const LEVANT_PALETTE: Swatch[] = [
@@ -142,11 +150,11 @@ export const WORK: CaseStudy[] = [
       { id: "outcome", label: "Outcome" },
     ],
     palette: LEVANT_PALETTE,
-    metrics: [
-      { label: "Sell-through", value: "9 days" },
-      { label: "Launch AOV", value: "£184" },
-      { label: "Return rate", value: "4.1%" },
-      { label: "LCP, mobile", value: "1.2s" },
+    outcomes: [
+      { n: "01", label: "Launched on schedule" },
+      { n: "02", label: "Clearer buying journey" },
+      { n: "03", label: "Conversion-led design" },
+      { n: "04", label: "Built to scale" },
     ],
   },
   {

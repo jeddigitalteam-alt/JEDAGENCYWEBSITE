@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import Link from "next/link";
 import { buttonClass } from "@/components/ui/primitives";
+import ServicesPanels from "@/components/home/ServicesPanels";
 import { useIntro } from "@/components/motion/intro-context";
 import { useParallaxLayers } from "@/lib/hooks/useParallax";
 import { PIECE_A, PIECE_B, VIEWBOX } from "@/components/brand/puzzle-paths";
@@ -201,7 +202,22 @@ export function Hero() {
         </motion.div>
       </div>
 
-      <div className="relative z-10 flex items-end justify-between gap-6">
+      {/* The service rail, inside the hero composition rather than as the
+          section that used to follow it — so the cards are already moving on
+          the first screen. It is the flexible child of this column: the
+          headline block above and the standfirst below keep their natural
+          heights, and the rail takes whatever is left between them, which is
+          how it fits one screen at any desktop height without a negative
+          margin or absolute positioning. */}
+      {/* Deliberately not wrapped in an entrance of its own. The label inside it
+          is a heading, and the shared reveal is already its entrance — a fade
+          on this block would stack a second animation on top of that. The cards
+          are simply there when the panels part, already moving. */}
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+        <ServicesPanels />
+      </div>
+
+      <div className="relative z-10 mt-6 flex items-end justify-between gap-6">
         <motion.p
           className="max-w-[34ch] text-step-0 text-content-dim"
           initial={{ opacity: 0, y: 12 }}

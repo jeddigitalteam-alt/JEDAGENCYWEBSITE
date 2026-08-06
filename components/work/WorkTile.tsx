@@ -23,12 +23,19 @@ export function WorkTile({
   videoSrc,
   frameClassName = "",
   imagePosition,
+  showIndex = true,
 }: {
   study: CaseStudy;
   index: number;
   priority?: boolean;
   sizes?: string;
   videoSrc?: string;
+  /**
+   * The "01" badge in the corner of the frame. Off where the tile is not part
+   * of a set — a number on a single card reads as a count of one rather than
+   * as a position in a sequence.
+   */
+  showIndex?: boolean;
   /**
    * Extra classes for the image frame. Used by the full-width featured tile to
    * widen its aspect ratio on large screens — at a fixed 4:3 a full-bleed tile
@@ -113,9 +120,11 @@ export function WorkTile({
           />
         ) : null}
 
-        <span className="mono absolute left-4 top-4 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur-sm">
-          {String(index + 1).padStart(2, "0")}
-        </span>
+        {showIndex ? (
+          <span className="mono absolute left-4 top-4 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur-sm">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        ) : null}
       </div>
 
       <div className="mt-4 flex items-baseline justify-between gap-4">

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -21,6 +22,20 @@ interface IntroState {
   /** Reduced-motion users get the static 300ms path. */
   reduced: boolean;
   markIntroDone: () => void;
+  /**
+   * True while a full-screen veil is over the page — right now that is the
+   * route transition's seam panels.
+   *
+   * Anything with an entrance reads this so it does not spend that entrance
+   * behind a cover. It flips on during the render that follows a pathname
+   * change, before the new page's own components render, so a heading at the
+   * top of the arriving route sees it on its very first render rather than a
+   * frame later — a frame late is enough for an IntersectionObserver to have
+   * already fired.
+   */
+  covered: boolean;
+  /** Called by the veil when it has finished clearing. */
+  uncover: () => void;
 }
 
 const IntroContext = createContext<IntroState>({
@@ -28,12 +43,34 @@ const IntroContext = createContext<IntroState>({
   shouldRun: false,
   reduced: false,
   markIntroDone: () => {},
+  covered: false,
+  uncover: () => {},
 });
 
 export function IntroProvider({ children }: { children: React.ReactNode }) {
   const [phase, setPhase] = useState<IntroPhase>("pending");
   const [shouldRun, setShouldRun] = useState<boolean | null>(null);
   const [reduced, setReduced] = useState(false);
+
+  /* The veil. Raised here rather than in the route transition itself because
+     of ordering: this provider sits above the routed tree, so adjusting the
+     state during its render — React's documented pattern for deriving state
+     from a changed input — means the flag is already true by the time the new
+     page's components render for the first time. Doing it in the transition's
+     effect would leave a window in which an above-the-fold heading could
+     observe itself into view and play its entrance behind the panels, which
+     is precisely the bug this exists to close. It is cleared by whoever raised
+     the veil, via `uncover`. */
+  const pathname = usePathname();
+  const [veiledPath, setVeiledPath] = useState<string | null>(null);
+  const [covered, setCovered] = useState(false);
+  if (veiledPath !== pathname) {
+    // First mount is not a route change: the intro loader owns that moment and
+    // `introDone` already gates on it.
+    setCovered(veiledPath !== null);
+    setVeiledPath(pathname);
+  }
+  const uncover = useCallback(() => setCovered(false), []);
 
   // Decided on the client only: sessionStorage and the media query are both
   // unavailable during SSR, and guessing either would cause a flash.
@@ -76,8 +113,10 @@ export function IntroProvider({ children }: { children: React.ReactNode }) {
       shouldRun,
       reduced,
       markIntroDone,
+      covered,
+      uncover,
     }),
-    [phase, shouldRun, reduced, markIntroDone],
+    [phase, shouldRun, reduced, markIntroDone, covered, uncover],
   );
 
   return (

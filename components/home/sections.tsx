@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import {
@@ -19,7 +20,12 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 /* ------------------------------------------------------------------ work */
 
 export function SelectedWork() {
-  const shown = WORK.slice(0, 4);
+  /* One project on the homepage: the written-up case study. The others are not
+     removed from anywhere else — they keep their tiles on /work and inside the
+     industry grids, which is where a visitor going looking for the full list
+     ends up. Here the single tile runs full width, which is the shape the
+     featured slot already had, so nothing reflows around a gap. */
+  const shown = WORK.slice(0, 1);
   return (
     <section className="px-5 py-24 md:px-8 md:py-32">
       <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
@@ -44,6 +50,10 @@ export function SelectedWork() {
                 study={study}
                 index={i}
                 priority={i === 0}
+                /* No "01" badge on a lone tile — a counter on a set of one
+                   only draws attention to the count. The badge stays on
+                   /work and the industry grids, which are actual sets. */
+                showIndex={false}
                 sizes={
                   featured
                     ? "(min-width: 768px) 100vw, 100vw"
@@ -221,9 +231,17 @@ const ASSEMBLY: AssemblyPlan = {
     /* The heading is not in this plan. It has the site's line-by-line masked
        reveal instead, the same as every other heading — see RevealHeading — so
        the eyebrow and the "All articles" button stay put around it exactly as
-       they do in every other section. Only the cards fly. */
+       they do in every other section. Only the cards fly.
 
-    /* --- top row ---------------------------------------------------- */
+       Four routes, not six. They are four of the six the six-card version
+       flew, kept because they were tuned: the far-left arc, the high arc from
+       the right, the low arc from the left and the low arc from the right.
+       Each one is now paired with a card position that suits it, and the two
+       that went with the dropped cards — the from-below arc and the oversized
+       one that settled down to size — went with them.
+
+       On a phone the grid is one column, so the `narrow` variants alternate
+       strictly left, right, left, right down the stack. */
     {
       select: "[data-flight=card-0]",
       x: -70,
@@ -239,83 +257,54 @@ const ASSEMBLY: AssemblyPlan = {
     },
     {
       select: "[data-flight=card-1]",
-      x: 6,
-      y: 50,
-      rotate: 14,
-      scale: 0.65,
-      opacity: 0.15,
-      at: 0.08,
-      span: 0.66,
-      lift: true,
-      ownPace: true,
-      narrow: { x: 80, y: 6, rotate: 12, scale: 0.76 },
-    },
-    {
-      select: "[data-flight=card-2]",
       x: 68,
       y: -14,
       rotate: 24,
       scale: 0.74,
       opacity: 0.1,
+      at: 0.08,
+      span: 0.66,
+      lift: true,
+      ownPace: true,
+      narrow: { x: 80, y: 6, rotate: 12, scale: 0.76, opacity: 0.15 },
+    },
+    {
+      select: "[data-flight=card-2]",
+      x: -62,
+      y: 30,
+      rotate: 20,
+      scale: 0.7,
+      opacity: 0.12,
       at: 0.16,
       span: 0.66,
       lift: true,
       ownPace: true,
       narrow: { x: -80, y: -4, rotate: -15, scale: 0.76, opacity: 0.15 },
     },
-
-    /* --- bottom row ------------------------------------------------- */
     {
       select: "[data-flight=card-3]",
-      x: -62,
-      y: 30,
-      rotate: 20,
-      scale: 0.7,
-      opacity: 0.12,
-      at: 0.14,
-      span: 0.66,
-      lift: true,
-      ownPace: true,
-      narrow: { x: 80, y: 4, rotate: 14, scale: 0.76, opacity: 0.15 },
-    },
-    {
-      /* The one that comes in too big and settles down to size. */
-      select: "[data-flight=card-4]",
-      x: -4,
-      y: 66,
-      rotate: -12,
-      scale: 1.16,
-      opacity: 0.14,
-      at: 0.22,
-      span: 0.66,
-      lift: true,
-      ownPace: true,
-      /* Not oversized on a phone: a full-width card at 1.16 would be wider
-         than the screen, and clipping it would read as a mistake. */
-      narrow: { x: -80, y: 0, rotate: -12, scale: 0.78, opacity: 0.15 },
-    },
-    {
-      select: "[data-flight=card-5]",
       x: 64,
       y: 34,
       rotate: -22,
       scale: 0.72,
       opacity: 0.1,
-      at: 0.3,
+      at: 0.24,
       span: 0.66,
       lift: true,
       ownPace: true,
-      narrow: { x: 80, y: -4, rotate: 16, scale: 0.76, opacity: 0.15 },
+      narrow: { x: 80, y: 4, rotate: 16, scale: 0.76, opacity: 0.15 },
     },
   ],
 };
 
 export function ArticlesTeaser() {
-  /* Every article the studio has published. Six is the whole of lib/articles —
-     if a seventh is written, this shows five and the newest, which is the
-     right behaviour for a teaser; the grid is three-up so the count wants to
-     stay a multiple of three. */
-  const shown = ARTICLES.slice(0, 6);
+  /* Only the pieces that have artwork. The card is built around its picture
+     now, so an article without one has nothing to show here — and inventing a
+     stand-in, or leaving an empty frame, would both be worse than leaving it
+     to /articles, where every piece is still listed and every route still
+     works. Four today, and if a fifth image is generated it joins the row
+     without another change. */
+  const shown = ARTICLES.filter((a) => a.image);
   const zoneRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   useScrollAssembly(zoneRef, ASSEMBLY, !reduced);
@@ -367,7 +356,13 @@ export function ArticlesTeaser() {
             fly out of the frame and back into it. No clipping here — a panel
             has to be able to leave — which changes nothing at rest, because a
             cell is the same colour as the page behind it. */}
-        <ul className="grid gap-px rounded-xl border border-rule bg-rule md:grid-cols-3">
+        {/* Two up from `md`, four across from `xl`. Four across is what keeps
+            the pinned stage inside one screen: these cards carry a picture
+            now, so a 2x2 at desktop width would stand about 1.7 screens tall
+            and the bottom row would spend the whole flight below the fold.
+            The pin is scoped to `xl` in globals.css to match, so the 2x2 case
+            assembles in normal flow instead — same flight, no sticky. */}
+        <ul className="grid gap-px rounded-xl border border-rule bg-rule md:grid-cols-2 xl:grid-cols-4">
           {shown.map((a, i) => (
             <li key={a.slug} className="bg-surface">
               <Link
@@ -379,10 +374,27 @@ export function ArticlesTeaser() {
                 className="group flex h-full flex-col justify-between bg-surface p-6"
               >
                 <div>
-                  <p className="mono text-content-dim">
+                  {/* The artwork is 3:2 and the frame is 3:2, so `cover` has
+                      nothing to crop: each poster arrives whole, lettering and
+                      all, at any card width. Rounded and clipped inside the
+                      card's own padding, which is what keeps it clear of the
+                      grid's rounded outer corners — the frame is drawn by the
+                      list, and a full-bleed picture would square those corners
+                      off. No overlay: the type sits below the picture, not on
+                      it, so there is nothing to rescue. */}
+                  <div className="relative aspect-[3/2] overflow-hidden rounded-lg bg-ink-raised">
+                    <Image
+                      src={a.image!}
+                      alt={a.imageAlt ?? ""}
+                      fill
+                      sizes="(min-width: 1280px) 22vw, (min-width: 768px) 44vw, 88vw"
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
+                    />
+                  </div>
+                  <p className="mono mt-5 text-content-dim">
                     {a.readingMinutes} min read
                   </p>
-                  <h3 className="display mt-4 text-step-2 transition-colors group-hover:text-blue">
+                  <h3 className="display mt-3 text-step-2 transition-colors group-hover:text-blue">
                     {a.title}
                   </h3>
                   <p className="mt-3 text-step--1 text-content-dim">

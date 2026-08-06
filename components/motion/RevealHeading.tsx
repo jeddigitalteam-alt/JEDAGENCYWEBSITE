@@ -54,25 +54,44 @@ const HIDDEN = `translateY(calc(110% + ${PAD}))`;
 /** A heading word, and whether the space before it belonged inside the <em>. */
 type Word = { text: string; em: boolean; emSpace: boolean };
 
-function toWords(roman: string, italic?: string): Word[] {
+/**
+ * A run of heading text in one style. Use `parts` where the italic is not the
+ * tail of the line — "A tennis brand with <em>no history</em> to trade on"
+ * cannot be said with roman + italic, because it goes back to roman afterwards.
+ */
+export type HeadingPart = { text: string; em?: boolean };
+
+function partsToWords(parts: readonly HeadingPart[]): Word[] {
   const out: Word[] = [];
-  for (const t of roman.trim().split(/\s+/))
-    if (t) out.push({ text: t, em: false, emSpace: false });
-  const it = italic?.trim().split(/\s+/).filter(Boolean) ?? [];
-  it.forEach((t, i) =>
-    /* In the original markup the space before the italic run sat outside the
-       <em> and the spaces within it sat inside. Italic carries its own
-       letter-spacing, so a space moved across that boundary is a different
-       width — and a different width is a different line break. Each space
-       stays where it was. */
-    out.push({ text: t, em: true, emSpace: i > 0 }),
-  );
+  for (const part of parts) {
+    const em = part.em === true;
+    part.text
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .forEach((t, i) =>
+        /* In the original markup the space before an <em> run sat outside it
+           and the spaces within it sat inside. Italic carries its own
+           letter-spacing, so a space moved across that boundary is a different
+           width — and a different width is a different line break. Each space
+           stays where it was: the run's first word takes a roman space, the
+           rest take the run's own. */
+        out.push({ text: t, em, emSpace: em && i > 0 }),
+      );
+  }
   return out;
 }
 
+function toWords(roman: string, italic?: string): Word[] {
+  return partsToWords([{ text: roman }, ...(italic ? [{ text: italic, em: true }] : [])]);
+}
+
 export type RevealHeadingProps = {
-  roman: string;
+  /** The heading, roman first then italic. Ignored when `parts` is given. */
+  roman?: string;
   italic?: string;
+  /** Arbitrary roman/italic runs, for headings that are not roman-then-italic. */
+  parts?: readonly HeadingPart[];
   className?: string;
   id?: string;
   as?: "h1" | "h2" | "h3" | "p" | "div";
@@ -83,12 +102,16 @@ export type RevealHeadingProps = {
 export function RevealHeading({
   roman,
   italic,
+  parts,
   className = "",
   id,
   as: As = "h2",
   reveal = true,
 }: RevealHeadingProps) {
-  const words = useMemo(() => toWords(roman, italic), [roman, italic]);
+  const words = useMemo(
+    () => (parts ? partsToWords(parts) : toWords(roman ?? "", italic)),
+    [parts, roman, italic],
+  );
   const hostRef = useRef<HTMLElement>(null);
   const wordRefs = useRef<(HTMLElement | null)[]>([]);
   /** Word indices per line, or null until measured. */
@@ -97,11 +120,15 @@ export function RevealHeading({
   const measuredAt = useRef(0);
 
   const reduced = useReducedMotionPref();
-  const { shouldRun, introDone } = useIntro();
-  /* Nothing reveals from behind the intro loader: a heading above the fold
-     would otherwise play and finish while the overlay still covered it, and
-     the reader would arrive to a page that had already used its entrance. */
-  const cued = shouldRun === false || introDone;
+  const { shouldRun, introDone, covered } = useIntro();
+  /* Nothing reveals from behind a cover. Two of them: the intro loader on the
+     first paint, and the route transition's seam panels on every navigation
+     after it. A heading above the fold would otherwise play and finish while
+     the overlay was still up, and the reader would arrive at a page that had
+     already spent its entrance — which is exactly how every page-hero heading
+     on the site came to look static to anyone browsing it rather than landing
+     on it cold. */
+  const cued = (shouldRun === false || introDone) && !covered;
   const active = reveal && !reduced;
 
   /* Measure, then wrap — before the browser paints, so the flat pass is never
@@ -162,10 +189,15 @@ export function RevealHeading({
   }, [active]);
 
   /* Fires once. The observer is dropped on the first crossing, so scrolling
-     back up and down again cannot replay or reverse it. */
+     back up and down again cannot replay or reverse it.
+
+     It is not created at all until the page is uncovered, which is what makes
+     `shown` a one-way latch: it can only ever be set while the reveal is
+     allowed to be seen, so a later cover — the next route change — cannot
+     un-light a heading that has already landed. */
   useEffect(() => {
     const host = hostRef.current;
-    if (!host || !active || shown) return;
+    if (!host || !active || !cued || shown) return;
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries[0]?.isIntersecting) return;
@@ -178,9 +210,9 @@ export function RevealHeading({
     );
     io.observe(host);
     return () => io.disconnect();
-  }, [active, shown]);
+  }, [active, cued, shown]);
 
-  const lit = shown && cued;
+  const lit = shown;
 
   /** The separator that preceded a word, kept on the correct side of the em. */
   const gap = (w: Word, first: boolean): ReactNode =>

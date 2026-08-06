@@ -7,6 +7,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
+import RevealHeading from "@/components/motion/RevealHeading";
 
 /* ------------------------------------------------------------------ palette */
 
@@ -115,9 +116,12 @@ export function LabSection({
       >
         <div>
           <p className="mono text-content-dim">Labs — {index}</p>
-          <h2 className="display mt-3 max-w-[18ch] text-step-4">
-            {roman} <em>{italic}</em>
-          </h2>
+          <RevealHeading
+            as="h2"
+            className="display mt-3 max-w-[18ch] text-step-4"
+            roman={roman}
+            italic={italic}
+          />
           <p className="mt-4 max-w-[56ch] text-step-0 text-content-dim">
             {line}
           </p>
