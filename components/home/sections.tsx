@@ -25,62 +25,83 @@ export function SelectedWork() {
      industry grids, which is where a visitor going looking for the full list
      ends up. Here the single tile runs full width, which is the shape the
      featured slot already had, so nothing reflows around a gap. */
-  const shown = WORK.slice(0, 1);
+  const study = WORK[0];
   return (
     <section className="px-5 py-24 md:px-8 md:py-32">
-      <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <Eyebrow>Selected work</Eyebrow>
-          <SectionHeading roman="Recent" italic="work" className="mt-4" />
-        </div>
-        <Link
-          href="/work"
-          className="mono rounded-full border border-rule px-5 py-2.5 transition-colors hover:border-blue hover:text-blue"
-        >
-          All work — {WORK.length}
-        </Link>
-      </div>
+      {/* The measure is shared by the heading row and the tile, so the "Recent
+          work" label lines up with the left edge of the picture and the "All
+          work" pill with its right edge. Centring only the media would have
+          left the heading hanging off in the gutter.
 
-      <div className="grid gap-x-6 gap-y-14 md:grid-cols-2">
-        {shown.map((study, i) => {
-          const featured = i % 3 === 0;
-          return (
-            <div key={study.slug} className={featured ? "md:col-span-2" : ""}>
-              <WorkTile
-                study={study}
-                index={i}
-                priority={i === 0}
-                /* No "01" badge on a lone tile — a counter on a set of one
-                   only draws attention to the count. The badge stays on
-                   /work and the industry grids, which are actual sets. */
-                showIndex={false}
-                sizes={
-                  featured
-                    ? "(min-width: 768px) 100vw, 100vw"
-                    : "(min-width: 768px) 50vw, 100vw"
-                }
-                /* The featured tile runs the full width of the page, so a fixed
-                   4:3 box grows past the height of the viewport on any wide
-                   monitor — 115% at 1440px, 281% at 3440px. The ratio gives it
-                   a banner shape from lg up, and the max-height is the ceiling
-                   that ultrawide displays need, where even 2:1 is still taller
-                   than the screen. Below lg it stays 4:3, untouched. */
-                frameClassName={
-                  featured
-                    ? "lg:aspect-[16/9] lg:max-h-[82vh] 2xl:aspect-[2/1]"
-                    : ""
-                }
-                /* The banner crop is much wider than the source, so a blind
-                   centre left the campaign lock-up sitting high. 45% puts its
-                   measured centre of mass on the middle of the frame. At the
-                   4:3 crop used below lg the source is almost the same ratio,
-                   so this moves it by a fraction of a percent — tablet and
-                   mobile are effectively untouched. */
-                imagePosition={featured ? "center 45%" : undefined}
-              />
-            </div>
-          );
-        })}
+          The cap is stated in `rem` rather than as a percentage because the
+          problem it solves is absolute, not proportional: past a point the tile
+          stops gaining presence and just gains width. 120rem is 1920px, so any
+          window up to about 2000px still gets the full-bleed tile it has always
+          had, and only genuinely wide displays see it settle and centre. On a
+          3440 ultrawide that is 56% of the screen at 75vh tall — big enough to
+          be the feature, bounded enough not to be a mural. `mx-auto` does the
+          centring; the page gutter is still outside it, so the side margins
+          never close up. */}
+      <div className="mx-auto w-full max-w-[120rem]">
+        <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <Eyebrow>Selected work</Eyebrow>
+            <SectionHeading roman="Recent" italic="work" className="mt-4" />
+          </div>
+          <Link
+            href="/work"
+            className="mono rounded-full border border-rule px-5 py-2.5 transition-colors hover:border-blue hover:text-blue"
+          >
+            All work — {WORK.length}
+          </Link>
+        </div>
+
+        <WorkTile
+          study={study}
+          index={0}
+          priority
+          /* No "01" badge on a lone tile — a counter on a set of one only
+             draws attention to the count. The badge stays on /work and the
+             industry grids, which are actual sets. */
+          showIndex={false}
+          /* Capped at the measure above, so past 1920px the tile stops growing
+             and the browser stops reaching for larger sources. */
+          sizes="(min-width: 2000px) 1920px, 100vw"
+          /* A fixed 4:3 box grows past the height of the viewport on any wide
+             monitor — 115% at 1440px, 281% at 3440px. The ratio gives it a
+             banner shape from lg up, and the max-height is the ceiling that
+             ultrawide displays need. Below lg it stays 4:3, untouched.
+
+             `mx-auto` is the fix for the off-centre tile, and the reason is
+             the interaction between the two properties above it. When
+             `max-h` binds, a box with an `aspect-ratio` does not just get
+             shorter — it gets *narrower*, because the ratio is preserved and
+             the height is now the constrained dimension. The width it gives
+             back was being taken entirely off the right-hand side, since a
+             block box with a computed width sits at the start of its line:
+
+               1920x1080  frame 1575 wide in an 1856 container — 281px adrift
+               3440x1440  frame 2360 wide in a 3376 container — 1016px adrift
+
+             which is the "image on the left, empty space on the right" this
+             replaces. `mx-auto` splits that remainder evenly, so the tile is
+             centred whether the width or the height is the binding
+             constraint.
+
+             The `2xl:aspect-[2/1]` step is gone with it. It existed to stop the
+             tile overrunning very wide monitors, which the measure cap now does
+             at every size, and it was making the ultrawide case worse: a 2:1
+             box hits the height ceiling sooner, so it lost more width to the
+             same bug. Holding 16/9 all the way up also means the artwork keeps
+             one crop instead of changing shape at 1536px. */
+          frameClassName="mx-auto lg:aspect-[16/9] lg:max-h-[82vh]"
+          /* The banner crop is much wider than the source, so a blind centre
+             left the campaign lock-up sitting high. 45% puts its measured
+             centre of mass on the middle of the frame. At the 4:3 crop used
+             below lg the source is almost the same ratio, so this moves it by
+             a fraction of a percent — tablet and mobile are untouched. */
+          imagePosition="center 45%"
+        />
       </div>
     </section>
   );

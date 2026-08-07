@@ -325,7 +325,7 @@ export function ContactForm() {
           <button
             type="submit"
             disabled={!configured || status === "submitting"}
-            className="mono rounded-full bg-coral px-6 py-3 text-ink transition-colors enabled:hover:bg-paper disabled:cursor-not-allowed disabled:bg-ink-raised disabled:text-content-dim"
+            className="mono rounded-full bg-blue px-6 py-3 text-ink transition-colors enabled:hover:bg-blue-lift enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink-raised disabled:text-content-dim"
           >
             {status === "submitting"
               ? "Sending…"

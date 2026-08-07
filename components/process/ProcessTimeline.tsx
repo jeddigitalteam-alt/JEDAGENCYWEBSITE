@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotionPref } from "@/lib/hooks/useMediaQuery";
+import { useMarqueeRail } from "@/lib/hooks/useMarqueeRail";
 import { Eyebrow } from "@/components/ui/primitives";
 
 const STEPS = [
@@ -38,14 +39,15 @@ const STEPS = [
 ];
 
 /**
- * How long one full pass of the five cards takes.
+ * Travel rate, in px a second.
  *
- * Set to travel at the services marquee's speed rather than to a round number,
- * so the two rails read as one interaction: that one covers 2828px of card in
- * 56s, or about 50px a second. Five process cards at `34vw + 1rem` come to
- * 2528px on a 1440px viewport, which is 50s at the same pace.
+ * The same figure the services rail uses, so the two read as one interaction.
+ * It was already the intent behind this component's old fixed 50s cycle — five
+ * cards at `34vw + 1rem` come to 2528px on a 1440px viewport, which is 50s at
+ * this pace — but stated as seconds it only held at that one width. Stated as a
+ * rate, with the seconds derived from the measured track, it holds everywhere.
  */
-const CYCLE_S = 50;
+const PX_PER_SECOND = 50.5;
 
 /**
  * The five process stages, running as a continuous marquee.
@@ -64,15 +66,22 @@ const CYCLE_S = 50;
  * only, so a ten-card track would carry nine gaps and half of it would land a
  * few pixels short of a copy, once every cycle, forever.
  *
- * It is a CSS animation on a transform: no per-frame React, no wheel or touch
- * handling of ours, so vertical scrolling is untouched. It does not pause on
- * hover — only when the section is nowhere near the viewport, and under reduced
+ * It is a CSS animation on a transform, so at rest there is no per-frame work
+ * of any kind. `useMarqueeRail` — shared with the services rail — adds the
+ * cycle length, measured from the track so the pace holds at any card width,
+ * and a temporary speed-up from horizontal wheel, trackpad and touch input.
+ * Vertical scrolling is never claimed; see the hook. It does not pause on
+ * hover, only when the section is nowhere near the viewport, and under reduced
  * motion, where it becomes an ordinary scrollable row of the five real cards.
  */
 export function ProcessTimeline() {
   const reduced = useReducedMotionPref();
   const sectionRef = useRef<HTMLElement>(null);
   const [near, setNear] = useState(true);
+  const { viewportRef, trackRef } = useMarqueeRail<
+    HTMLDivElement,
+    HTMLOListElement
+  >({ enabled: !reduced, pxPerSecond: PX_PER_SECOND });
 
   /* Stop the compositor animating a strip nobody can see. Toggled by an
      observer, so this is two state changes a page rather than one a frame. */
@@ -100,14 +109,20 @@ export function ProcessTimeline() {
       {/* `overflow-hidden` is what keeps the second copy off the page's own
           scroll width. Under reduced motion the same box becomes an ordinary
           scroller, gutter and all. */}
-      <div className="mt-8 overflow-hidden motion-reduce:overflow-x-auto motion-reduce:overscroll-x-contain motion-reduce:px-5 motion-reduce:[scrollbar-width:none] md:motion-reduce:px-8 [&::-webkit-scrollbar]:hidden">
+      <div
+        ref={viewportRef}
+        className="mt-8 overflow-hidden touch-pan-y motion-reduce:overflow-x-auto motion-reduce:overscroll-x-contain motion-reduce:px-5 motion-reduce:[scrollbar-width:none] md:motion-reduce:px-8 [&::-webkit-scrollbar]:hidden"
+      >
         <ol
+          ref={trackRef}
           /* No padding of its own: the -50% wrap is measured against the
              track's whole width, so a gutter here would offset the seam. The
              reduced-motion gutter lives on the scroller above instead. */
-          className="flex w-max motion-safe:animate-[marquee_var(--cycle)_linear_infinite]"
+          className="flex w-max shrink-0 motion-safe:animate-[marquee_var(--cycle)_linear_infinite]"
           style={{
-            ["--cycle" as string]: `${CYCLE_S}s`,
+            /* Placeholder for the frame before the measured value lands — see
+               the services rail for the same note. */
+            ["--cycle" as string]: "50s",
             animationPlayState: near ? "running" : "paused",
           }}
         >

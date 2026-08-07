@@ -167,6 +167,8 @@ export const WORK: CaseStudy[] = [
       "A searchable stock catalogue and an export enquiry route, for a dealer selling worldwide.",
     industries: ["machinery", "b2b", "ecommerce"],
     thumb: "/work/south-downs/home.png",
+    /* Unused — this study has no case-study page (`full` is unset), so no route
+       is generated for it. */
     hero: "/work/south-downs/export-loading.png",
     heroPosition: "center 38%",
   },
@@ -180,6 +182,7 @@ export const WORK: CaseStudy[] = [
       "A made-to-measure workshop given a product range you can actually browse before enquiring.",
     industries: ["ecommerce", "b2b"],
     thumb: "/work/bespoke-garden-decor/home.png",
+    /* Unused — no case-study page for this study. See South Downs. */
     hero: "/work/bespoke-garden-decor/products.png",
     heroPosition: "center 78%",
   },

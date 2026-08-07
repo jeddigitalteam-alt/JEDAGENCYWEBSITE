@@ -205,7 +205,7 @@ export function ScopeBuilder({ atTop = false }: { atTop?: boolean }) {
             <button
               onClick={send}
               disabled={!picked.length}
-              className="mono mt-6 w-full rounded-full bg-coral px-6 py-3.5 text-ink transition-colors hover:bg-paper disabled:cursor-not-allowed disabled:bg-ink-raised disabled:text-content-dim"
+              className="mono mt-6 w-full rounded-full bg-blue px-6 py-3.5 text-ink transition-colors enabled:hover:bg-blue-lift enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink-raised disabled:text-content-dim"
             >
               {picked.length
                 ? `Send this scope — ${estimate.weeks} weeks`

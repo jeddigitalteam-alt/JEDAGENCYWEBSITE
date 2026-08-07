@@ -5,19 +5,26 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { SERVICES } from "@/lib/services";
 import { useReducedMotionPref } from "@/lib/hooks/useMediaQuery";
+import { useMarqueeRail } from "@/lib/hooks/useMarqueeRail";
 
 const SHOWN = SERVICES.slice(0, 5);
 
 /**
- * How long one full pass of the five cards takes.
+ * Travel rate, in px a second.
  *
- * The track is two copies and travels -50%, so this is the time to move exactly
- * one copy — about 2830px at desktop size, which works out near 50px a second.
+ * This used to be a fixed 56s cycle, which was tuned against a track that was
+ * about 2830px at desktop size — near 50px a second. The cards are no longer a
+ * fixed share of the viewport width (see the card sizing below), so a fixed
+ * number of seconds would mean a different speed at every window size, which is
+ * what the old constant already quietly did: the same 56s ran the rail at about
+ * 120px/s on an ultrawide. Stating the pace instead and deriving the seconds
+ * from the measured track holds the tuned speed everywhere.
+ *
  * Deliberately slower than the clients marquee: these cards are an order of
  * magnitude larger and carry a picture, a title and a sentence each, so they
  * need time to be read rather than recognised.
  */
-const CYCLE_S = 56;
+const PX_PER_SECOND = 50.5;
 
 /**
  * Readability scrim, painted over the art.
@@ -106,15 +113,25 @@ const ART: Record<string, { src: string; position: string; alt: string }> = {
  * falls between items only, so a ten-card track would carry nine gaps and half
  * of it would land 2px short of a copy, once every cycle, forever.
  *
- * It is a CSS animation on a transform: no per-frame React, no wheel or touch
- * handling of ours, so vertical scrolling is untouched. It does not pause on
- * hover — only when it is nowhere near the viewport, and under reduced motion,
- * where it becomes an ordinary scrollable row of the five real cards.
+ * It is a CSS animation on a transform, so at rest there is no per-frame work
+ * of any kind. `useMarqueeRail` adds two things on top of it: the cycle length,
+ * derived from the measured track so the pace holds at every card size, and a
+ * temporary speed-up from horizontal wheel, trackpad and touch input. Vertical
+ * scrolling is never claimed — see the hook. It does not pause on hover, only
+ * when it is nowhere near the viewport, and under reduced motion, where it
+ * becomes an ordinary scrollable row of the five real cards.
+ *
+ * There is no visible control. The rail can be grabbed and thrown — see
+ * `useMarqueeRail` — and that is the whole of its interface.
  */
 export function ServicesPanels() {
   const reduced = useReducedMotionPref();
   const sectionRef = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(true);
+  const { viewportRef, trackRef } = useMarqueeRail<HTMLDivElement, HTMLUListElement>({
+    enabled: !reduced,
+    pxPerSecond: PX_PER_SECOND,
+  });
 
   /* Stop the compositor animating a strip nobody can see. Toggled by an
      observer, so this is two state changes a page rather than one a frame. */
@@ -152,12 +169,30 @@ export function ServicesPanels() {
       {/* Breaks the hero gutter so the strip runs edge to edge and clips at both
           sides as it loops. `overflow-hidden` is what keeps the second copy off
           the page's own scroll width. Under reduced motion the same box becomes
-          an ordinary scroller. */}
-      <div className="-mx-5 flex min-h-[10rem] flex-1 overflow-hidden md:-mx-8 motion-reduce:overflow-x-auto motion-reduce:overscroll-x-contain motion-reduce:px-5 motion-reduce:[scrollbar-width:none] md:motion-reduce:px-8 [&::-webkit-scrollbar]:hidden">
+          an ordinary scroller.
+
+          The rail takes its height from the cards now, rather than the cards
+          taking their size from it. The card width is a share of the viewport
+          and its height follows from the ratio, so the number of cards on
+          screen is the same at every desktop width instead of drifting with
+          the window's proportions — see the card below. */}
+      <div
+        ref={viewportRef}
+        className="-mx-5 flex shrink-0 overflow-hidden touch-pan-y md:-mx-8 motion-reduce:overflow-x-auto motion-reduce:overscroll-x-contain motion-reduce:px-5 motion-reduce:[scrollbar-width:none] md:motion-reduce:px-8 [&::-webkit-scrollbar]:hidden"
+      >
         <ul
-          className="flex w-max motion-safe:animate-[marquee_var(--cycle)_linear_infinite]"
+          ref={trackRef}
+          /* `shrink-0` is load-bearing. The rail is a flex row, so the track is
+             a flex item, and a flex item's default `flex-shrink: 1` pulled the
+             measured width the hook sets back down to the width of the rail —
+             1440px against a real track of 3734px, which left `-50%` moving the
+             cards at two fifths of their proper speed. */
+          className="flex w-max shrink-0 motion-safe:animate-[marquee_var(--cycle)_linear_infinite]"
           style={{
-            ["--cycle" as string]: `${CYCLE_S}s`,
+            /* A placeholder only. The real value is measured from the track and
+               written to this same custom property by `useMarqueeRail`; this
+               keeps the animation valid for the frame before that lands. */
+            ["--cycle" as string]: "56s",
             animationPlayState: near ? "running" : "paused",
           }}
         >
@@ -173,16 +208,34 @@ export function ServicesPanels() {
                   key={`${copy}-${service.slug}`}
                   aria-hidden={ghost || undefined}
                   /* Right margin, not gap — see the note above the component.
-                     No height of its own: the track is a flex row, so every
-                     card stretches to it, and the track stretches to the rail,
-                     which takes whatever the hero has spare. `h-full` cannot do
-                     this — a percentage height resolves against the parent's
-                     specified height, and every box in that chain is `auto`
-                     with its used height coming from flex, so it collapsed to
-                     the border. The 10rem floor and 32rem ceiling live on the
-                     rail: usable on a short laptop, never taller than the card
-                     already was. */
-                  className="group relative mr-1 w-[86vw] shrink-0 overflow-hidden rounded-xl border border-rule bg-ink-raised md:max-h-[32rem] md:w-[46vw] lg:w-[39vw]"
+
+                     **Width is a share of the viewport, height follows from the
+                     ratio.** Stated that way round, the number of cards on
+                     screen is a property of the design rather than an accident
+                     of the window: 29vw is a shade under three and a half cards
+                     in view at every desktop width, from a 1280 laptop to a 3440
+                     ultrawide. The previous arrangement derived the width from
+                     whatever height the hero had spare, so a wide short window
+                     and a narrow tall one disagreed — cards capped at 740px on a
+                     3440 display, which is 4.6 in view and reads as small.
+
+                     Three steps rather than a single `clamp()`, because the
+                     right answer is not continuous: a phone wants one card and
+                     a bit, a tablet wants two and a bit, and a desktop wants
+                     three and a half. A clamp between those would pass through
+                     awkward middles.
+
+                       base   88vw   ~1.1 cards   (390px -> 343px card)
+                       sm     44vw   ~2.3 cards   (768px -> 338px card)
+                       lg     29vw   ~3.4 cards   (1920px -> 557px card)
+
+                     16/9 rather than the artwork's own 3:2 because these are
+                     landscape cards sitting under a headline, and 3:2 is taller
+                     than the hero can spare on a laptop. The crop it asks of the
+                     picture is a consistent 16% off the height, taken evenly top
+                     and bottom, and it matches the featured work tile's
+                     `lg:aspect-[16/9]`. */
+                  className="group relative mr-1 aspect-[16/9] w-[88vw] shrink-0 self-start overflow-hidden rounded-xl border border-rule bg-ink-raised sm:w-[44vw] lg:w-[29vw]"
                 >
                 {/* Art and scrim are card-level layers, not part of the link's
                     flow, so the copy keeps exactly the position it had. */}
@@ -192,7 +245,10 @@ export function ServicesPanels() {
                       src={art.src}
                       alt={art.alt}
                       fill
-                      sizes="(max-width: 767px) 86vw, (max-width: 1023px) 46vw, 39vw"
+                      /* Matches the card widths exactly, so the browser picks a
+                         source for the box it will actually be drawn into
+                         rather than over-fetching. */
+                      sizes="(min-width: 1024px) 29vw, (min-width: 640px) 44vw, 88vw"
                       className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] group-focus-within:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
                       style={{ objectPosition: art.position }}
                       draggable={false}
@@ -235,6 +291,7 @@ export function ServicesPanels() {
           )}
         </ul>
       </div>
+
     </div>
   );
 }

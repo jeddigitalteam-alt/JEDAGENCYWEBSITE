@@ -268,7 +268,10 @@ export function Header() {
 
           <Link
             href="/contact"
-            className="mono ml-2 rounded-full border border-rule px-4 py-2 transition-colors hover:border-coral hover:text-coral"
+            /* The header's primary CTA, filled in Puzzle blue like every other
+               "Start a project" on the site. It was a bordered pill with a
+               coral hover, which read as one more nav item. */
+            className="mono ml-2 rounded-full bg-blue px-4 py-2 text-ink transition-colors hover:bg-blue-lift active:scale-[0.98]"
             onMouseEnter={close}
             onFocus={close}
           >

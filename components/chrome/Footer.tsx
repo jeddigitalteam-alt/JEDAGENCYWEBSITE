@@ -68,7 +68,7 @@ export function Footer() {
               </p>
               <Link
                 href="/contact"
-                className="mono mt-6 inline-flex rounded-full bg-coral px-6 py-3 text-ink transition-colors hover:bg-paper"
+                className="mono mt-6 inline-flex rounded-full bg-blue px-6 py-3 text-ink transition-colors hover:bg-blue-lift active:scale-[0.98]"
               >
                 Start a project
               </Link>

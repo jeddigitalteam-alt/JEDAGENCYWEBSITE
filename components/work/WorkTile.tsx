@@ -127,7 +127,15 @@ export function WorkTile({
         ) : null}
       </div>
 
-      <div className="mt-4 flex items-baseline justify-between gap-4">
+      {/* `flex-wrap` is what keeps this off the page's scroll width at 320px.
+          The meta is `shrink-0` — deliberately, so "Plant and machinery — 2025"
+          never breaks mid-phrase next to a short client name — but that also
+          means it cannot give way when the title beside it is already down to
+          its longest word. On a 320px screen the two came to about 15px more
+          than the column, and the whole page scrolled sideways to fit them.
+          Wrapping drops the meta onto its own line in exactly that case and
+          changes nothing at any width where both already fit. */}
+      <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h3 className="display text-step-2 transition-colors group-hover:text-blue">
           {study.client}
         </h3>

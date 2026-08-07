@@ -22,8 +22,8 @@ export default function WorkPage() {
           <RevealHeading
             as="h1"
             className="display mt-4 max-w-[18ch] text-step-5"
-            roman="Work we can"
-            italic="show you"
+            roman="Completed"
+            italic="Projects"
           />
           <p className="mono mt-6 max-w-[52ch] text-content-dim">
             Drag, scroll or use the arrow keys.
@@ -45,8 +45,8 @@ export default function WorkPage() {
       {/*
         Everything below was the /how-we-work page. It is unchanged apart from
         its opening, which was a page hero and is now a section heading: the h1
-        became an h2 at the section size, because a second h1 under "Work we can
-        show you" would be two page titles, and its top padding gave way to the
+        became an h2 at the section size, because a second h1 under "Completed
+        Projects" would be two page titles, and its top padding gave way to the
         divider above. The timeline and the closing CTA are untouched.
 
         `scroll-mt-28` clears the fixed header when /work#how-we-work is opened
@@ -86,7 +86,7 @@ export default function WorkPage() {
             </Link>
             <Link
               href="/contact"
-              className="mono rounded-full bg-coral px-5 py-2.5 text-ink transition-colors hover:bg-paper"
+              className="mono rounded-full bg-blue px-5 py-2.5 text-ink transition-colors hover:bg-blue-lift active:scale-[0.98]"
             >
               Start a project
             </Link>
