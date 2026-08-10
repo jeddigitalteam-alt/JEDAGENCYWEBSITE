@@ -14,7 +14,10 @@
     "gen:placeholders": "node scripts/gen-placeholders.mjs",
     "shoot:loader": "node scripts/shoot-loader.mjs",
     "verify:routes": "node scripts/verify-routes.mjs",
-    "verify:interactions": "node scripts/verify-interactions.mjs"
+    "verify:interactions": "node scripts/verify-interactions.mjs",
+    "verify:footer": "node scripts/verify-footer.mjs",
+    "verify:chrome": "node scripts/verify-chrome.mjs",
+    "verify:editorial": "node scripts/verify-editorial.mjs"
   },
   "dependencies": {
     "geist": "^1.7.2",

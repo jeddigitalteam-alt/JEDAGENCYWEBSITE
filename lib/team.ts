@@ -73,6 +73,14 @@ export interface Testimonial {
   role: string;
   /** Which case study this fit note belongs beside. */
   project: string;
+  /**
+   * Out of five, rendered as that many filled stars — the same rating the
+   * homepage testimonial carries, since the two are now presented identically.
+   * Held in the data rather than hard-coded in the section so a second fit note
+   * is a data change, and so a rating that is not five cannot be misreported by
+   * a component that assumes it.
+   */
+  rating: number;
 }
 
 /**
@@ -86,5 +94,6 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Richard",
     role: "Founder",
     project: "Bespoke Garden Decor",
+    rating: 5,
   },
 ];

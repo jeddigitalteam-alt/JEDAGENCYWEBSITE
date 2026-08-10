@@ -1,9 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import {
   useScrollAssembly,
   type AssemblyPlan,
@@ -13,9 +13,8 @@ import { TESTIMONIALS } from "@/lib/team";
 import { ARTICLES } from "@/lib/articles";
 import { WORK } from "@/lib/work";
 import { Eyebrow, SectionHeading } from "@/components/ui/primitives";
+import TestimonialQuote from "@/components/home/TestimonialQuote";
 import WorkTile from "@/components/work/WorkTile";
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 /* ------------------------------------------------------------------ work */
 
@@ -27,7 +26,15 @@ export function SelectedWork() {
      featured slot already had, so nothing reflows around a gap. */
   const study = WORK[0];
   return (
-    <section className="px-5 py-24 md:px-8 md:py-32">
+    /* Full-bleed Puzzle blue, from the same `[data-blue]` field the footer and
+       the homepage peek use — one definition of what this surface is, so the
+       LEVANT tile closes ranks with the footer rather than approximating it.
+       Nothing inside carries a colour of its own: the field reassigns the
+       semantic tokens and the eyebrow, heading, tile and pill all follow. */
+    <section
+      data-blue
+      className="bg-surface px-5 py-24 text-content md:px-8 md:py-32"
+    >
       {/* The measure is shared by the heading row and the tile, so the "Recent
           work" label lines up with the left edge of the picture and the "All
           work" pill with its right edge. Centring only the media would have
@@ -50,7 +57,7 @@ export function SelectedWork() {
           </div>
           <Link
             href="/work"
-            className="mono rounded-full border border-rule px-5 py-2.5 transition-colors hover:border-blue hover:text-blue"
+            className="mono rounded-full border border-rule px-5 py-2.5 transition-colors hover:border-accent hover:text-accent"
           >
             All work — {WORK.length}
           </Link>
@@ -162,57 +169,45 @@ export function ClientRail() {
 /* ------------------------------------------------------------- fit notes */
 
 /**
- * Testimonials as "fit notes": each quote seats against the project it refers
- * to, rather than floating free in a carousel of praise.
+ * Fit notes: what a client said once the work had been live a while.
+ *
+ * Presented as `TestimonialQuote` — the same component the testimonial above it
+ * uses, not a second design that resembles it. It was an accordion of one: a
+ * disclosure button that hid a single quote behind a click, set at half the
+ * size of the quote further up the page, with the name given more weight than
+ * the words. Two quotes, two systems, no reason.
+ *
+ * What stays is the framing. This one keeps its eyebrow and heading because it
+ * is a labelled section rather than an editorial break, and the project it
+ * belongs beside is still named — that is the whole idea of a fit note. Below
+ * that line it is identical: five stars, the quote at `text-step-4`, the client
+ * and then the person.
  */
 export function FitNotes() {
-  const [open, setOpen] = useState(0);
+  const note = TESTIMONIALS[0];
+  if (!note) return null;
 
   return (
     <section className="px-5 py-24 md:px-8 md:py-32">
       <Eyebrow>Fit notes</Eyebrow>
+      {/* `parts` rather than roman/italic: the italic is "afterwards" alone, and
+          splitting it as roman "What clients said" + italic "afterwards" is
+          exactly the same three-run reading. The measure is wide enough that the
+          line breaks after "clients", so the two halves never meet mid-word. */}
       <SectionHeading
         roman="What clients said"
         italic="afterwards"
-        className="mt-4 max-w-[20ch]"
+        className="mt-4 max-w-[22ch]"
       />
 
-      <ul className="mt-12 border-t border-rule">
-        {TESTIMONIALS.map((t, i) => {
-          const isOpen = open === i;
-          return (
-            <li key={t.name} className="border-b border-rule">
-              <button
-                className="flex w-full items-baseline justify-between gap-6 py-6 text-left"
-                aria-expanded={isOpen}
-                onClick={() => setOpen(isOpen ? -1 : i)}
-              >
-                <span className="mono text-content-dim">{t.project}</span>
-                <span className="display flex-1 text-step-2">
-                  {t.name}
-                  <span className="text-content-dim"> — {t.role}</span>
-                </span>
-                <span
-                  className="mono shrink-0 text-blue"
-                  aria-hidden="true"
-                >
-                  {isOpen ? "−" : "+"}
-                </span>
-              </button>
-              <motion.div
-                initial={false}
-                animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
-                transition={{ duration: 0.36, ease: EASE }}
-                className="overflow-hidden"
-              >
-                <p className="display max-w-[44ch] pb-8 text-step-2 italic">
-                  “{t.quote}”
-                </p>
-              </motion.div>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="mt-16 md:mt-20">
+        <TestimonialQuote
+          rating={note.rating}
+          quote={note.quote}
+          company={note.project}
+          attribution={`${note.name} — ${note.role}`}
+        />
+      </div>
     </section>
   );
 }
@@ -409,7 +404,12 @@ export function ArticlesTeaser() {
                       alt={a.imageAlt ?? ""}
                       fill
                       sizes="(min-width: 1280px) 22vw, (min-width: 768px) 44vw, 88vw"
-                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
+                      /* `motion-safe:` on the scale — Tailwind v4 compiles
+                         `scale-*` to the standalone `scale` property, which the
+                         `transform-none` that used to sit here does not cancel,
+                         so the hover was still scaling for readers who had
+                         asked for no movement. Same fix as ArticleMedia. */
+                      className="object-cover transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.03] motion-reduce:transition-none"
                     />
                   </div>
                   <p className="mono mt-5 text-content-dim">

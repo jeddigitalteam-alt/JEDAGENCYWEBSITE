@@ -143,7 +143,12 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+        {/* `lg`, not `md`. Splitting Industries out of the Services panel adds a
+            sixth top-level item, and six plus the pill measures ~750px of a
+            768px screen — it fits by a hair and wraps on any longer label. The
+            palette is already the navigation below this breakpoint, so the
+            tablet range simply uses it. */}
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
           {PRIMARY_NAV.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(item.href + "/");
@@ -229,8 +234,23 @@ export function Header() {
                       exit={{ opacity: 0, y: -12, x: "-50%" }}
                       transition={{ duration: 0.32, ease: EASE }}
                     >
-                      <div className="w-[min(44rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-rule bg-ink-raised">
-                        <div className="grid gap-8 p-6 md:grid-cols-2 md:p-8">
+                      {/* Sized from the panel's own content: a single column
+                          in a 44rem box would be one narrow list against a
+                          field of empty. Both panels carry one column today;
+                          the two-column case is kept because the markup is
+                          generic and the data decides. */}
+                      <div
+                        className={`overflow-hidden rounded-2xl border border-rule bg-ink-raised ${
+                          item.columns.length > 1
+                            ? "w-[min(44rem,calc(100vw-2rem))]"
+                            : "w-[min(26rem,calc(100vw-2rem))]"
+                        }`}
+                      >
+                        <div
+                          className={`grid gap-8 p-6 md:p-8 ${
+                            item.columns.length > 1 ? "md:grid-cols-2" : ""
+                          }`}
+                        >
                           {item.columns.map((col) => (
                             <div key={col.heading}>
                               <p className="mono mb-4 text-content-dim">
@@ -279,9 +299,11 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* Mobile: the palette is the nav. Cheaper than a second menu system. */}
+        {/* Mobile and tablet: the palette is the nav. Cheaper than a second
+            menu system, and it already carries every route — including both
+            services and industries — so the split above needs nothing here. */}
         <button
-          className="mono rounded-full border border-rule px-4 py-2 md:hidden"
+          className="mono rounded-full border border-rule px-4 py-2 lg:hidden"
           onClick={() =>
             document.dispatchEvent(new CustomEvent("puzzle:open-palette"))
           }

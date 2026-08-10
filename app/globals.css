@@ -32,6 +32,12 @@
   --link: var(--blue);
   --link-underline: var(--blue);
 
+  /* What an interactive title, border or arrow moves TO on hover. Semantic for
+     the same reason `--link` is: blue is right on ink and on paper, and on the
+     blue field it would be the field. A component says `hover:text-accent` and
+     stops needing to know which surface it was dropped onto. */
+  --accent: var(--blue);
+
   /* --- structural signature: the seam --- */
   --seam-w: 1px;
   --seam-color: var(--blue);
@@ -67,6 +73,9 @@
   /* blue-on-white is 2.6:1 — not usable for text */
   --link: var(--ink);
   --link-underline: var(--blue);
+  /* Blue stays the hover accent here: it is large type and borders, not body
+     copy, and it is the one place the brand colour reads against paper. */
+  --accent: var(--blue);
   color-scheme: light;
 }
 
@@ -77,6 +86,7 @@
   --color-content: var(--content);
   --color-content-dim: var(--content-dim);
   --color-rule: var(--rule);
+  --color-accent: var(--accent);
 
   --color-ink: var(--ink);
   --color-ink-raised: var(--ink-raised);
@@ -177,6 +187,182 @@ body {
 }
 
 /* ============================================================
+   The underlapping footer
+
+   The footer is pinned to the bottom of the window and the page
+   is a solid layer travelling over it, so the footer is only
+   ever seen where the page has already gone past. No second copy
+   of the footer, no duplicated markup, and the whole of it stays
+   in the DOM and in the accessibility tree throughout — it is
+   covered, not hidden.
+
+   The measured part lives in FooterReveal: `--footer-h` is the
+   footer's own height, and `data-footer-reveal` is its answer to
+   "can this run here at all".
+   ============================================================ */
+
+/**
+ * Everything the visitor reads. Opaque, so it occludes the footer, and it
+ * reserves exactly the footer's height beneath itself for the footer to be
+ * uncovered into.
+ *
+ * It deliberately does NOT set `z-index`. A stacking context here would trap
+ * the full-screen overlays that pages render from inside <main> — the
+ * industries case reader at 85, the process modal at 95 — beneath the header at
+ * 50. Paint order comes from the footer's negative index instead, which needs
+ * no context on this side at all.
+ */
+.page-layer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* `dvh` after `vh` so a browser without it still gets a full screen; the
+     value is a floor for short pages, never a height, so the toolbar-driven
+     changes on mobile cost nothing. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--surface);
+}
+
+html[data-footer-reveal="on"] .page-layer {
+  /* Measured, not guessed. The document ends up exactly as tall as it was with
+     the footer in normal flow, so switching the effect on at hydration moves
+     nothing and the scroll position stays put. */
+  margin-bottom: var(--footer-h, 0px);
+}
+
+html[data-footer-reveal="on"] .site-footer {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  /* Behind the page layer, and above <body>'s own background — which is the
+     whole reason <body> carries `isolation: isolate`. Without that isolation
+     the negative index falls through to the canvas and the footer is never seen
+     at all. Being painted behind does not make it inert: where the page layer
+     has passed, the footer is the topmost thing at that point and takes its own
+     clicks and focus normally. */
+  z-index: -1;
+}
+
+/**
+ * The blue field. A third structural surface alongside ink and `[data-invert]`
+ * paper: the footer, the homepage peek that previews it, and any section that
+ * wants to close ranks with them — `<section data-blue>`.
+ *
+ * Reassigns the semantic token layer exactly the way `[data-invert]` does, so
+ * every utility and component inside — `text-content-dim`, `border-rule`, the
+ * clock, a work tile — flips with no per-element colours and no second set of
+ * classes.
+ *
+ * Ink on blue, not white on blue. White on `--blue` is 2.6:1 and fails AA
+ * outright; ink on it is 7.4:1. That is the finding in NOTES.md that shaped the
+ * token layer in the first place, and a whole field of blue is where it matters
+ * most. `--content-dim` is mixed at 76% ink for the same reason: that is where
+ * the secondary type clears 4.5:1 against this background.
+ *
+ * `--accent` is the token that made this possible at all. It is the colour an
+ * interactive title or border moves to on hover — blue on every other surface,
+ * and on a blue field that would be the field itself, invisible. Here it is
+ * paper, so a work tile keeps its hover without knowing what it is sitting on.
+ */
+[data-blue],
+.site-footer,
+.footer-peek__inner {
+  --accent: var(--paper);
+  --surface: var(--blue);
+  --surface-raised: color-mix(in oklab, var(--blue) 88%, var(--ink));
+  --content: var(--ink);
+  --content-dim: color-mix(in oklab, var(--ink) 76%, var(--blue));
+  --rule: color-mix(in oklab, var(--ink) 24%, transparent);
+  --link: var(--ink);
+  --link-underline: var(--ink);
+  color-scheme: light;
+  background: var(--surface);
+  color: var(--content);
+}
+
+/* Notches on both, so a phone's home indicator never sits on the type. */
+.site-footer {
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+}
+.footer-peek__inner {
+  padding-bottom: env(safe-area-inset-bottom);
+  /* A little depth where the strip meets the page, so it reads as something
+     underneath rising into view rather than a bar stuck on top. */
+  box-shadow: 0 -14px 32px -22px color-mix(in oklab, var(--ink) 80%, transparent);
+}
+
+/**
+ * The homepage peek.
+ *
+ * Above the page layer, below the header (50) and every overlay — so it can
+ * never cover a menu, the palette, the route wipe or the loader.
+ *
+ * The transform here is the hand-off into the full reveal and is scroll-linked:
+ * `--peek-exit` runs 0 → 1 as the real footer uncovers the strip's own height,
+ * so 100% of this translation is exactly the number of pixels of footer now
+ * showing. The strip's top edge therefore tracks the reveal boundary to the
+ * pixel — it is only ever over footer, never over the page — and since both are
+ * the same blue, all you see is the invitation sliding out of the bottom while
+ * the footer comes up behind it. No transition on this one: a transition would
+ * lag the scroll and read as a snap.
+ *
+ * Opaque throughout, deliberately. Fading it instead put translucent type over
+ * the footer's own bottom row and a lighter band over the page above the
+ * boundary — two states of the same blue at once, which is the one thing the
+ * hand-off has to avoid.
+ */
+.footer-peek {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 30;
+  pointer-events: none;
+  transform: translate3d(0, calc(var(--peek-exit, 0) * 100%), 0);
+}
+
+/* The show/hide, which is a state change rather than a scroll position: it
+   rises from beneath the viewport on the site's own expo-out curve. Restrained
+   on purpose — one movement, no overshoot. */
+.footer-peek__inner {
+  pointer-events: auto;
+  transform: translate3d(0, 105%, 0);
+  opacity: 0;
+  transition:
+    transform 620ms var(--ease-lock),
+    opacity 380ms var(--ease-out-soft);
+}
+
+.footer-peek[data-shown="true"] .footer-peek__inner {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+}
+
+/* Belt and braces for `inert`: the strip must never take a click meant for
+   whatever is behind it, including in a browser that ignores the attribute. */
+.footer-peek:not([data-shown="true"]) .footer-peek__inner {
+  pointer-events: none;
+}
+
+/* Reduced motion: no travel, in or out. The strip still appears and still hands
+   over to the footer — the site-wide rule collapses the transition, so both
+   states are simply arrived at, and the hand-off fades the CONTENT rather than
+   the strip. Fading the strip itself would put a translucent blue over the dark
+   page above the reveal boundary; fading only what is written on it leaves an
+   opaque field that merges with the footer arriving behind it. FooterReveal
+   shortens the hand-off to match, so the words are gone before the footer's own
+   bottom row reaches this band. */
+@media (prefers-reduced-motion: reduce) {
+  .footer-peek,
+  .footer-peek__inner {
+    transform: none;
+  }
+  .footer-peek__row {
+    opacity: calc(1 - var(--peek-exit, 0));
+  }
+}
+
+/* ============================================================
    accessibility
    ============================================================ */
 
@@ -222,16 +408,11 @@ body {
   }
 }
 
-/* Custom cursor replaces the pointer on fine-pointer devices only */
-@media (hover: hover) and (pointer: fine) {
-  /* `data-custom-cursor`, not `data-cursor` — the latter is the per-element
-     label attribute and must never appear on <body>. */
-  body[data-custom-cursor="on"],
-  body[data-custom-cursor="on"] a,
-  body[data-custom-cursor="on"] button {
-    cursor: none;
-  }
-}
+/* The site uses the native cursor. There was a custom puzzle-piece one here,
+   drawn on a fine pointer with `cursor: none` on the document beneath it; it is
+   gone, component and listeners with it. Nothing replaces the rule — the
+   browser's own pointer, text and link cursors are the default, and every
+   affordance is carried by the elements themselves. */
 
 /* ============================================================
    Labs range inputs. Scoped to `.lab-range` so nothing else on

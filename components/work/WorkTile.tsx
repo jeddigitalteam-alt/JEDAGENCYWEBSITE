@@ -8,8 +8,7 @@ import { hasCaseStudy, type CaseStudy } from "@/lib/work";
 
 /**
  * Work tile. Plays a silent looping video on hover where one exists, and
- * otherwise animates the still — the cursor becomes a "VIEW" disc either way
- * via `data-cursor`.
+ * otherwise animates the still.
  *
  * TODO(assets): no case-study videos exist yet. `videoSrc` is wired end to end
  * so dropping an mp4 into public/work/<slug>/ and adding the path in lib/work.ts
@@ -64,7 +63,7 @@ export function WorkTile({
   };
 
   /* Studies without a case-study page render as a plain <div>: no href, no
-     data-cursor, no hover handlers and no `group`, so the image never scales
+     hover handlers and no `group`, so the image never scales
      and the title never turns blue. Nothing that implies navigation survives,
      and there is no tab stop — but the card itself is visually identical. */
   const linked = hasCaseStudy(study);
@@ -72,7 +71,6 @@ export function WorkTile({
   const wrapperProps = linked
     ? {
         href: `/work/${study.slug}`,
-        "data-cursor": "View",
         className: "group block",
         onMouseEnter: onEnter,
         onMouseLeave: onLeave,
@@ -136,7 +134,11 @@ export function WorkTile({
           Wrapping drops the meta onto its own line in exactly that case and
           changes nothing at any width where both already fit. */}
       <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="display text-step-2 transition-colors group-hover:text-blue">
+        {/* `accent`, not `blue`: the tile now also appears on the blue field,
+            where a blue hover is the background. The token resolves to blue on
+            ink and on paper exactly as before — this changes nothing on /work
+            or in the industry grids. */}
+        <h3 className="display text-step-2 transition-colors group-hover:text-accent">
           {study.client}
         </h3>
         <span className="mono shrink-0 text-content-dim">

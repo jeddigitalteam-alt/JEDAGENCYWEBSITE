@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ALL_ROUTES } from "@/lib/site";
+import { navigateWithTransition } from "@/components/motion/route-transition-bus";
 
 /**
  * ⌘K route jumper. Doubles as the mobile menu — the header dispatches
@@ -73,9 +74,13 @@ export function CommandPalette() {
     }
   }, [open]);
 
+  /* Through the route transition where it is mounted, so a jump from the
+     palette is the same move as a click on a link — these are buttons, so the
+     transition's own anchor listener can never see them. Falls back to a plain
+     push when nothing is listening. */
   const go = (href: string) => {
     setOpen(false);
-    router.push(href);
+    if (!navigateWithTransition(href)) router.push(href);
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {

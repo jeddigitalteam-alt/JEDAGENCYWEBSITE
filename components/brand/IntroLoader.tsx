@@ -4,27 +4,29 @@ import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useIntro } from "@/components/motion/intro-context";
 import SeamPanels from "@/components/motion/SeamPanels";
-import {
-  LOADER_PIECE_A,
-  LOADER_PIECE_B,
-  LOADER_PIECE_OFFSETS,
-  LOADER_SEAM_ANGLE_DEG,
-  LOADER_VIEWBOX,
-} from "@/components/brand/puzzle-loader-paths";
+import PuzzleMarkAnimation from "@/components/brand/PuzzleMarkAnimation";
+import { LOADER_SEAM_ANGLE_DEG } from "@/components/brand/puzzle-loader-paths";
 
 /**
  * ============================================================================
  *  LOADER ARTWORK LOCKED — DO NOT MODIFY WHEN EDITING THE SITE LOGO
  * ============================================================================
  *
- * This component draws the LOADER mark, not the site logo. Its geometry comes
- * from ./puzzle-loader-paths, a frozen copy that nothing else imports, so the
- * site logo (./PuzzleSiteLogo + ./puzzle-paths) can be changed freely without
- * touching what renders here.
+ * This component stages the LOADER mark, not the site logo. Its geometry comes
+ * from ./puzzle-loader-paths, a frozen copy the site logo cannot reach, so
+ * ./PuzzleSiteLogo + ./puzzle-paths can be changed freely without touching what
+ * renders here.
  *
  * Locked: shape, stroke, animation, timing, positioning, and how the pieces
  * connect. The pieces are stroke-only outlines on ink and they lock edge to
  * edge — do NOT give them the site logo's blue fill or white keyline.
+ *
+ * The pieces now render through ./PuzzleMarkAnimation, which was lifted out of
+ * this file so the route transition could play the same connect rather than
+ * duplicate it. That was an extraction, not a redesign: the markup, offsets,
+ * durations and curve are the ones that were inline here, and the loader's
+ * rendered output was diffed frame by frame across the change. The timing
+ * constants below are still this component's own.
  */
 
 /* --- timing -------------------------------------------------------------
@@ -131,71 +133,26 @@ export function IntroLoader() {
         angleDeg={LOADER_SEAM_ANGLE_DEG}
       />
 
-      {/* Mark sits above the panels and is deliberately NOT rotated. */}
+      {/* Mark sits above the panels and is deliberately NOT rotated.
+          The pieces themselves are PuzzleMarkAnimation, which was lifted out of
+          this file unchanged so the route transition could play the same
+          gesture instead of carrying a second copy. Every value below is the
+          one that was inline here; the drawn outlines are still this
+          component's alone. */}
       <motion.div
         className="absolute inset-0 grid place-items-center"
         animate={{ opacity: cleared ? 0 : 1, scale: cleared ? 1.04 : 1 }}
         transition={{ duration: 0.3, ease: EASE_LOCK }}
       >
-        <svg
-          viewBox={LOADER_VIEWBOX}
-          className="w-[min(52vw,30rem)] text-blue"
-          fill="none"
-          stroke="currentColor"
+        <PuzzleMarkAnimation
+          locked={locked}
+          reduced={reduced}
+          duration={LOCK_DUR}
+          draw={{ duration: DRAW_DUR, stagger: DRAW_B_DELAY }}
           strokeWidth={7}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          role="img"
-          aria-label="Puzzle"
-        >
-          {[LOADER_PIECE_A, LOADER_PIECE_B].map((d, i) => (
-            <motion.g
-              key={i}
-              /* Only transform and opacity animate here, so declaring it lets
-                 the compositor hold the pieces on their own layers instead of
-                 re-rasterising them behind main-thread work. */
-              style={{ willChange: "transform" }}
-              initial={
-                reduced
-                  ? false
-                  : {
-                      x: LOADER_PIECE_OFFSETS[i].x,
-                      y: LOADER_PIECE_OFFSETS[i].y,
-                    }
-              }
-              animate={
-                locked
-                  ? { x: 0, y: 0 }
-                  : {
-                      x: LOADER_PIECE_OFFSETS[i].x,
-                      y: LOADER_PIECE_OFFSETS[i].y,
-                    }
-              }
-              /* Monotonic close along the seam normal, no overshoot.
-                 This previously ran through a keyframe at -0.07 of the start
-                 offset, which carried each piece past the seam and made the two
-                 solids visibly cross before settling back onto 0. Travelling
-                 straight to 0 on a decelerating curve removes that crossing;
-                 EASE_LOCK is cubic-bezier(0.16, 1, 0.3, 1), whose control
-                 points are all within [0,1], so it cannot overshoot either. */
-              transition={{
-                duration: reduced ? 0 : LOCK_DUR,
-                ease: EASE_LOCK,
-              }}
-            >
-              <motion.path
-                d={d}
-                initial={reduced ? false : { pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{
-                  duration: reduced ? 0 : DRAW_DUR,
-                  delay: reduced ? 0 : i * DRAW_B_DELAY,
-                  ease: "easeInOut",
-                }}
-              />
-            </motion.g>
-          ))}
-        </svg>
+          className="w-[min(52vw,30rem)] text-blue"
+          title="Puzzle"
+        />
       </motion.div>
 
       {/* Mono counter, bottom-left — the LEVANT micro-type voice. */}

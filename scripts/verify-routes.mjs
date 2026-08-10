@@ -112,10 +112,14 @@ for (const [width, tag] of WIDTHS) {
   });
   const page = await ctx.newPage();
   await page.goto(base + "/", { waitUntil: "load" });
-  // The keyboard checks below need React to have hydrated and attached its
-  // document-level listeners. Without this the ⌘K assertion is a coin flip.
+  /* The keyboard checks below need React to have hydrated and attached its
+     document-level listeners. Without this the ⌘K assertion is a coin flip.
+     The palette publishes its own state on <html> from an effect, so this waits
+     on the very component the assertion is about. (It used to wait on the
+     custom cursor's flag, which no longer exists — the site uses the native
+     cursor.) */
   await page.waitForFunction(
-    () => document.body.dataset.customCursor === "on",
+    () => document.documentElement.dataset.paletteOpen === "false",
     null,
     { timeout: 10000 },
   );

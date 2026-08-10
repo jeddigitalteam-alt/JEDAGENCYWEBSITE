@@ -263,7 +263,6 @@ export function ProcessLadder() {
                 }}
                 aria-haspopup="dialog"
                 aria-label={`${stage.title} — read more about this stage`}
-                data-cursor="Open"
                 className="group flex w-full items-start gap-5 py-8 text-left md:gap-10 md:py-12"
               >
                 {/* Circle and its connector. The connector lives inside the

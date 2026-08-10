@@ -28,6 +28,11 @@ export const PRIMARY_NAV: {
   columns?: { heading: string; links: NavLink[] }[];
 }[] = [
   { label: "Work", href: "/work" },
+  /* Services and Industries are two top-level destinations with a panel each,
+     not one panel with two columns. They answer different questions — what we
+     do, and who we have done it for — and burying the second inside the first
+     made it findable only by someone already looking for the first. Neither
+     list is duplicated: each appears under exactly one heading. */
   {
     label: "Services",
     href: "/services",
@@ -40,6 +45,12 @@ export const PRIMARY_NAV: {
           description: s.summary,
         })),
       },
+    ],
+  },
+  {
+    label: "Industries",
+    href: "/industries",
+    columns: [
       {
         heading: "Industries",
         links: INDUSTRIES.map((i) => ({

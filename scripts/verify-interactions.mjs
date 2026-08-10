@@ -62,13 +62,35 @@ check(
 );
 await page.screenshot({ path: join(out, "contact-prefilled.png") });
 
-/* ----------------------------------------------------------- mega menu */
+/* ----------------------------------------------------------- mega menu
+   Services and Industries are two top-level items with a panel each. This
+   used to assert the industries column *inside* the services panel; that
+   nesting is gone deliberately, so the assertion is now that each panel
+   carries its own list and neither carries the other's. */
 await page.goto(base, { waitUntil: "load" });
-await page.getByRole("button", { name: "Services" }).first().hover();
+await page.getByRole("button", { name: "Services", exact: true }).first().hover();
 await page.waitForTimeout(500);
-const panelLinks = await page.locator('header a[href^="/industries/"]').count();
-check(panelLinks >= 7, `mega-menu shows industries column (${panelLinks} links)`);
+const servicePanelLinks = await page
+  .locator('header a[href^="/services/"]')
+  .count();
+const strayIndustries = await page
+  .locator('header a[href^="/industries/"]')
+  .count();
+check(
+  servicePanelLinks >= 7 && strayIndustries === 0,
+  `services panel lists services only (${servicePanelLinks} services, ${strayIndustries} industries)`,
+);
 await page.screenshot({ path: join(out, "mega-menu.png") });
+
+await page.getByRole("button", { name: "Industries", exact: true }).first().hover();
+await page.waitForTimeout(500);
+const industryPanelLinks = await page
+  .locator('header a[href^="/industries/"]')
+  .count();
+check(
+  industryPanelLinks >= 7,
+  `industries has its own panel (${industryPanelLinks} links)`,
+);
 await page.keyboard.press("Escape");
 // AnimatePresence runs a 0.32s exit — wait past it before asserting removal.
 await page.waitForTimeout(900);

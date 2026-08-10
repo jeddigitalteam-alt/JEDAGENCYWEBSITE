@@ -13,6 +13,17 @@ export interface PuzzleSiteLogoProps extends React.SVGProps<SVGSVGElement> {
    */
   keyline?: string;
   /**
+   * Colour of the body. Defaults to the artwork's own blue, which is what the
+   * header and every other instance uses.
+   *
+   * The footer overrides it to `var(--blue)`: the field there IS the brand
+   * blue, and the artwork's sampled blue is a shade off it, so the piece read
+   * as a slightly wrong patch sitting on the background rather than as the
+   * background showing through a white outline. Same geometry, same component,
+   * one colour — no second copy of the mark.
+   */
+  body?: string;
+  /**
    * Accessible label. Omit for decorative instances — the mark is then hidden
    * from assistive tech rather than announced twice alongside the "puzzle"
    * wordmark it sits next to.
@@ -41,6 +52,7 @@ export interface PuzzleSiteLogoProps extends React.SVGProps<SVGSVGElement> {
  */
 export function PuzzleSiteLogo({
   keyline = "#ffffff",
+  body = SITE_MARK_BLUE,
   title,
   ...props
 }: PuzzleSiteLogoProps) {
@@ -55,7 +67,7 @@ export function PuzzleSiteLogo({
       {title ? <title>{title}</title> : null}
       <path
         d={SITE_MARK_PATH}
-        fill={SITE_MARK_BLUE}
+        fill={body}
         stroke={keyline}
         strokeWidth={SITE_MARK_KEYLINE}
         strokeLinejoin="round"

@@ -25,7 +25,7 @@ function GridCard({
   if (!hasCaseStudy(study))
     return <div className="w-full text-left">{children}</div>;
   return (
-    <button onClick={onOpen} data-cursor="View" className="group w-full text-left">
+    <button onClick={onOpen} className="group w-full text-left">
       {children}
     </button>
   );

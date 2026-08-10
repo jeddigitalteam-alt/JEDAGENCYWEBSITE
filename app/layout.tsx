@@ -11,7 +11,7 @@ import SmoothScroll from "@/components/motion/SmoothScroll";
 import ScrollToTop from "@/components/motion/ScrollToTop";
 import Header from "@/components/chrome/Header";
 import Footer from "@/components/chrome/Footer";
-import Cursor from "@/components/chrome/Cursor";
+import FooterReveal from "@/components/chrome/FooterReveal";
 import CommandPalette from "@/components/chrome/CommandPalette";
 
 /* Display — high contrast, and its italic has real calligraphic slope, which
@@ -95,7 +95,13 @@ export default function RootLayout({
          --ink / --surface. */
       style={{ backgroundColor: "#0f0f12" }}
     >
-      <body className="flex min-h-full flex-col bg-surface text-content">
+      {/* `isolate` is load-bearing, not tidiness. The footer underlaps the page
+          by painting at z-index -1, and a negative index only stays inside the
+          document if something above it forms a stacking context; without this
+          the footer would fall through to the canvas and never be visible.
+          Isolating on <body> rather than on the page layer is deliberate — see
+          the note on `.page-layer` in globals.css. */}
+      <body className="isolate flex min-h-full flex-col bg-surface text-content">
         {/* Runs while the document is still parsing — the only moment early
             enough to stop the browser restoring a previous scroll offset on
             reload or history navigation. Doing this in an effect is too late:
@@ -120,13 +126,19 @@ export default function RootLayout({
           <ScrollToTop />
           <IntroLoader />
           <RouteTransition />
-          <Cursor />
           <CommandPalette />
           <Header />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
+          {/* The page layer: everything the visitor reads, on one opaque
+              surface travelling over the footer. The header stays outside it so
+              its fixed panels keep competing at the top level, and so do the
+              overlays pages render from inside <main>. */}
+          <div data-page-layer className="page-layer">
+            <main id="main" className="flex-1">
+              {children}
+            </main>
+          </div>
           <Footer />
+          <FooterReveal />
         </IntroProvider>
       </body>
     </html>

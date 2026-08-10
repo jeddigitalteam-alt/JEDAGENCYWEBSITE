@@ -24,7 +24,6 @@ function RailCard({
   return (
     <Link
       href={`/work/${study.slug}`}
-      data-cursor="View"
       className="group block"
       onFocus={onFocus}
       // Native drag would fight the rail's own drag gesture.
@@ -114,7 +113,7 @@ export function WorkRail() {
               className="w-[78vw] shrink-0 sm:w-[46vw] lg:w-[32vw]"
             >
               {/* Only studies with a page become links. The rest are static
-                  cards: no href, no data-cursor, no `group` (so no hover
+                  cards: no href, no `group` (so no hover
                   colour) and no tab stop. See hasCaseStudy in lib/work. */}
               <RailCard
                 study={study}
