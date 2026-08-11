@@ -54,8 +54,8 @@ export function ArticleMedia({
             Gating the rule on the query instead means it does not exist for a
             reader who asked for no movement. */}
         <Image
-          src={article.image}
-          alt={article.imageAlt ?? ""}
+          src={article.image.src}
+          alt={article.image.alt}
           fill
           sizes={sizes}
           priority={priority}

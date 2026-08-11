@@ -489,6 +489,224 @@ exist under the preference rather than being cancelled by one that misses.
 Worth knowing generally: a test watching `transform` for a `scale-*` utility
 sees `none` throughout and reports whatever it likes.
 
+## Articles: one image model
+
+`image` is the piece's own artwork — the listing card *and* the hero at the top
+of the article, so a piece cannot show one face in the index and a different one
+when opened. `bodyImage` is an optional second picture set into the body at an
+editorial break, with `bodyImageAfter` naming the paragraph it follows
+(defaulting to the midpoint, clamped).
+
+Both carry their own `width`/`height`, which is what lets the body figures keep
+whatever shape they arrived in. They are not all 3:2 — the tenth screen's is
+square — and forcing one into the card's ratio would cut the content out of it
+rather than fit it. The card keeps its 3:2 frame with `cover`; the article page
+sizes intrinsically and never crops.
+
+Every piece now has artwork, and that had a consequence worth recording: the
+homepage teaser filtered on `image` and returned six, which wraps its `xl`
+four-column grid onto a second row and hands two cards to a flight plan that
+only defines routes for card-0 to card-3 — they would have sat still while the
+other four flew. The filter is capped at four.
+
+`contrast-is-not-a-checkbox` was replaced by `how-ai-is-reshaping-creative-design`,
+keeping the slot's date so the ordering and the page's left/right rhythm are
+unchanged. Nothing links to the old slug.
+
+## The Levant section, again
+
+Blue for one revision, now `[data-invert]` paper. One word, no restyling —
+which is the point of the field being an attribute that reassigns the semantic
+tokens rather than a set of colours applied per element. `--accent` stays blue
+on paper, so the tile's hover and the pill's border still read as the brand.
+
+Worth noting for whoever writes the next test: `verify-editorial` used to find
+this section by `[data-blue]`. That selector went green on the wrong thing the
+moment the attribute changed, so it now finds the section by its heading.
+
+## About
+
+Rebuilt around the client rather than the studio. The previous version led on
+headcount — the heading was a number of people, and a draggable board of eight
+named cards with a "n / 8 seated" counter sat beneath it. That is gone:
+`TeamBoard` is no longer mounted (the component file remains, unused), and the
+suite now asserts the constraint instead — no headcount phrasing anywhere in the
+page text.
+
+Also dropped: the 2019 founding year and the team roster, neither of which
+anything else on the site supports. What is kept is the one claim it can stand
+behind and that the services and process pages already make — the people who
+design the work are the people who build it.
+
+Structure is the site's existing punctuation, dark / inverted / dark, with every
+major heading through `RevealHeading`. One scroll moment: the journey rule draws
+left to right and the four stages arrive along it. It is the only genuinely
+sequential thing on the page, which is the whole argument for animating it.
+
+## Article bodies are blocks
+
+`body` was a flat `string[]` of paragraphs — one undifferentiated run of text
+with no heading structure, which is hard to scan at length and gives a search
+engine nothing to read as sections. It is now `ArticleBlock[]`: `p`, `h2`, `h3`
+and a sparing `takeaway`. No CMS and no markdown dependency; the only inline
+mark is a link, written `[label](/services)` and handled by a regex in
+`ArticleBody` that leaves anything else as text.
+
+Every piece was expanded to roughly three times its previous depth (2.8x–3.4x,
+700–1350 words). `readingMinutes` moved with them — it is displayed on the cards
+and would otherwise have been wrong by half.
+
+**`bodyImageAfter` is a block index, and it had to move.** The indices were
+chosen for five-paragraph pieces; at thirty-odd blocks the same number sits a
+fifth of the way down. Both figures are now at a section break near the middle,
+measured on the rendered page rather than counted in the data: 45% and 50%.
+
+## The homepage article selection
+
+`ARTICLES.filter(a => a.image).slice(0, 4)` is a rule that quietly changes its
+own answer. The moment a newer piece gained artwork it took the fourth slot and
+pushed "The brief is the deliverable" off the homepage — a decision nobody made.
+The four are now named in `HOMEPAGE_ARTICLE_SLUGS`.
+
+The count matters as much as the contents: the `xl` grid is four across and the
+flight plan defines routes for card-0 to card-3, so a fifth card would both wrap
+the row and sit motionless while the others flew.
+
+## One heading, both quotes
+
+The two quote sections were separate — an unheaded editorial break carrying the
+first, then a headed section carrying the second. Read down the page, the
+heading appeared to introduce the second quote and have nothing to do with the
+first, which had already gone past. One `Testimonials` section now, heading
+above both, with the gap between the quotes larger than the gap from the heading
+to the first so the heading reads as belonging to the group.
+
+## About: which headings reveal
+
+All of them except the journey stage labels. Those are already rising and fading
+as part of the sequence the section is built around, staggered on the same
+curve; wrapping them in the masked reveal as well would be two entrances
+animating the same words on different clocks. One movement per element.
+
+Worth knowing if you write a test for this: an instant `scrollTo` *past* an
+element means it never intersects, the observer reports false, and the heading
+stays hidden — correctly. The reveal has to be scrolled through, not jumped
+over, or the assertion fails for a reason unrelated to the animation.
+
+## The web design page
+
+Rebuilt around the work rather than around the description of the work. What it
+gained is one editorial block — a statement, the approach in a column beside it,
+and four panels of real client screens underneath — set between the headline and
+the service detail that was already there. The deliverables, the phase list, the
+scope link and the sibling-service nav are untouched.
+
+The page no longer prints `intro` beneath its headline. That sentence — the one
+about a layout that only works at 1440px being a picture of a design rather than
+a design — is the opening of the showcase's first paragraph instead, where it
+has room to be argued. Printing both would have made the same point twice before
+the reader had scrolled. The field stays in `lib/services.ts` as the service's
+canonical one-liner, and every service without a `showcase` renders exactly as
+it did before.
+
+Text on both sides is the layout, not a nicety: a statement with nothing beside
+it is a poster, and paragraphs with nothing above them are a page of copy. The
+split is 6 / gutter / 5 rather than half and half, and it only exists from `lg`.
+Display type at `--step-4` in a half-width tablet column breaks to about one
+word a line.
+
+## The showcase grid, and why the panels are square
+
+Four panels separated by the page itself: no rule between them, no frame around
+them, no field behind them. 16px two across, 12px stacked. It started as the
+`gap-px` over `bg-rule` hairline idiom the LEVANT swatches use, which was right
+on ink and wrong the moment the page went to paper — a drawn line where the
+answer is negative space. The radius stays at `rounded-xl`, which is what every
+other piece of media on the site carries.
+
+Square because three of the four sources are, including the clip, whose phone
+stands the full height of its frame. The first attempt used 5:4 and cut the top
+and bottom off it — the sort of thing a ratio chosen on paper does to a source
+nobody measured. Only the landscape still is cropped now, at the sides, where
+its composition already runs off the edge. A per-panel ratio would fit every
+source perfectly and lose the alignment that makes four panels read as a
+sequence, which is the part worth keeping.
+
+The panels settle out of a slight scale rather than rising into place. A
+translate would open a gap at the seam and show the field behind it.
+
+## The web design page runs on paper
+
+`paper: true` on the service, `data-invert` on the `<article>`. That is the
+whole light theme — the attribute reassigns the semantic tokens and every
+utility on the page already reads from them, so nothing was restyled per
+surface. It is set during render, not in an effect, so there is no dark first
+paint to flash out of. Every other service page is untouched.
+
+Three things did not come free, and they are the three worth knowing:
+
+**Raw colours do not follow the surface.** Two places named one. The phase tiles
+were `bg-ink-raised` and became four dark cards stranded on white;
+`bg-surface-raised` resolves to the identical ink-raised on every dark route and
+to a near-paper here. And blue is 7.4:1 on ink but 2.6:1 on paper — which is why
+the token layer refuses blue for text on a light surface in the first place — so
+the deliverable arrows and phase numerals take muted ink on paper instead. Not
+`--accent`: that stays blue on both surfaces deliberately, for large type and
+borders rather than eleven-pixel labels.
+
+**The header cannot inherit a surface it sits over.** It is fixed, it lives in
+the root layout outside the page layer, and on a white page its type was white
+on white. It asks instead — `isPaperRoute(pathname)`, derived during render so
+SSR gets it right rather than flipping after hydration.
+
+**Reassigning a custom property does not recolour text that inherited its
+colour.** The wordmark and the panel copy carry no colour of their own, so they
+take `<body>`'s *computed* `color` — resolved from the dark tokens long before
+the header exists. `[data-invert]` on the header changes the variables and
+changes nothing on screen. Declaring `text-content` at that level is what makes
+it re-resolve. Worth remembering for anything else dropped onto an inverted
+surface: the token flip only reaches what actually reads a token.
+
+The mega-menu panel moved to `bg-surface-raised` for the same reason as the
+phase tiles. The command palette did not — it is a full-screen overlay, dark on
+every route by design, and it stays that way over the white page exactly as the
+mega-menu's own scrim does.
+
+## A literal `&` in an asset path passes dev and fails the build
+
+The four files arrived in `public/work/Puzzle logo&images/`. Referenced there,
+everything works under `next dev` — the raw file 200s and the image optimiser
+serves it. In a production build every one of them fails: 404 on the file, and
+400 from the optimiser, which reports the source as *"The requested resource
+isn't a valid image."* Encoding the `&` as `%26` fixes the raw file and not the
+optimiser.
+
+So they are served from a copy at `public/work/web-design/`, under plain
+lowercase names — the same answer the article artwork reached. **Do not test an
+asset path only in dev.** That folder is a staging area, not a served one, and
+anything else pulled out of it needs the same treatment.
+
+## The clip in the grid
+
+Autoplaying, muted, looping, no controls — it is a panel of the grid, not a
+player. Two things about it are less obvious.
+
+It fades in on its first decoded frame, because a `<video>` with nothing decoded
+is a black rectangle and a black rectangle appearing in a grid of artwork is the
+flash worth avoiding. The catch: the element is server-rendered, so the browser
+begins loading it while React is still hydrating and `loadeddata` can fire
+before the handler exists. An event with no listener is simply gone, and the
+panel then sits at `opacity: 0` with a perfectly good frame behind it — which is
+exactly what shipped for about ten minutes. `readyState >= 2` in the effect is
+that same fact read as state rather than waited for as an event.
+
+And it holds on its first frame under `prefers-reduced-motion` rather than
+looping. `autoPlay` stays on the element in both directions so the server and
+the client render the same markup; the preference is applied afterwards, in an
+effect and in a `play` handler. The full fetch is gated on `seen` rather than on
+playback, so reduced motion — which latches `seen` on mount — still gets a frame
+to hold.
+
 ## Open / needs input
 
 - **Brand PNGs are absent.** `5.png`, `7.png`, `8.png`, `10.png` were never on

@@ -149,41 +149,47 @@ check(
 );
 
 /* --------------------------------------------------------------- about */
+/* The draggable team board is gone. It was eight named cards with bios and a
+   "n / 8 seated" counter, on a page rebuilt around what a client gets rather
+   than who we are — headcount was the one thing it was not allowed to state.
+   What replaces those two assertions is the constraint itself: no number of
+   people, anywhere on the page. */
 await page.goto(`${base}/about`, { waitUntil: "load" });
-await page.waitForTimeout(400);
-const card = page.locator("article", { hasText: "Ilse Moreau" }).first();
-// Must be on screen: synthetic mouse events are viewport-relative, so a card
-// below the fold silently receives nothing.
-await card.scrollIntoViewIfNeeded();
-await page.waitForTimeout(900); // let Lenis settle before measuring
-const cardBox = await card.boundingBox();
-if (cardBox) {
-  const sx = cardBox.x + cardBox.width / 2;
-  const sy = cardBox.y + cardBox.height / 2;
-  await page.mouse.move(sx, sy);
-  await page.mouse.down();
-  // Several discrete moves — one long jump can skip the drag threshold.
-  for (let i = 1; i <= 20; i++) {
-    await page.mouse.move(sx + i * 10, sy + i * 7);
-    await page.waitForTimeout(16);
-  }
-  await page.mouse.up();
-  await page.waitForTimeout(600);
-}
-const seated = await page.locator("text=/\\d \\/ 8 seated/").first().textContent();
-const draggedLoose = /7 \/ 8 seated/.test(seated ?? "");
-check(draggedLoose, `team card drags loose — "${seated?.trim()}"`);
-await page.screenshot({ path: join(out, "about-dragged.png") });
+await page.waitForTimeout(700);
+const aboutText = await page.evaluate(() => document.body.innerText);
+const headcount =
+  /(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)[- ](?:person|people|strong)/i.exec(
+    aboutText,
+  ) ??
+  /team of/i.exec(aboutText) ??
+  /\d+\s*\/\s*\d+\s*seated/i.exec(aboutText) ??
+  /small (?:team|studio|agency)/i.exec(aboutText);
+check(
+  headcount === null,
+  `about page states no headcount${headcount ? ` — found "${headcount[0]}"` : ""}`,
+);
 
-const reassemble = page.getByRole("button", { name: "Reassemble" });
-if (await reassemble.isEnabled()) {
-  await reassemble.click();
-  await page.waitForTimeout(700);
-  const reseated = await page.locator("text=/\\d \\/ 8 seated/").first().textContent();
-  check(/8 \/ 8 seated/.test(reseated ?? ""), `reassemble seats them all — "${reseated?.trim()}"`);
-} else {
-  fail.push("reassemble button stayed disabled — nothing was dragged loose");
-}
+const aboutHeadings = await page.$$eval("h1, h2", (els) =>
+  els.map((e) => e.textContent.trim()),
+);
+check(
+  aboutHeadings[0] === "Built for businesses going somewhere",
+  `about leads on the client, not the studio — "${aboutHeadings[0]}"`,
+);
+check(
+  aboutHeadings.length >= 5,
+  `about has its full section structure (${aboutHeadings.length} headings)`,
+);
+// Scoped to <main>: the last /contact link in the document is the footer's.
+const aboutCta = await page
+  .locator('main a[href="/contact"]')
+  .last()
+  .textContent();
+check(
+  /Start a project/i.test(aboutCta ?? ""),
+  `about closes on a CTA — "${aboutCta?.trim()}"`,
+);
+await page.screenshot({ path: join(out, "about.png"), fullPage: true });
 
 /* ----------------------------------------------------- industries filter */
 await page.goto(`${base}/industries`, { waitUntil: "load" });

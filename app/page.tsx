@@ -1,11 +1,10 @@
 import Hero from "@/components/home/Hero";
 import ProcessLadder from "@/components/home/ProcessLadder";
-import Testimonial from "@/components/home/Testimonial";
 import {
   ArticlesTeaser,
   ClientRail,
-  FitNotes,
   SelectedWork,
+  Testimonials,
 } from "@/components/home/sections";
 
 /**
@@ -13,10 +12,13 @@ import {
  * hero, so the cards are moving on the first screen. There is no second copy
  * of it further down the page.
  *
- * `ProcessLadder` and `FitNotes` are both about how the studio works, and they
- * are deliberately not adjacent: the testimonial sits between them so the page
- * alternates between what we claim and what a client said, rather than running
- * two claims together.
+ * `ProcessLadder` is what the studio claims; `Testimonials` is what clients
+ * said afterwards. They sit next to each other in that order on purpose — the
+ * claim, then the corroboration.
+ *
+ * The two quote sections were merged into one. They used to be separated, with
+ * the heading sitting above only the second, so it read as introducing that
+ * quote rather than the pair.
  */
 export default function HomePage() {
   return (
@@ -25,8 +27,7 @@ export default function HomePage() {
       <SelectedWork />
       <ClientRail />
       <ProcessLadder />
-      <Testimonial />
-      <FitNotes />
+      <Testimonials />
       <ArticlesTeaser />
     </>
   );

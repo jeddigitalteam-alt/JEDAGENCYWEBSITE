@@ -52,7 +52,7 @@ const CONTRAST = `
   })()
 `;
 
-/* ==================================== 1. the Levant work section, in blue */
+/* ================================== 1. the Levant work section, now white */
 {
   const [page, ctx, errors] = await newPage();
   await page.goto(base, { waitUntil: "load" });
@@ -61,29 +61,35 @@ const CONTRAST = `
   const field = await page.evaluate(
     ([contrastSrc]) => {
       const ratio = eval(contrastSrc);
-      const section = document.querySelector("[data-blue]");
+      /* The section is identified by its heading, not by the attribute that
+         happens to be setting its surface — that attribute has now been both
+         `data-blue` and `data-invert`, and a test keyed to it would have gone
+         green on the wrong section. */
+      const section = [...document.querySelectorAll("section")].find((el) =>
+        /Recent work/.test(el.querySelector("h2")?.textContent ?? ""),
+      );
       if (!section) return null;
-      const footer = document.querySelector("[data-site-footer]");
       const bg = getComputedStyle(section).backgroundColor;
       const at = (sel) => {
         const el = section.querySelector(sel);
         return el ? getComputedStyle(el).color : null;
       };
+      const tile = section.querySelector("img");
       return {
         bg,
-        footerBg: getComputedStyle(footer).backgroundColor,
-        token: getComputedStyle(document.documentElement)
-          .getPropertyValue("--blue")
+        paper: getComputedStyle(document.documentElement)
+          .getPropertyValue("--paper")
           .trim(),
-        // Does the section actually contain the Levant tile?
         heading: section.querySelector("h2")?.textContent,
         tileTitle: section.querySelector("h3")?.textContent,
+        tileSrc: tile ? new URL(tile.currentSrc || tile.src).searchParams.get("url") : null,
+        tileW: tile ? Math.round(tile.getBoundingClientRect().width) : 0,
+        pill: section.querySelector('a[href="/work"]')?.textContent,
         eyebrowContrast: ratio(bg, at("p.mono")),
         headingContrast: ratio(bg, at("h2")),
         tileTitleContrast: ratio(bg, at("h3")),
         summaryContrast: ratio(bg, at("p:not(.mono)")),
         pillContrast: ratio(bg, at('a[href="/work"]')),
-        // The hover accent must not be the field it sits on.
         accent: getComputedStyle(section).getPropertyValue("--accent").trim(),
         width: Math.round(section.getBoundingClientRect().width),
         viewport: window.innerWidth,
@@ -92,22 +98,30 @@ const CONTRAST = `
     [CONTRAST],
   );
 
-  check(Boolean(field), "work section: the blue field exists");
+  check(Boolean(field), "work section: found by its heading");
   check(
-    field.bg === field.footerBg,
-    `work section: background is the exact footer blue (${field.bg} vs ${field.footerBg})`,
+    field.bg === "rgb(255, 255, 255)",
+    `work section: background is white (${field.bg})`,
   );
   check(
-    field.token === "#12a8ff",
-    `work section: that is the --blue token (${field.token})`,
+    /^#f{3,6}$/i.test(field.paper),
+    `work section: that is the --paper token (${field.paper})`,
   );
   check(
-    /Recent/.test(field.heading ?? "") && /LEVANT/i.test(field.tileTitle ?? ""),
-    `work section: still the Levant "Recent work" tile (${field.heading} / ${field.tileTitle})`,
+    /LEVANT/i.test(field.tileTitle ?? ""),
+    `work section: still the Levant tile (${field.tileTitle})`,
+  );
+  check(
+    /levant/i.test(field.tileSrc ?? "") && field.tileW > 400,
+    `work section: the Levant image is untouched and full width (${field.tileW}px)`,
+  );
+  check(
+    /All work/.test(field.pill ?? ""),
+    `work section: the copy and link are unchanged (${field.pill?.trim()})`,
   );
   check(
     field.width === field.viewport,
-    `work section: full-bleed (${field.width} of ${field.viewport})`,
+    `work section: still full-bleed (${field.width} of ${field.viewport})`,
   );
   for (const [name, r] of [
     ["eyebrow", field.eyebrowContrast],
@@ -116,27 +130,27 @@ const CONTRAST = `
     ["summary", field.summaryContrast],
     ["pill", field.pillContrast],
   ]) {
-    check(r >= 4.5, `work section: ${name} contrast ${r}:1 on the blue`);
+    check(r >= 4.5, `work section: ${name} contrast ${r}:1 on the white`);
   }
-  check(
-    field.accent !== "" && field.accent !== "var(--blue)",
-    `work section: hover accent is not the field itself (${field.accent})`,
-  );
 
-  // The hover must actually change the tile title's colour.
-  const hover = await page.evaluate(() => {
-    const h3 = document.querySelector("[data-blue] h3");
-    return getComputedStyle(h3).color;
-  });
-  await page.locator("[data-blue] a.group").first().hover();
+  /* The hover must still register against the new surface. Scoped to the
+     section by its heading — "the first h3 on the page" is a services card in
+     the hero, which is hovered by nothing and never changes. */
+  const tileTitle = page
+    .locator("section", { has: page.locator("h2", { hasText: "Recent work" }) })
+    .locator("h3")
+    .first();
+  const before = await tileTitle.evaluate((el) => getComputedStyle(el).color);
+  await page
+    .locator("section", { has: page.locator("h2", { hasText: "Recent work" }) })
+    .locator("a.group")
+    .first()
+    .hover();
   await page.waitForTimeout(400);
-  const hovered = await page.evaluate(() => {
-    const h3 = document.querySelector("[data-blue] h3");
-    return getComputedStyle(h3).color;
-  });
+  const after = await tileTitle.evaluate((el) => getComputedStyle(el).color);
   check(
-    hover !== hovered,
-    `work section: the tile title still changes on hover (${hover} to ${hovered})`,
+    before !== after,
+    `work section: the tile title still changes on hover (${before} to ${after})`,
   );
   check(errors.length === 0, `work section: no console errors (${errors.join(" | ")})`);
   await ctx.close();
@@ -290,8 +304,8 @@ const CONTRAST = `
     `articles: the newest piece leads (${shape.h2s[0]})`,
   );
   check(
-    shape.images.length === 4,
-    `articles: the four generated posters are used (${shape.images.length})`,
+    shape.images.length === 6,
+    `articles: every piece now carries artwork (${shape.images.length} of 6)`,
   );
   check(
     shape.images.every((i) => i.src.startsWith("/_next/image") || i.src.startsWith("/articles/")),
@@ -473,6 +487,196 @@ for (const [w, h, label] of [
   check(
     hoverScale === "none" || hoverScale === "1",
     `reduced motion: hover does not scale the picture either (${hoverScale})`,
+  );
+  await ctx.close();
+}
+
+/* ==================================== articles: depth, structure, figures */
+{
+  const [page, ctx] = await newPage();
+  const slugs = [
+    "the-tenth-screen",
+    "motion-that-earns-it",
+    "how-ai-is-reshaping-creative-design",
+    "what-a-rebrand-cannot-fix",
+    "designing-for-models-that-are-wrong",
+    "the-brief-is-the-deliverable",
+  ];
+  const seenLinks = new Set();
+  for (const slug of slugs) {
+    await page.goto(`${base}/articles/${slug}`, { waitUntil: "load" });
+    await page.waitForTimeout(500);
+    const r = await page.evaluate(() => {
+      const art = document.querySelector("article");
+      const figs = [...art.querySelectorAll("figure")];
+      const box = art.getBoundingClientRect();
+      const height = box.height;
+      const at = figs[1]
+        ? Math.round(
+            (((figs[1].getBoundingClientRect().top + window.scrollY) -
+              (box.top + window.scrollY)) /
+              height) *
+              100,
+          )
+        : null;
+      return {
+        h1: art.querySelectorAll("h1").length,
+        h2: art.querySelectorAll("h2").length,
+        h3: art.querySelectorAll("h3").length,
+        words: art.innerText.trim().split(/\s+/).length,
+        figures: figs.length,
+        figurePct: at,
+        // The inline-link syntax must never reach the page as text.
+        rawMarkup: /\]\(/.test(art.innerText),
+        links: [...art.querySelectorAll("p a, aside a")].map((a) =>
+          a.getAttribute("href"),
+        ),
+        firstIsHero: art.querySelector("figure img")?.getAttribute("alt") ?? "",
+        title: document.title,
+        desc:
+          document.querySelector('meta[name="description"]')?.content ?? "",
+      };
+    });
+    r.links.forEach((l) => seenLinks.add(l));
+
+    check(r.h1 === 1, `${slug}: exactly one h1 (${r.h1})`);
+    check(r.h2 >= 4, `${slug}: sectioned with h2s (${r.h2})`);
+    check(r.h3 >= 2, `${slug}: uses h3 beneath them (${r.h3})`);
+    check(
+      r.words >= 700,
+      `${slug}: substantial at ${r.words} words`,
+    );
+    check(!r.rawMarkup, `${slug}: no unparsed link markup on the page`);
+    check(r.links.length >= 3, `${slug}: carries internal links (${r.links.length})`);
+    check(r.firstIsHero.length > 20, `${slug}: opens with its thumbnail`);
+    check(
+      r.title.length > 10 && r.title.length < 90,
+      `${slug}: title is a usable length (${r.title.length})`,
+    );
+    check(
+      r.desc.length > 80 && r.desc.length < 220,
+      `${slug}: meta description is a usable length (${r.desc.length})`,
+    );
+    /* The body figure has to sit near the middle of the EXPANDED piece. The
+       indices were chosen for the short versions and would otherwise sit a
+       fifth of the way down. */
+    if (r.figures > 1) {
+      check(
+        r.figurePct >= 30 && r.figurePct <= 70,
+        `${slug}: body figure sits mid-article (${r.figurePct}%)`,
+      );
+    } else {
+      check(r.figures === 1, `${slug}: thumbnail only, no stray figure`);
+    }
+  }
+
+  // Every internal link a body points at must resolve.
+  for (const href of [...seenLinks].filter((h) => h?.startsWith("/"))) {
+    const res = await page.goto(base + href, { waitUntil: "commit" });
+    check(res.status() === 200, `body link resolves: ${href} (${res.status()})`);
+  }
+  await ctx.close();
+}
+
+/* ======================= homepage: the editorial selection is not derived */
+{
+  const [page, ctx] = await newPage();
+  await page.goto(base, { waitUntil: "load" });
+  await page.waitForTimeout(1200);
+  const cards = await page.$$eval('a[href^="/articles/"] h3', (els) =>
+    els.map((e) => e.textContent.trim()),
+  );
+  check(
+    cards.includes("The brief is the deliverable"),
+    `homepage keeps "The brief is the deliverable" (${cards.join(" · ")})`,
+  );
+  check(
+    !cards.includes("How AI Is Reshaping Creative Design"),
+    "homepage: the AI piece did not displace it",
+  );
+  check(cards.length === 4, `homepage still shows four cards (${cards.length})`);
+
+  const quotes = await page.$$eval("blockquote", (els) => els.length);
+  const saidHeadings = await page.$$eval("h2", (els) =>
+    els.filter((e) => /clients said/i.test(e.textContent)).length,
+  );
+  check(quotes === 2, `both testimonials render (${quotes})`);
+  check(
+    saidHeadings === 1,
+    `"What clients said afterwards" appears exactly once (${saidHeadings})`,
+  );
+  const order = await page.evaluate(() => {
+    const h = [...document.querySelectorAll("h2")].find((e) =>
+      /clients said/i.test(e.textContent),
+    );
+    const qs = [...document.querySelectorAll("blockquote")];
+    const y = (el) => el.getBoundingClientRect().top + window.scrollY;
+    return qs.every((q) => y(q) > y(h));
+  });
+  check(order, "the heading sits above both quotes, not between them");
+  await ctx.close();
+}
+
+/* ============================== about: every major heading uses the reveal */
+{
+  const [page, ctx] = await newPage();
+  await page.goto(`${base}/about`, { waitUntil: "load" });
+  await page.waitForTimeout(900);
+  const heads = await page.evaluate(() =>
+    [...document.querySelectorAll("main h1, main h2, main h3")].map((h) => ({
+      tag: h.tagName,
+      text: h.textContent.trim(),
+      /* A revealed heading is wrapped per line in an overflow-hidden mask —
+         that wrapper is the signature of the shared implementation, so this
+         cannot pass against a lookalike animation. */
+      revealed: Boolean(h.querySelector("span.block.overflow-hidden")),
+      inSequence: Boolean(h.closest("li")?.style.opacity !== undefined && h.closest("ol")),
+    })),
+  );
+  const majors = heads.filter((h) => h.tag !== "H3" || !h.inSequence);
+  check(
+    majors.every((h) => h.revealed),
+    `about: every major heading uses the shared reveal (${majors.filter((h) => !h.revealed).map((h) => h.text).join(", ") || "all"})`,
+  );
+  check(
+    heads.filter((h) => h.revealed).length >= 10,
+    `about: reveal applied broadly (${heads.filter((h) => h.revealed).length} headings)`,
+  );
+
+  /* Plays once, and does not reverse. The heading has to be scrolled THROUGH,
+     not jumped past: an instant jump beyond an element means it never
+     intersects, the observer reports false, and the assertion would fail for a
+     reason that has nothing to do with the animation. */
+  const target = await page.evaluate(() => {
+    const h = [...document.querySelectorAll("main h2")].find((el) =>
+      el.querySelector("span.block.overflow-hidden"),
+    );
+    return Math.round(h.getBoundingClientRect().top + window.scrollY);
+  });
+  const opacity = () =>
+    page.evaluate(() => {
+      const h = [...document.querySelectorAll("main h2")].find((el) =>
+        el.querySelector("span.block.overflow-hidden"),
+      );
+      return getComputedStyle(h.querySelector("span.block.overflow-hidden > span.block"))
+        .opacity;
+    });
+
+  // Bring it into view.
+  await page.evaluate((y) => window.scrollTo(0, y - 500), target);
+  await page.waitForTimeout(1500);
+  const lit = await opacity();
+  check(lit === "1", `about: heading reveals when scrolled to (${lit})`);
+
+  // Well past it, then back to the top — it must still be shown.
+  await page.evaluate((y) => window.scrollTo(0, y + 2000), target);
+  await page.waitForTimeout(900);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(1200);
+  const stillLit = await opacity();
+  check(
+    stillLit === "1",
+    `about: it does not reverse on the way back up (${stillLit})`,
   );
   await ctx.close();
 }

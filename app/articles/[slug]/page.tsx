@@ -5,6 +5,8 @@ import { ARTICLES, getArticle } from "@/lib/articles";
 import { Eyebrow } from "@/components/ui/primitives";
 import ReadingProgress from "@/components/articles/ReadingProgress";
 import RevealHeading from "@/components/motion/RevealHeading";
+import ArticleFigure from "@/components/articles/ArticleFigure";
+import ArticleBody from "@/components/articles/ArticleBody";
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
@@ -18,15 +20,34 @@ export async function generateMetadata({
   const { slug } = await params;
   const article = getArticle(slug);
   if (!article) return { title: "Article" };
+  /* The headline is written to be read on the page; `seoTitle` is written to
+     be read in a results list. Where a piece sets one, it wins for metadata
+     only — the visible heading is never touched. */
+  const title = article.seoTitle ?? article.title;
+  const description = article.metaDescription ?? article.standfirst;
   return {
-    title: article.title,
-    description: article.standfirst,
+    title,
+    description,
+    alternates: { canonical: `/articles/${article.slug}` },
     openGraph: {
       type: "article",
-      title: article.title,
-      description: article.standfirst,
+      title,
+      description,
+      url: `/articles/${article.slug}`,
       publishedTime: article.datetime,
       authors: [article.author],
+      ...(article.image
+        ? {
+            images: [
+              {
+                url: article.image.src,
+                width: article.image.width,
+                height: article.image.height,
+                alt: article.image.alt,
+              },
+            ],
+          }
+        : {}),
     },
   };
 }
@@ -65,13 +86,14 @@ export default async function ArticlePage({
             {article.date}
           </time>
 
-          <div className="mt-10 grid gap-6">
-            {article.body.map((p, i) => (
-              <p key={i} className="text-step-0 leading-relaxed">
-                {p}
-              </p>
-            ))}
-          </div>
+          {/* The hero: the same picture the listing card shows, so opening a
+              piece confirms what was clicked rather than presenting a second
+              face. Every article that has artwork opens with it. */}
+          {article.image ? (
+            <ArticleFigure image={article.image} priority className="mt-10" />
+          ) : null}
+
+          <ArticleBody article={article} />
         </div>
 
         <aside className="mx-auto mt-24 max-w-2xl border-t border-rule pt-8">

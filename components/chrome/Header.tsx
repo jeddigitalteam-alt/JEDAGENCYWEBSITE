@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PRIMARY_NAV, SITE } from "@/lib/site";
+import { isPaperRoute } from "@/lib/services";
 import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -101,9 +102,33 @@ export function Header() {
   // An open mega-menu or palette pins it regardless of scroll direction.
   const pinned = Boolean(openLabel) || paletteOpen;
 
+  /* The header is transparent and fixed over the page, so its type is only
+     legible because it knows what it is sitting on. It lives in the root layout,
+     outside the page layer, and cannot inherit the surface — so it asks. Derived
+     during render rather than in an effect: `usePathname()` resolves on the
+     server too, so the first painted frame is already the right colour instead
+     of white-on-white until hydration. */
+  const paper = isPaperRoute(pathname);
+
+  /* `text-content` has to be re-stated here, not just inherited. The wordmark
+     and the panel copy carry no colour of their own, so they take <body>'s
+     computed `color` — resolved from the dark tokens long before this element
+     exists. Reassigning the custom properties on the header does nothing for a
+     value that was already computed upstream; declaring the colour at this
+     level is what makes it re-resolve. On a dark route it resolves to the same
+     white it inherited, so this is a no-op everywhere else.
+
+     Blue is the other half of it: 7.4:1 on ink, 2.6:1 on paper — which is why
+     the token layer refuses blue for text on a light surface. On a paper route
+     the active and hovered nav states go to full-strength ink instead, still a
+     clear step up from the dim resting state they sit beside. */
+  const navActive = paper ? "text-content" : "text-blue";
+  const navHover = paper ? "hover:text-content" : "hover:text-blue";
+
   return (
     <motion.header
-      className="fixed inset-x-0 top-0 z-50"
+      {...(paper ? { "data-invert": true } : {})}
+      className={`fixed inset-x-0 top-0 z-50 ${paper ? "text-content" : ""}`}
       initial={false}
       animate={{ y: hidden && !pinned ? "-100%" : "0%" }}
       transition={
@@ -158,8 +183,8 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`mono rounded-full px-3 py-2 transition-colors hover:text-blue ${
-                    active ? "text-blue" : "text-content-dim"
+                  className={`mono rounded-full px-3 py-2 transition-colors ${navHover} ${
+                    active ? navActive : "text-content-dim"
                   }`}
                   onMouseEnter={close}
                   onFocus={close}
@@ -206,8 +231,8 @@ export function Header() {
               >
                 <button
                   ref={isOpen ? triggerRef : undefined}
-                  className={`mono rounded-full px-3 py-2 transition-colors hover:text-blue ${
-                    active || isOpen ? "text-blue" : "text-content-dim"
+                  className={`mono rounded-full px-3 py-2 transition-colors ${navHover} ${
+                    active || isOpen ? navActive : "text-content-dim"
                   }`}
                   aria-expanded={isOpen}
                   aria-haspopup="true"
@@ -240,7 +265,12 @@ export function Header() {
                           the two-column case is kept because the markup is
                           generic and the data decides. */}
                       <div
-                        className={`overflow-hidden rounded-2xl border border-rule bg-ink-raised ${
+                        /* Follows the surface rather than naming ink. On every
+                           dark route `--surface-raised` IS `--ink-raised`, so
+                           this panel is unchanged there; on a paper route the
+                           tokens above have flipped and a hardcoded dark card
+                           would be holding dark text. */
+                        className={`overflow-hidden rounded-2xl border border-rule bg-surface-raised ${
                           item.columns.length > 1
                             ? "w-[min(44rem,calc(100vw-2rem))]"
                             : "w-[min(26rem,calc(100vw-2rem))]"
@@ -263,7 +293,13 @@ export function Header() {
                                       href={link.href}
                                       className="group/link block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface"
                                     >
-                                      <span className="text-step-0 transition-colors group-hover/link:text-blue">
+                                      <span
+                                        className={`text-step-0 transition-colors ${
+                                          paper
+                                            ? "group-hover/link:text-content"
+                                            : "group-hover/link:text-blue"
+                                        }`}
+                                      >
                                         {link.label}
                                       </span>
                                       {link.description ? (

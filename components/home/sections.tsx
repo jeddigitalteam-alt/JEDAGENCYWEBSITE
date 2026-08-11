@@ -10,7 +10,8 @@ import {
 } from "@/components/home/use-scroll-assembly";
 import { CLIENTS } from "@/lib/site";
 import { TESTIMONIALS } from "@/lib/team";
-import { ARTICLES } from "@/lib/articles";
+import { HOMEPAGE_TESTIMONIALS } from "@/lib/testimonials";
+import { homepageArticles } from "@/lib/articles";
 import { WORK } from "@/lib/work";
 import { Eyebrow, SectionHeading } from "@/components/ui/primitives";
 import TestimonialQuote from "@/components/home/TestimonialQuote";
@@ -26,13 +27,16 @@ export function SelectedWork() {
      featured slot already had, so nothing reflows around a gap. */
   const study = WORK[0];
   return (
-    /* Full-bleed Puzzle blue, from the same `[data-blue]` field the footer and
-       the homepage peek use — one definition of what this surface is, so the
-       LEVANT tile closes ranks with the footer rather than approximating it.
-       Nothing inside carries a colour of its own: the field reassigns the
-       semantic tokens and the eyebrow, heading, tile and pill all follow. */
+    /* Full-bleed paper, via `[data-invert]` — the site's existing light
+       surface, the same one the client marquee below it uses. Nothing inside
+       carries a colour of its own: the attribute reassigns the semantic tokens
+       and the eyebrow, heading, tile and pill all follow, so the switch from
+       the blue field it briefly ran on is one word and no restyling.
+
+       `--accent` stays blue here, which is what keeps the tile's hover and the
+       pill's border reading as the brand rather than as ink on ink. */
     <section
-      data-blue
+      data-invert
       className="bg-surface px-5 py-24 text-content md:px-8 md:py-32"
     >
       {/* The measure is shared by the heading row and the tile, so the "Recent
@@ -169,44 +173,75 @@ export function ClientRail() {
 /* ------------------------------------------------------------- fit notes */
 
 /**
- * Fit notes: what a client said once the work had been live a while.
+ * Client testimonials: one heading, then every quote beneath it.
  *
- * Presented as `TestimonialQuote` — the same component the testimonial above it
- * uses, not a second design that resembles it. It was an accordion of one: a
- * disclosure button that hid a single quote behind a click, set at half the
- * size of the quote further up the page, with the name given more weight than
- * the words. Two quotes, two systems, no reason.
+ * These were two separate sections — an unheaded editorial break carrying the
+ * first quote, then a headed "fit notes" section carrying the second. Read down
+ * the page, the heading introduced the second quote and appeared to have
+ * nothing to do with the first, which had already gone past.
  *
- * What stays is the framing. This one keeps its eyebrow and heading because it
- * is a labelled section rather than an editorial break, and the project it
- * belongs beside is still named — that is the whole idea of a fit note. Below
- * that line it is identical: five stars, the quote at `text-step-4`, the client
- * and then the person.
+ * One section now. The heading belongs to the whole area, both quotes sit under
+ * it in the order they were in, and each is still the same `TestimonialQuote`
+ * with the same stars, sizes and entrance. Nothing about either quote, name,
+ * company or role changed.
+ *
+ * The two sources stay separate in the data — `HOMEPAGE_TESTIMONIALS` is the
+ * long-form quote, `TESTIMONIALS` the fit notes that seat against a named
+ * project — because they are written differently even though they are now
+ * presented together.
  */
-export function FitNotes() {
+export function Testimonials() {
+  const long = HOMEPAGE_TESTIMONIALS[0];
   const note = TESTIMONIALS[0];
-  if (!note) return null;
+  const quotes = [
+    long && {
+      key: long.company,
+      rating: long.rating,
+      quote: long.quote,
+      company: long.company,
+      attribution: long.attribution,
+    },
+    note && {
+      key: note.project,
+      rating: note.rating,
+      quote: note.quote,
+      company: note.project,
+      attribution: `${note.name} — ${note.role}`,
+    },
+  ].filter(Boolean) as {
+    key: string;
+    rating: number;
+    quote: string;
+    company: string;
+    attribution: string;
+  }[];
+
+  if (!quotes.length) return null;
 
   return (
+    /* The padding is the section: this reads as a held breath between two dense
+       blocks, so it is deliberately more than the 24/32 its neighbours use. */
     <section className="px-5 py-24 md:px-8 md:py-32">
       <Eyebrow>Fit notes</Eyebrow>
-      {/* `parts` rather than roman/italic: the italic is "afterwards" alone, and
-          splitting it as roman "What clients said" + italic "afterwards" is
-          exactly the same three-run reading. The measure is wide enough that the
-          line breaks after "clients", so the two halves never meet mid-word. */}
       <SectionHeading
         roman="What clients said"
         italic="afterwards"
         className="mt-4 max-w-[22ch]"
       />
 
-      <div className="mt-16 md:mt-20">
-        <TestimonialQuote
-          rating={note.rating}
-          quote={note.quote}
-          company={note.project}
-          attribution={`${note.name} — ${note.role}`}
-        />
+      {/* The gap between the quotes is larger than the gap from the heading to
+          the first one, so the heading reads as belonging to the group rather
+          than to the quote directly under it. */}
+      <div className="mt-16 grid gap-24 md:mt-20 md:gap-32">
+        {quotes.map((q) => (
+          <TestimonialQuote
+            key={q.key}
+            rating={q.rating}
+            quote={q.quote}
+            company={q.company}
+            attribution={q.attribution}
+          />
+        ))}
       </div>
     </section>
   );
@@ -314,13 +349,16 @@ const ASSEMBLY: AssemblyPlan = {
 };
 
 export function ArticlesTeaser() {
-  /* Only the pieces that have artwork. The card is built around its picture
-     now, so an article without one has nothing to show here — and inventing a
-     stand-in, or leaving an empty frame, would both be worse than leaving it
-     to /articles, where every piece is still listed and every route still
-     works. Four today, and if a fifth image is generated it joins the row
-     without another change. */
-  const shown = ARTICLES.filter((a) => a.image);
+  /* The four the homepage shows, named in lib/articles rather than derived
+     here. Deriving them — "everything with a picture, first four" — is a rule
+     that changes its own answer: when a newer piece gained artwork it took the
+     fourth slot and pushed "The brief is the deliverable" off the page, which
+     was nobody's decision. Every piece still lives on /articles regardless.
+
+     The count matters as well as the contents: the `xl` grid is four across and
+     the flight plan below defines routes for card-0 to card-3, so a fifth card
+     would both wrap the row and sit still while the others flew. */
+  const shown = homepageArticles();
   const zoneRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   useScrollAssembly(zoneRef, ASSEMBLY, !reduced);
@@ -400,8 +438,8 @@ export function ArticlesTeaser() {
                       it, so there is nothing to rescue. */}
                   <div className="relative aspect-[3/2] overflow-hidden rounded-lg bg-ink-raised">
                     <Image
-                      src={a.image!}
-                      alt={a.imageAlt ?? ""}
+                      src={a.image!.src}
+                      alt={a.image!.alt}
                       fill
                       sizes="(min-width: 1280px) 22vw, (min-width: 768px) 44vw, 88vw"
                       /* `motion-safe:` on the scale — Tailwind v4 compiles
