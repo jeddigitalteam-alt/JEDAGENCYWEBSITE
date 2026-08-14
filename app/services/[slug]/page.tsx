@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { SERVICES, getService } from "@/lib/services";
 import { Eyebrow } from "@/components/ui/primitives";
 import RevealHeading from "@/components/motion/RevealHeading";
+import ServiceChapter from "@/components/services/ServiceChapter";
 import ServiceShowcase from "@/components/services/ServiceShowcase";
 
 export function generateStaticParams() {
@@ -18,10 +19,17 @@ export async function generateMetadata({
   const { slug } = await params;
   const service = getService(slug);
   if (!service) return { title: "Service" };
+  /* `name` and `summary` are written for a nav dropdown — short, and assuming
+     the reader already knows this is a design studio. Where a service is
+     something people search for by name, it says so in its own words instead.
+     Neither field changes a single line of visible copy. */
+  const title = service.metaTitle ?? service.name;
+  const description = service.metaDescription ?? service.summary;
   return {
-    title: service.name,
-    description: service.summary,
-    openGraph: { title: `${service.name} — Puzzle`, description: service.summary },
+    title,
+    description,
+    alternates: { canonical: `/services/${service.slug}` },
+    openGraph: { title: `${title} — Puzzle`, description },
   };
 }
 
@@ -77,6 +85,17 @@ export default async function ServicePage({
           {service.intro}
         </p>
       )}
+
+      {/* The rest of the editorial run. Only the two web pages carry chapters
+          today, and both open on a showcase — which is where the space above
+          this comes from, so there is no top padding here to double it up. */}
+      {service.chapters?.length ? (
+        <div className="mx-auto grid w-full max-w-[120rem] gap-24 pb-24 md:gap-32 md:pb-32">
+          {service.chapters.map((chapter) => (
+            <ServiceChapter key={chapter.statement.roman} chapter={chapter} />
+          ))}
+        </div>
+      ) : null}
 
       <div
         className={`grid gap-12 lg:grid-cols-2 lg:gap-16 ${

@@ -21,6 +21,13 @@ export type ShowcaseMedia =
       /** The file's own, so the optimiser can pick a source width sensibly. */
       width: number;
       height: number;
+      /**
+       * Where to take the square crop from, as `object-position`. Only worth
+       * setting on a landscape source whose subject is not in the middle —
+       * centre is right for most of them, and a value here is a claim that it
+       * is not.
+       */
+      position?: string;
     }
   | {
       kind: "video";
@@ -31,6 +38,22 @@ export type ShowcaseMedia =
        */
       label: string;
     };
+
+/**
+ * A statement, and the argument set in the column beside it.
+ *
+ * The unit the editorial run on a service page is built from — one is the top
+ * half of the showcase, and the rest follow it down the page. Rendered by
+ * `ServiceChapter`.
+ */
+export interface Chapter {
+  /** The mono label above it. Omitted where the chapter follows another. */
+  eyebrow?: string;
+  /** Roman + italic, the site's heading signature. Set at section-heading size. */
+  statement: { roman: string; italic: string };
+  /** Two to four paragraphs, set in the column beside the statement. */
+  body: string[];
+}
 
 /**
  * A statement, a short argument beside it, and the work that proves it.
@@ -45,6 +68,14 @@ export interface Showcase {
   body: string[];
   /** Four panels, read left to right then top to bottom. */
   media: ShowcaseMedia[];
+  /**
+   * Tile ratio for this grid, as a Tailwind aspect class. Square when omitted.
+   *
+   * Set it where a whole set is landscape: a 1.25:1 source in a square tile
+   * loses a fifth of its width to `object-cover`, which reads as the picture
+   * being cut off at the edges even though the grid fits its container exactly.
+   */
+  ratio?: string;
 }
 
 export interface Service {
@@ -65,6 +96,24 @@ export interface Service {
    * rendered as well, and the page opens on the headline alone.
    */
   showcase?: Showcase;
+  /**
+   * The rest of the editorial run, after the showcase.
+   *
+   * A service with real ground to cover gets two or three of these between the
+   * showcase and the deliverables, so the argument is made in prose rather than
+   * as a checklist with the interesting parts left as bullet points. A service
+   * without them renders exactly as it did before.
+   */
+  chapters?: Chapter[];
+  /**
+   * Search title and description, where the nav one-liner is not the right
+   * thing to hand a search engine. `name` and `summary` are written for a
+   * dropdown — short, and assuming you already know it is a design studio —
+   * so the pages people actually search for by name say so here instead. The
+   * visible copy is never written for this; it is only the metadata.
+   */
+  metaTitle?: string;
+  metaDescription?: string;
   /**
    * Render the page on paper rather than ink.
    *
@@ -100,29 +149,51 @@ export const SERVICES: Service[] = [
     ],
     headline: { roman: "An identity that", italic: "holds up unattended" },
   },
+  /**
+   * Web design and web development were two services and are now one.
+   *
+   * They were never two jobs — they were one problem answered twice, once on a
+   * canvas and once in a repository, and splitting them across two pages sold
+   * the seam rather than the absence of one. The showcase, its four panels and
+   * the paper surface are exactly as they were; the argument around them was
+   * rewritten to say what the merge means, and the deliverables and phases are
+   * the two lists reconciled into one run of work.
+   *
+   * Both old slugs 308 to this one — see `next.config.ts`.
+   */
   {
-    slug: "web-design",
-    name: "Web design",
-    summary: "Sites designed against real content and real constraints.",
+    slug: "web-design-development",
+    name: "Web design & development",
+    summary:
+      "Sites designed against real content, and built by the people who designed them.",
     /* Not rendered on this page — the showcase below carries this argument at
        length, and printing both would say the same thing twice within one
        screen. Kept as the service's canonical one-liner. */
     intro:
       "We design in the browser early, because a layout that only works at 1440px with perfect copy is not a design — it is a picture of one.",
+    metaTitle: "Web design & development agency",
+    metaDescription:
+      "Website design and development from a Hampshire studio: responsive web design, custom Next.js builds, CMS integration and performance work — designed and built by one team.",
     deliverables: [
-      "Sitemap and content model",
-      "Wireframes at three breakpoints",
-      "Full design system in Figma",
-      "Motion specification",
-      "Handover with tokens as code",
+      "Sitemap, content model and structure",
+      "Full design system, drawn at three breakpoints",
+      "Next.js App Router build",
+      "CMS integration and editor training",
+      "Performance budget, enforced in CI",
+      "Deployment, analytics and a runbook",
     ],
     phases: [
       { name: "Structure", weeks: 1 },
       { name: "Art direction", weeks: 2 },
       { name: "Page design", weeks: 3 },
-      { name: "System and handover", weeks: 1 },
+      { name: "Build", weeks: 3 },
+      { name: "Integration", weeks: 2 },
+      { name: "Launch", weeks: 1 },
     ],
-    headline: { roman: "Sites that survive", italic: "real content" },
+    headline: {
+      roman: "Designed to look right,",
+      italic: "built to work properly",
+    },
     paper: true,
     showcase: {
       statement: {
@@ -132,7 +203,7 @@ export const SERVICES: Service[] = [
       body: [
         "We design against your real content, at real widths, in the browser early. A layout that only holds at 1440px with copy nobody has written yet is not a design — it is a picture of one.",
         "Structure comes first: what the site is for, what someone needs to do on it, and the shape the content actually arrives in. Art direction goes on top of something that already works, so the visual design has something to be right about.",
-        "Then the people who designed it build it. No handover document and no translation step, which is how a site stays as quick and as considered on its fortieth page as it was on the homepage.",
+        "Then the same people build it. Design and development are not two jobs passed between rooms — they are one problem answered twice, and the handover document is where the answer usually goes missing.",
       ],
       media: [
         {
@@ -164,27 +235,157 @@ export const SERVICES: Service[] = [
         },
       ],
     },
+    chapters: [
+      {
+        eyebrow: "Design",
+        statement: {
+          roman: "Structure first, then",
+          italic: "something to look at",
+        },
+        body: [
+          "Before a page is drawn we settle what the site is for: the two or three things people actually arrive to do, and everything else that is only there because a competitor has one. Most slow sites are slow because of what they contain, not how they were built.",
+          "Type, hierarchy and spacing are decided as a system rather than page by page. That is what keeps page forty looking like page one, and it is the difference between a design and a set of screens that happen to share a colour.",
+          "Responsive is not the desktop layout at a smaller size. A narrow screen changes what belongs at the top, what can fold away and what a thumb can reach — so it gets designed, not derived. We draw at three widths and check on real devices, because a browser window dragged narrow is not a phone.",
+        ],
+      },
+      {
+        eyebrow: "Build",
+        statement: {
+          roman: "Built by the people",
+          italic: "who drew it",
+        },
+        body: [
+          "The build is where design quality is usually lost: spacing rounds off, motion gets approximated, and the state nobody drew is invented on the spot by whoever hit it first. One team designing and building removes the translation step where all of that happens.",
+          "Speed is a design decision, not a phase at the end. Image weight, font loading and what runs on the main thread are settled while the pages are still being drawn, then held to a budget in CI — so the site is still quick a year after the launch it was measured at.",
+          "Where you need to change things yourself, we build the parts that should change and leave the rest alone. A content model that cannot break the layout is worth considerably more than an editor that lets anyone move anything anywhere.",
+          "Motion earns its place by explaining something — where you are, what just happened, what is about to. And nothing ships until the responsive behaviour, the links, the keyboard path and the numbers have been checked on real devices. A site is finished when it has been tested, not when it has been uploaded.",
+        ],
+      },
+    ],
   },
   {
-    slug: "web-development",
-    name: "Web development",
-    summary: "Next.js builds that stay fast after you start adding pages.",
+    slug: "ux-ui-design",
+    name: "UX & UI design",
+    summary:
+      "Interfaces built around the decisions people actually have to make.",
     intro:
-      "We build what we designed. Same team, so nothing gets lost in a handover document nobody reads.",
+      "Good interfaces feel obvious. That is not luck — it is what is left after the decisions nobody needed have been taken out.",
+    metaTitle: "UX & UI design agency",
+    metaDescription:
+      "User experience and user interface design from a Hampshire studio: journey mapping, information architecture, wireframes, prototypes and design systems for teams across the UK.",
     deliverables: [
-      "Next.js App Router build",
-      "CMS integration and editor training",
-      "Analytics and consent",
-      "Performance budget, enforced in CI",
-      "Deployment and a runbook",
+      "Journey maps, with the decision points marked",
+      "Information architecture and naming",
+      "Wireframes at three breakpoints",
+      "Interactive prototype of the flows that matter",
+      "Interface design and component library",
+      "Design system with every state documented",
     ],
     phases: [
-      { name: "Setup and tokens", weeks: 1 },
-      { name: "Component build", weeks: 3 },
-      { name: "Integration", weeks: 2 },
-      { name: "Launch", weeks: 1 },
+      { name: "Journeys and audit", weeks: 2 },
+      { name: "Architecture and wireframes", weeks: 2 },
+      { name: "Interface design", weeks: 3 },
+      { name: "Prototype and iterate", weeks: 2 },
     ],
-    headline: { roman: "Built to stay", italic: "fast" },
+    headline: {
+      roman: "Interfaces people",
+      italic: "don’t have to think about",
+    },
+    paper: true,
+    showcase: {
+      statement: {
+        roman: "Good interfaces should",
+        italic: "feel obvious",
+      },
+      body: [
+        "Obvious is the hardest thing to design. It is what is left once the decisions a person never needed to make have been removed — and every one of those was put there by someone reasonable, for a reason that made sense at the time.",
+        "So we start with what someone is trying to get done, not with screens. Where they arrive from, what they are deciding, where they stall, and the point at which they give up and phone you instead. That last one is usually the most useful thing anyone says all week.",
+        "Structure is settled before anything is styled: hierarchy, sequence, what belongs on one screen and what does not. Visual design is a great deal easier when it has something correct to be applied to.",
+      ],
+      media: [
+        {
+          kind: "image",
+          src: "/work/ux-ui-design/levant-product.png",
+          alt: "LEVANT — the 001 product page on two phones, one showing size and quantity controls, the other the product gallery",
+          width: 2000,
+          height: 2000,
+        },
+        /* The last three were 1.25:1, and a 1.25:1 picture in a square tile
+           gives up a fifth of its width — the "cut off at the right" this grid
+           kept being accused of, which was never the container. These are the
+           same three subjects recomposed square at the source, so `object-cover`
+           now has nothing to crop and no panel needs a `position` to steer it.
+           The fix is the artwork, which is the right place for it.
+
+           Two of them are trimmed rather than the raw 2000px files, and both
+           trims are in the pixels, not in CSS — a scale-and-nudge would have had
+           to hold at every tile size, and resamples the picture to hide a defect
+           that can simply be cut off. Originals are kept in the staging folder,
+           so either can be re-cut from source. See NOTES.md. */
+        {
+          kind: "image",
+          /* 26.png carried a 1px dark line baked into its last column and last
+             row — mean luminance 2 against an interior of 245, which read as an
+             unintended border down the right and along the bottom. Nothing in
+             CSS: no border, no shadow, no background. Cropped to 1997 square,
+             three pixels clear of it and of any antialiasing. */
+          src: "/work/ux-ui-design/loading-options-spec.png",
+          alt: "South Downs Plant & Machinery — the loading options screen held on a phone, beside its spacing specification with every gap annotated",
+          width: 1997,
+          height: 1997,
+        },
+        {
+          kind: "image",
+          /* 24.png sat on a white canvas — 24px of it on the left, 32px on the
+             right and bottom — so the black and yellow artwork rendered visibly
+             inset while the other three reached their edges. The trim takes the
+             canvas and the artwork's own corner radius with it (a ~68px radius
+             on the left corners would otherwise leave white slivers inside the
+             tile's own rounded-xl), leaving solid colour on all four edges:
+             corners now read 25 / 157 / 26 / 158, and zero border pixels are
+             white. About 1.8% comes off each side, nowhere near the phone or
+             the wording. */
+          src: "/work/ux-ui-design/enquiry-sheet.png",
+          alt: "South Downs Plant & Machinery — the “looking for something specific” enquiry sheet on a phone, beside its title card",
+          width: 1872,
+          height: 1872,
+        },
+        {
+          kind: "image",
+          src: "/work/ux-ui-design/machine-search.png",
+          alt: "South Downs Plant & Machinery — the machine search on a phone, against the enquiry dashboard and interface library behind it",
+          width: 2000,
+          height: 2000,
+        },
+      ],
+    },
+    chapters: [
+      {
+        eyebrow: "Structure and interface",
+        statement: {
+          roman: "Hierarchy before",
+          italic: "decoration",
+        },
+        body: [
+          "Information architecture is the part nobody asks for and everybody feels. What sits at the top level, what is one tap down, and whether things are named in your customer's words or your org chart's. Get that wrong and no amount of visual polish rescues it.",
+          "Wireframes exist to be argued with. They are deliberately unfinished so the conversation stays on sequence, priority and what a screen is actually for — rather than on a shade of blue applied to something that has not been agreed yet.",
+          "The interface then goes on top of a structure that already works, and it should look like you rather than like the defaults of whatever it was built in. Distinctive and obvious are not opposites; most templates manage neither.",
+        ],
+      },
+      {
+        eyebrow: "Behaviour",
+        statement: {
+          roman: "Important interactions have to be",
+          italic: "used, not imagined",
+        },
+        body: [
+          "Anything with real behaviour — a multi-step form, a filter, a search that returns nothing — gets prototyped and put in front of someone before it is built. A flow can read perfectly on a wall and fall apart on the second tap.",
+          "Mobile is not a smaller desktop. What can be hovered, how much fits before a decision drops below the fold, whether a control belongs at the top of the screen or under a thumb — all of that changes with the screen, so all of it gets designed for the screen.",
+          "What survives becomes a system: named components, defined states, and rules for the cases nobody has drawn yet. That is what stops an interface drifting the moment the product grows past the screens we made.",
+          "And we show work early, in whatever state it is genuinely in. Feedback on something unfinished is useful. Approval of something finished is a signature.",
+        ],
+      },
+    ],
   },
   {
     slug: "digital-product-design",
@@ -228,16 +429,35 @@ export const SERVICES: Service[] = [
     ],
     headline: { roman: "Motion that", italic: "means something" },
   },
+  /**
+   * Two subjects on one page, deliberately: using AI in the creative process,
+   * and designing the products that use it. They are the same argument seen
+   * from either end — a model produces more than it judges, so the judgement
+   * has to come from somewhere, whether that is a designer choosing between
+   * fifteen directions or an interface telling someone when not to trust an
+   * answer.
+   *
+   * The panels are generated studies, described as such in their alt text.
+   * They are exploration, which is what the page is about; they are not client
+   * work and must not be captioned as though they were.
+   */
   {
     slug: "ai-design",
     name: "AI design",
-    summary: "Interfaces for models that are wrong sometimes.",
+    summary:
+      "Exploring more directions with AI — and interfaces for models that get it wrong.",
+    /* Not rendered on this page — the showcase carries the argument. Kept as
+       the service's canonical one-liner. */
     intro:
       "The hard part of AI design is not the chat box. It is designing for confidence, correction and refusal — so people can tell when to trust the output.",
+    metaTitle: "AI design agency",
+    metaDescription:
+      "AI product and interface design from a Hampshire studio: generative exploration in the creative process, AI UX, and interfaces built for systems whose output is not always right.",
     deliverables: [
+      "Concept exploration at volume, then a shortlist",
       "Interaction model for uncertainty",
       "Prompt and result interface patterns",
-      "Streaming, retry and failure states",
+      "Streaming, retry and correction states",
       "Evaluation surface for the team",
       "Guidance on disclosure",
     ],
@@ -247,7 +467,108 @@ export const SERVICES: Service[] = [
       { name: "Interface design", weeks: 3 },
       { name: "Testing with real output", weeks: 2 },
     ],
-    headline: { roman: "Design for models that", italic: "get it wrong" },
+    headline: {
+      roman: "AI changes the speed.",
+      italic: "Taste decides the direction",
+    },
+    paper: true,
+    showcase: {
+      statement: {
+        roman: "More possibilities.",
+        italic: "Better judgement still wins",
+      },
+      body: [
+        "We use AI to explore faster, prototype earlier and push ideas further than a schedule would otherwise allow — without handing the creative decisions over to it.",
+        "What has actually changed is the cost of trying something. A direction that used to take a day to visualise takes an hour, so it gets visualised instead of being described in a meeting and quietly dropped.",
+        "What has not changed is that somebody still has to decide which of them is any good. That part has not been automated, and working as though it has is how studios end up shipping things that are technically fine and completely forgettable.",
+      ],
+      /* Every source here is 1.25:1 or wider. In a square tile that is a fifth
+         of the width gone, taken off both edges — which is what "cut off at the
+         right" looks like when the grid itself fits its container exactly. At
+         5:4 the two figure studies fit to the pixel, and the crop that remains
+         falls on the two abstracts, where there is no subject to lose. */
+      ratio: "aspect-[5/4]",
+      media: [
+        {
+          kind: "image",
+          src: "/work/ai-design/generative-lattice.png",
+          alt: "Generated study — a honeycomb lattice of overlapping cells, shading from deep violet through coral into orange",
+          width: 1254,
+          height: 1254,
+        },
+        {
+          kind: "image",
+          src: "/work/ai-design/expedition.png",
+          alt: "Generated study — a lone figure in an exposure suit walking through dust towards a distant industrial city",
+          width: 1402,
+          height: 1122,
+        },
+        {
+          kind: "image",
+          src: "/work/ai-design/silhouette.png",
+          alt: "Generated study — a figure pressed against red backlit glass, one hand raised, the silhouette diffused",
+          width: 1403,
+          height: 1121,
+        },
+        {
+          kind: "image",
+          src: "/work/ai-design/voxel-field.png",
+          alt: "Generated study — a dark field of small tiles rolling in waves, catching a single cold highlight",
+          width: 1535,
+          height: 1024,
+        },
+      ],
+    },
+    chapters: [
+      {
+        eyebrow: "Exploration",
+        statement: {
+          roman: "More directions before",
+          italic: "committing to one",
+        },
+        body: [
+          "The constraint early on was never imagination. It was how many ideas you could afford to make visible before the budget said choose — concepts, moodboards, visual directions, layout studies and image treatments all cost roughly the same amount of time each.",
+          "They no longer do. So the shortlist gets wider before it gets narrower: more directions drawn, more layouts tried at real proportions, more alternatives put up next to each other where they can be compared rather than imagined.",
+          "The work is still made properly once a direction is chosen. What changes is that the choice is made against fifteen options instead of three, and the ones that were only ever somebody's first instinct get found out early, while changing course is still cheap.",
+        ],
+      },
+      {
+        eyebrow: "Judgement",
+        statement: {
+          roman: "Speed without judgement is",
+          italic: "just more noise",
+        },
+        body: [
+          "A model will return two hundred variations in an afternoon and hold no opinion about any of them. Volume is the easy half. The useful half is deciding what is relevant, what actually sounds like the brand, what is distinctive rather than merely competent, and what to throw away.",
+          "Most of what comes back is average by construction — it is drawn from everything, so it lands in the middle of everything. Average is the one thing a brand cannot afford, and recognising it takes someone who has formed a view about what good looks like.",
+          "So the ratio matters more than the volume. Generating is cheap now; editing, refining and knowing when to stop are not, and that is where the design work has moved.",
+        ],
+      },
+      {
+        eyebrow: "Designing AI products",
+        statement: {
+          roman: "If the product thinks,",
+          italic: "the interface has to explain",
+        },
+        body: [
+          "An interface over a model is a different problem from an interface over a database. The output is not deterministic — the same input can give a different answer twice — so a design that quietly assumes correctness will mislead people confidently.",
+          "That puts the weight on a few things. Showing what the system can and cannot do, before somebody asks it for something it will fail at. Showing that it is working, rather than leaving a silence. And making the result correctable, because the answer to a wrong output is an edit, not an apology.",
+          "Confidence has to be legible too. People need enough signal to decide whether to trust an answer or check it, and a system that never admits doubt teaches people to trust everything or nothing. None of this is exotic: it is clarity, feedback and control, applied to something that is sometimes wrong.",
+        ],
+      },
+      {
+        eyebrow: "Workflow",
+        statement: {
+          roman: "Useful where it",
+          italic: "removes repetition",
+        },
+        body: [
+          "The honest test is whether a step got better, not whether AI touched it. It earns its place on the repetitive parts: first-pass variations, carrying a system across formats, organising research into something readable, drafting copy a person then rewrites, standing a prototype up quickly enough to be worth testing.",
+          "It earns nothing by being added to a stage that already worked. Pushed into every step because it is fashionable, it slows the work down and adds a review cycle for output nobody asked for.",
+          "So it goes where it removes friction and stays out of where the thinking happens. That is a judgement per project rather than a policy, and it is worth revisiting as the tools change — which they do, faster than any policy would survive.",
+        ],
+      },
+    ],
   },
   {
     slug: "retainer",

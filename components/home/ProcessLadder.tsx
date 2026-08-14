@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import IntegrationsVisual from "@/components/home/IntegrationsVisual";
 import {
   useScrollAssembly,
   type AssemblyPlan,
@@ -35,16 +36,28 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  * are no `narrow` overrides because there is nothing to override — the travel
  * is stated in `vw`, so it already scales with the screen.
  *
- * The travel is large on purpose: half a viewport, with a few degrees of rake
- * and a slight undersize, resolving to exactly nothing. The section clips, so
- * a row still 50vw out cannot widen the page.
+ * The travel used to be half a viewport, with a few degrees of rake and a
+ * slight undersize, resolving to exactly nothing.
+ *
+ * **It had to come down when the integrations lattice took the right side.**
+ * `x` is read as vw — `(s.x * r * vw) / 100` in the hook — so it does not
+ * shrink when the rows are put into a column. At 1440 a row starting at 54vw
+ * began 778px from home inside a column ~596px wide, which put the whole first
+ * half of every right-hand flight on top of the lattice. Halving it to 26/23
+ * keeps the flight inside the column at every width the two-column layout
+ * exists at, and the alternating taper of the original (54/54/48/48) is
+ * preserved in proportion.
+ *
+ * The column also carries `overflow-clip`, so this is belt and braces: the
+ * numbers keep the motion where it reads well, and the clip makes crossing
+ * into the lattice impossible rather than merely unlikely.
  */
 const ASSEMBLY: AssemblyPlan = {
   narrowAt: 100000,
   flights: [
     {
       select: "[data-flight=stage-0]",
-      x: -54,
+      x: -26,
       rotate: -5,
       scale: 0.95,
       opacity: 0.18,
@@ -53,7 +66,7 @@ const ASSEMBLY: AssemblyPlan = {
     },
     {
       select: "[data-flight=stage-1]",
-      x: 54,
+      x: 26,
       rotate: 5,
       scale: 0.95,
       opacity: 0.18,
@@ -62,7 +75,7 @@ const ASSEMBLY: AssemblyPlan = {
     },
     {
       select: "[data-flight=stage-2]",
-      x: -48,
+      x: -23,
       rotate: -4,
       scale: 0.96,
       opacity: 0.22,
@@ -71,7 +84,7 @@ const ASSEMBLY: AssemblyPlan = {
     },
     {
       select: "[data-flight=stage-3]",
-      x: 48,
+      x: 23,
       rotate: 4,
       scale: 0.96,
       opacity: 0.22,
@@ -249,58 +262,71 @@ export function ProcessLadder() {
         className="mt-4 max-w-[18ch]"
       />
 
-      <ul className="mt-14 border-t border-rule md:mt-20">
-        {PROCESS.map((stage, i) => (
-          /* The <li> is the stationary slot the hook reads progress from — it
-             must not move, so every transform goes on the div inside it. */
-          <li key={stage.n} className="border-b border-rule">
-            <div data-flight={`stage-${i}`}>
-              <button
-                type="button"
-                onClick={(e) => {
-                  openerRef.current = e.currentTarget;
-                  setOpen(i);
-                }}
-                aria-haspopup="dialog"
-                aria-label={`${stage.title} — read more about this stage`}
-                className="group flex w-full items-start gap-5 py-8 text-left md:gap-10 md:py-12"
-              >
-                {/* Circle and its connector. The connector lives inside the
-                    flying element rather than the slot, so it travels with its
-                    own row instead of hanging in the empty layout waiting for
-                    one to arrive. */}
-                <span className="relative flex shrink-0 flex-col items-center self-stretch">
-                  <span className="mono grid h-12 w-12 place-items-center rounded-full border border-blue text-blue transition-colors duration-300 group-hover:bg-blue group-hover:text-ink md:h-16 md:w-16">
-                    {stage.n}
-                  </span>
-                  {i < PROCESS.length - 1 ? (
+      {/* Process left, lattice right, from `lg`. 5fr/6fr is ~45/55 — the
+          proportion the section already wanted, and the point at which the
+          stage titles at `--step-3` stop breaking to a word a line. Below
+          `lg` it is one column and the lattice falls under the stages, which
+          is also the DOM order, so nothing is reordered for a phone. */}
+      <div className="mt-14 grid gap-16 md:mt-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-center lg:gap-16">
+        {/* The clip that guarantees a row in flight cannot paint over the
+            lattice, whatever the viewport does to the vw-based travel. */}
+        <div className="overflow-clip">
+          <ul className="border-t border-rule">
+            {PROCESS.map((stage, i) => (
+              /* The <li> is the stationary slot the hook reads progress from —
+                 it must not move, so every transform goes on the div inside. */
+              <li key={stage.n} className="border-b border-rule">
+                <div data-flight={`stage-${i}`}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      openerRef.current = e.currentTarget;
+                      setOpen(i);
+                    }}
+                    aria-haspopup="dialog"
+                    aria-label={`${stage.title} — read more about this stage`}
+                    className="group flex w-full items-start gap-5 py-8 text-left md:gap-10 md:py-12"
+                  >
+                    {/* Circle and its connector. The connector lives inside the
+                        flying element rather than the slot, so it travels with
+                        its own row instead of hanging in the empty layout
+                        waiting for one to arrive. */}
+                    <span className="relative flex shrink-0 flex-col items-center self-stretch">
+                      <span className="mono grid h-12 w-12 place-items-center rounded-full border border-blue text-blue transition-colors duration-300 group-hover:bg-blue group-hover:text-ink md:h-16 md:w-16">
+                        {stage.n}
+                      </span>
+                      {i < PROCESS.length - 1 ? (
+                        <span
+                          aria-hidden="true"
+                          className="mt-3 w-px flex-1 bg-[color-mix(in_oklab,var(--blue)_38%,transparent)] transition-colors duration-300 group-hover:bg-blue"
+                        />
+                      ) : null}
+                    </span>
+
+                    <span className="min-w-0 flex-1">
+                      <span className="display block text-step-3 transition-transform duration-300 group-hover:translate-x-1.5 motion-reduce:transform-none">
+                        {stage.title}
+                      </span>
+                      <span className="mt-3 block max-w-[52ch] text-step-0 text-content-dim">
+                        {stage.summary}
+                      </span>
+                    </span>
+
                     <span
                       aria-hidden="true"
-                      className="mt-3 w-px flex-1 bg-[color-mix(in_oklab,var(--blue)_38%,transparent)] transition-colors duration-300 group-hover:bg-blue"
-                    />
-                  ) : null}
-                </span>
+                      className="mono shrink-0 self-center text-blue opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100 group-focus-visible:opacity-100"
+                    >
+                      ↗
+                    </span>
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-                <span className="min-w-0 flex-1">
-                  <span className="display block text-step-3 transition-transform duration-300 group-hover:translate-x-1.5 motion-reduce:transform-none">
-                    {stage.title}
-                  </span>
-                  <span className="mt-3 block max-w-[52ch] text-step-0 text-content-dim">
-                    {stage.summary}
-                  </span>
-                </span>
-
-                <span
-                  aria-hidden="true"
-                  className="mono shrink-0 self-center text-blue opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100 group-focus-visible:opacity-100"
-                >
-                  ↗
-                </span>
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+        <IntegrationsVisual className="justify-self-center" />
+      </div>
 
       <AnimatePresence>
         {open !== null ? (

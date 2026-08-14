@@ -18,6 +18,26 @@ const nextConfig: NextConfig = {
         destination: "/work#how-we-work",
         permanent: true,
       },
+      /**
+       * Web design and web development merged into one service, so both of
+       * their URLs now point at it rather than one surviving and one 404ing.
+       *
+       * `/services/web-design` is redirected as well as `/services/web-development`
+       * — the merged slug is a new one, so the design page's own URL would
+       * otherwise break too, and it is the one of the pair with inbound links
+       * worth keeping. Permanent, because the merge is not provisional: the two
+       * were never separable work.
+       */
+      {
+        source: "/services/web-design",
+        destination: "/services/web-design-development",
+        permanent: true,
+      },
+      {
+        source: "/services/web-development",
+        destination: "/services/web-design-development",
+        permanent: true,
+      },
     ];
   },
 };

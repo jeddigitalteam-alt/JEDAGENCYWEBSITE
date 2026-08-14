@@ -48,16 +48,22 @@ const SCRIM =
  * list is ever reordered. Files live under a plain lowercase path because Next
  * 404s a literal & in a static route -- the folder they arrived in is not servable.
  *
- * All five are 1536x1024 (3:2). They now fill the whole card, and every card
- * shape the panel takes — resting, hovered, tablet, mobile — is narrower than
- * 3:2, so object-cover always fits to height and crops horizontally only. That
- * makes the vertical half of object-position inert, and the horizontal half the
- * only thing worth tuning: at rest a panel shows barely a third of the image's
- * width, so each one is centred on its own subject (the identity card, the
- * screen, the dashboard) instead of wherever the middle happens to land. They
- * also sit so the lettering inside each shot lands whole in the resting crop
- * rather than being sliced mid-word; hovering only ever widens the window, so
- * what reads cleanly at rest still reads cleanly expanded.
+ * Four of the five are 1536x1024 (3:2). They fill the whole card, and every
+ * card shape the panel takes — resting, hovered, tablet, mobile — is narrower
+ * than 3:2, so object-cover fits those to height and crops horizontally only.
+ * That makes the vertical half of object-position inert for them, and the
+ * horizontal half the only thing worth tuning: at rest a panel shows barely a
+ * third of the image's width, so each one is centred on its own subject (the
+ * identity card, the screen, the dashboard) instead of wherever the middle
+ * happens to land. They also sit so the lettering inside each shot lands whole
+ * in the resting crop rather than being sliced mid-word; hovering only ever
+ * widens the window, so what reads cleanly at rest still reads cleanly
+ * expanded.
+ *
+ * The UX and UI card is the exception. Its source is 1391x1131, which is taller
+ * than 16/9, so that one crops vertically and its second number is the one
+ * doing the work — biased above centre to keep the branded header and the
+ * search panel in frame rather than the empty ground beneath them.
  */
 const ART: Record<string, { src: string; position: string; alt: string }> = {
   "brand-identity": {
@@ -65,15 +71,17 @@ const ART: Record<string, { src: string; position: string; alt: string }> = {
     position: "40% 50%",
     alt: "A printed identity system: blue cards, a type specimen and a guidelines document",
   },
-  "web-design": {
+  /* Keyed to the merged service. `web-development.png` is no longer referenced:
+     there is one web card now, and it is this one. */
+  "web-design-development": {
     src: "/work/services/web-design.png",
     position: "44% 50%",
     alt: "A website design shown on a laptop under coloured studio lighting",
   },
-  "web-development": {
-    src: "/work/services/web-development.png",
-    position: "37% 50%",
-    alt: "A laptop surrounded by a code editor, build output and performance scores",
+  "ux-ui-design": {
+    src: "/work/ux-ui-design/south-downs-app.png",
+    position: "50% 42%",
+    alt: "South Downs Plant & Machinery — the machine search on a phone, against the interface library it was built from",
   },
   "digital-product-design": {
     src: "/work/services/digital-product-design.png",

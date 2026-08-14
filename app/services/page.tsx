@@ -8,7 +8,7 @@ import RevealHeading from "@/components/motion/RevealHeading";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Brand identity, web design, web development, digital product design, motion, AI design and retainers — from a Hampshire studio.",
+    "Brand identity, web design and development, UX and UI design, digital product design, motion, AI design and retainers — from a Hampshire studio.",
 };
 
 export default function ServicesPage() {

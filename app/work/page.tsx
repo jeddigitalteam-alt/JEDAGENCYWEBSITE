@@ -2,9 +2,51 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import WorkRail from "@/components/work/WorkRail";
 import ProcessTimeline from "@/components/process/ProcessTimeline";
-import { Eyebrow, Interlock } from "@/components/ui/primitives";
+import ShowcaseGrid, {
+  type ShowcaseMedia,
+} from "@/components/services/ShowcaseGrid";
+import { Eyebrow, Interlock, SectionHeading } from "@/components/ui/primitives";
 import { WORK } from "@/lib/work";
 import RevealHeading from "@/components/motion/RevealHeading";
+
+/**
+ * Four panels, read left to right then top to bottom.
+ *
+ * Served from `public/work/gallery/`, not from the folder these arrived in: a
+ * literal `&` in a directory name survives `next dev` and fails outright in a
+ * production build — 404 on the raw file, 400 from the image optimiser. See
+ * NOTES.md. All four are 2000×2000, so the square panels crop nothing.
+ */
+const GALLERY: ShowcaseMedia[] = [
+  {
+    kind: "image",
+    src: "/work/gallery/bespoke-garden-decor-journal.png",
+    alt: "Bespoke Garden Decor — a journal piece on choosing timber, open on the site's blog",
+    width: 2000,
+    height: 2000,
+  },
+  {
+    kind: "image",
+    src: "/work/gallery/levant-campaign.png",
+    alt: "LEVANT — the campaign homepage, its headline set over a clay-court film",
+    width: 2000,
+    height: 2000,
+  },
+  {
+    kind: "image",
+    src: "/work/gallery/bespoke-garden-decor-products.png",
+    alt: "Bespoke Garden Decor — the handcrafted product range, shown over the kind of garden it is built for",
+    width: 2000,
+    height: 2000,
+  },
+  {
+    kind: "image",
+    src: "/work/gallery/south-downs-home.png",
+    alt: "South Downs Plant & Machinery — the homepage and its stock search, over a yard of used excavators",
+    width: 2000,
+    height: 2000,
+  },
+];
 
 export const metadata: Metadata = {
   title: "Work",
@@ -32,6 +74,41 @@ export default function WorkPage() {
 
         <div className="mt-16">
           <WorkRail />
+        </div>
+      </section>
+
+      {/*
+        The same treatment the web design and development page uses, and the
+        same component: four square panels, two across, separated by nothing but
+        the page.
+
+        Which is why the section is inverted. On ink the gaps between the panels
+        would be gaps in the dark and the four would read as one block; the
+        gutters are only gutters when the surface behind them is paper. That is
+        one attribute — `[data-invert]` reassigns the semantic token layer and
+        everything inside follows it, exactly as the homepage's paper sections
+        do. Nothing here is restyled for the surface.
+      */}
+      <section
+        data-invert
+        className="bg-surface px-5 py-24 text-content md:px-8 md:py-32"
+      >
+        {/* The measure the homepage's paper section already uses, so the
+            heading's left edge and the grid's line up and the pair stops
+            growing on a genuinely wide display rather than becoming a mural. */}
+        <div className="mx-auto w-full max-w-[120rem]">
+          <Eyebrow>In detail</Eyebrow>
+          <SectionHeading
+            roman="The work,"
+            italic="close up"
+            className="mt-4 max-w-[18ch]"
+          />
+          <p className="mt-6 max-w-[54ch] text-step-0 text-content-dim">
+            Four screens from the past year — a journal, a campaign, a product
+            range and a machine search.
+          </p>
+
+          <ShowcaseGrid media={GALLERY} className="mt-16 md:mt-24" />
         </div>
       </section>
 

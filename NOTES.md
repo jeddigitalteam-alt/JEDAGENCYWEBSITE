@@ -707,6 +707,187 @@ effect and in a `play` handler. The full fetch is gated on `seen` rather than on
 playback, so reduced motion — which latches `seen` on mount — still gets a frame
 to hold.
 
+## Web design and web development are one service
+
+They were never two jobs. They were one problem answered twice — once on a
+canvas, once in a repository — and two pages for it sold the seam rather than
+the absence of one. `web-design` and `web-development` are now
+`web-design-development`, "Web design & development", and both old slugs 308 to
+it in `next.config.ts`.
+
+**Both**, not just the development one. The merged slug is new, so the design
+page's own URL would have broken too, and of the pair it is the one with links
+worth keeping. The service count is unchanged at seven, because UX & UI design
+arrived in the same pass — so "Seven ways we can help" on `/services` is still
+true, which is luck rather than planning and is worth knowing if a service is
+ever added or dropped.
+
+The showcase, its four panels and the paper surface are exactly as they were.
+What changed is the argument around them, and the deliverables and phases, which
+are the two old lists reconciled into one twelve-week run.
+
+## The grid is a component now, and /work inverts to use it
+
+`ServiceShowcase` was a statement, a column of prose and a 2x2 grid in one file.
+It is now three: `ServiceChapter` (the statement and the prose), `ShowcaseGrid`
+(the panels), and a `ServiceShowcase` that composes them. Nothing moved
+visually — same markup, same gaps, same square panels, same entrance — and
+`ServiceShowcase` stopped being a client component on the way, because
+everything needing the browser went into the grid where it belonged.
+
+Two consumers followed: the UX & UI page, and `/work`.
+
+**`/work` sets `[data-invert]` on the section to get it.** The grid's separation
+is negative space — no rule between the panels, no frame, no field behind them —
+so on ink the gaps are gaps in the dark and the four read as one block. The
+gutters are only gutters when the surface behind them is paper. That is one
+attribute and no restyling, the same move the homepage's paper sections make.
+
+Known and unchanged: the fixed header is white type and does not know it is over
+a mid-page paper section, so it is briefly illegible if you scroll up through
+one. `isPaperRoute()` answers per route, not per scroll position. Every paper
+section on the homepage has had this since it was built; fixing it means
+teaching the header to observe what is under it, which is a bigger change than
+any of these sections asked for.
+
+## Chapters, and the one crop that had to be argued with
+
+Services can now carry `chapters` — the same statement-and-column block after
+the showcase, two or three of them — so a page with real ground to cover makes
+its argument in prose rather than as a checklist with the interesting parts left
+as bullets. Only the two web pages use them.
+
+`ShowcaseMedia` images gained an optional `position`. Exactly one source needed
+it. `south-downs-enquiry.png` is 1402 wide against a 1122 square window, and its
+two halves — a title card and a phone — use every pixel of that width, so a
+centred crop takes 140px off the left and the S of "Simple" with it. That reads
+as a mistake. At `25% 50%` the wording is whole and the phone bleeds off the
+right edge instead, which reads as a picture continuing past its frame. There is
+no position that keeps both; this is the least-bad one, chosen by rendering all
+three and looking.
+
+The eight new gallery files were copied to `public/work/gallery/` and
+`public/work/ux-ui-design/` rather than referenced where they landed — see the
+`&` note above. That trap is now three for three.
+
+## "Cut off at the right" was the crop, not the container
+
+Reported as the gallery overflowing its parent. It is not, and it is worth
+recording how that was established rather than assumed.
+
+Measured on `/work`, `/services/ux-ui-design`, `/services/web-design-development`
+and `/services/ai-design`, at 1920 / 1440 / 1366 / 1024 / 768 / 390: the grid is
+exactly its parent's content box at every one, both columns are identical to the
+pixel, the left and right gutters are equal (32px desktop, 20px at 390), and
+`document.scrollWidth === clientWidth` throughout. `sm:grid-cols-2` compiles to
+`repeat(2, minmax(0, 1fr))` and `box-sizing: border-box` is global, so the two
+usual causes were already covered.
+
+**The cause is `object-cover` on landscape sources in a square tile.** A 1.25:1
+picture in a 1:1 box gives up a fifth of its width, taken off both edges. That
+looks exactly like clipping and is not: the tile is where it should be, the
+picture inside it is cropped. `/work` never had it — all four of those sources
+are 2000x2000 and lose nothing.
+
+So the grid takes an optional `ratio`, defaulting to `aspect-square` so every
+existing page is untouched, and the AI page sets `aspect-[5/4]` because its
+whole set is 1.25:1 or wider. Two of its four now fit to the pixel and the
+remaining crop lands on the two abstracts, where there is no subject to lose.
+
+One ratio for all four, still. A per-panel ratio would fit every source and lose
+the alignment that makes four panels read as one sequence.
+
+**The UX and UI set was settled the other way, and better: the artwork was
+re-cut.** Its three landscape panels were replaced with square recompositions of
+the same three subjects, so every source there is now 1:1 against a 1:1 tile and
+`object-cover` has nothing left to crop — no `position` override on any panel,
+no `contain`, no page-level exception. Where you can change the source, change
+the source; steering a crop is what you do when you cannot.
+
+`south-downs-app.png` stayed on disk through that swap even though the grid no
+longer points at it — the homepage service carousel still uses it as the UX and
+UI card art, tuned to its 1391x1131 shape. The other two outgoing files had no
+remaining references and were deleted.
+
+Two of the replacements then needed trimming, both in the pixels rather than in
+CSS. A scale-and-nudge would have had to hold at every tile size and resamples
+the whole picture to hide a few pixels; a crop is exact and costs nothing.
+
+- **`enquiry-sheet.png`** sat on a pure-white canvas — 24px left, 32px right and
+  bottom, 29px top — so its black and yellow artwork rendered visibly inset
+  while the other three reached their edges. The trim takes the canvas *and the
+  artwork's own corner radius*: a ~68px radius on the left corners would
+  otherwise leave white slivers inside the tile's own `rounded-xl`. Cut 1872
+  square; zero border pixels are now white and the corners read 25 / 157 / 26 /
+  158.
+- **`loading-options-spec.png`** had a 1px dark line baked into its last column
+  and last row — mean luminance 2 and 136 against an interior of 245 — which is
+  the "unintended border down the right and along the bottom". Nothing in CSS:
+  no border, no shadow, no background. Cut to 1997 square, three pixels clear.
+
+Originals are still in the `&` staging folder, so either can be re-cut.
+
+## The image optimiser caches by URL, so replacing a file in place serves stale
+
+Worth knowing, because it wasted a diagnostic round. Both files above were
+overwritten under their existing names. `next start` then kept serving the
+**old** optimised variants out of `.next/cache/images`, which is keyed on the
+URL, the width and the quality — none of which changed.
+
+The symptom was maddening: the tile's centre pixel was correct and its edges
+were not, at 1440 but not at 768 or 390. That is exactly what a partially warm
+cache looks like — the width variants that had been requested before were stale,
+the ones that had not were fresh. `rm -rf .next/cache/images` and a restart
+resolved it, and the same measurements then passed at every width.
+
+A production deploy starts with an empty cache, so this is a local trap rather
+than a shipping bug. But if a served image is ever replaced in place and looks
+unchanged, clear that directory before believing anything.
+
+Two measurement traps came with it, both of which produced confident nonsense:
+
+- `elementHandle.screenshot()` rounds the element box outward, so the capture
+  includes a sliver of the page. Sampling row 0 of that image samples the white
+  gutter, not the tile, and reports every tile as inset. Screenshot the viewport
+  and index by device pixel instead.
+- Index with `ceil` on the near edges and `floor` on the far ones. Tile tops
+  land on fractional CSS positions — 111.69 and 807.69 at 1440 — so `round`
+  samples the device row *above* the tile and reports a white inset on all four
+  tiles at once, including ones nothing had touched.
+
+`w-full min-w-0 max-w-full` was added to the grid and the tiles anyway. It fixes
+nothing measurable today; it is there so that dropping this grid into a flex
+parent — where the default `min-width: auto` lets a wide child push past its
+container — cannot reintroduce the thing everyone assumes is already happening.
+`overflow-hidden` stays on the tile, where the rounded corner needs it, and
+never on the section.
+
+## The AI page
+
+Two subjects on one page, deliberately: using AI in the creative process, and
+designing products that use it. They are the same argument from either end — a
+model produces far more than it judges, so the judgement has to come from
+somewhere, whether that is a designer choosing between fifteen directions or an
+interface telling someone when not to trust an answer.
+
+Four chapters, on paper, with the showcase grid between the headline and them.
+
+The four panels are **generated studies and are described as such in their alt
+text.** They are exploration, which is what the page is about. They are not
+client work and must not be captioned as though they were — the page makes no
+claim it cannot support, which was an explicit requirement and is worth keeping
+if the copy is ever revised.
+
+The filenames were changed on the way in (`AI 2.png` to `generative-lattice.png`
+and so on). Not cosmetic: the source folder is the `&` staging area, and spaces
+plus mixed case in a path that is fine on Windows and case-sensitive on the
+deploy host is the same class of bug caught twice already.
+
+No new CTA was added. The shared service template already carries "Build a full
+scope" in the phase box, the header carries "Start a project" and the footer
+carries "Get in touch" — all three render on this page. A closing CTA block
+would have been a change to all seven service pages, not to this one.
+
 ## Open / needs input
 
 - **Brand PNGs are absent.** `5.png`, `7.png`, `8.png`, `10.png` were never on
