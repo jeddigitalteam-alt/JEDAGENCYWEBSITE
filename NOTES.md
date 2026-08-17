@@ -888,6 +888,106 @@ scope" in the phase box, the header carries "Start a project" and the footer
 carries "Get in touch" — all three render on this page. A closing CTA block
 would have been a change to all seven service pages, not to this one.
 
+## The product page, and why it needed no new code
+
+`digital-product-design` is the fourth page on paper, with a showcase, four
+chapters and the shared grid. **Nothing was built for it.** `paper`, `showcase`,
+`chapters`, `metaTitle`/`metaDescription` and the masked heading reveal are all
+already data on `Service`, and `app/services/[slug]/page.tsx` already renders
+each one — so the redesign is a single entry in `lib/services.ts` and four
+files in `public/`. `isPaperRoute()` derives from the same data, so the header
+inverted over the white page without being told.
+
+Its grid is the first with a **moving panel outside the web page**, and that
+needed nothing either: `ShowcaseMedia` has carried a `video` kind since the
+merged web page, and `ShowcaseVideo` already handles autoplay, muted, loop,
+`playsInline`, no controls, `object-cover`, the fade-in on first decoded frame
+(a `<video>` with nothing decoded is a black rectangle), the upgrade from
+`preload="metadata"` to `"auto"` once the grid is reached, and pausing on a held
+frame under reduced motion. Adding a filename special case would have been the
+wrong instinct twice over.
+
+**All four sources are 1:1** — 2000², 952², 2000² and 1254² — so the square tile
+crops nothing and no panel needs a `position`. That is the lesson from the two
+grids that had to be argued with, applied at the asset end instead of the CSS
+end: the cheapest fix for "cut off at the edges" is a source that matches the
+tile.
+
+**The clip is 29.6MB for 59.8s at 952².** It plays, it loops, and the deferred
+`preload` means nobody who does not scroll to it pays for it — but that is still
+a large autoplaying download next to `levant.mp4` at 637KB, and 952² is soft for
+a panel that reaches ~920 CSS px at 1920. Worth a transcode (shorter loop, ~2Mbps,
+1600² or better) before this is anything but a preview. `ffmpeg` is not on this
+machine, which is why it was not done here. `345308.jpg` sits in the staging
+folder and looks like the matching still if a `poster` is ever wanted.
+
+### Two traps in verifying it, both in the test rather than the page
+
+`document.body.innerText` returns text **with `text-transform` applied**, and
+`.mono` is uppercase — so every eyebrow, label and pill reads as caps. Assert
+case-insensitively or three true things look broken at once.
+
+Seeding `sessionStorage["puzzle:intro-seen"]` to skip the loader makes React log
+one hydration-attribute warning on **every** route, because the loader stamps
+`data-intro-seen` on `<html>` from a value the server could not know. Confirmed
+against `/`, `/services/brand-identity` and `/services/ai-design` with the seed
+removed: zero errors everywhere. It is the harness, not the site, and real
+visitors never set it before first paint.
+
+## The coverflow, and the five things that had to change to land it
+
+`components/ui/CoverflowCarousel.tsx` is a **supplied implementation**, not one
+written here. The transform system is untouched: fractional centre position,
+card pitch, index folding, the `Math.pow(distance, falloff)` ramp, the 82°
+tilt cap, the edge fade, the flick carry capped at two cards, the 0.16
+exponential settle. Do not "tidy" that maths — it is the thing that was asked
+for, and the rake is tuned by it.
+
+It arrived written against a different stack, so five things changed and only
+these: `cn` (added as `lib/utils.ts` — a filter and a join, not clsx +
+tailwind-merge, because nothing here needs conflict resolution); `lucide-react`
+(not a dependency, so the two chevrons are inline SVGs with the same `size-5`
+API, and they only render behind `showNavigation`); the shadcn colour tokens
+(`bg-muted` → `bg-surface-raised`, `text-foreground` → `text-content`,
+`bg-background/70` → `bg-surface/70`, so it inverts with `[data-invert]` like
+everything else); `outline-none ring-ring` (dropped — `globals.css` already
+gives every `:focus-visible` a 2px blue outline, and suppressing it would have
+taken the keyboard affordance off the one element that needs it); and
+`animate-in fade-in`, which needs a plugin that is not installed.
+
+**Reduced motion** removes the settle only. The rake, the drag and the keyboard
+are layout rather than animation, so they stay; under the preference navigation
+lands on the target frame instead of easing to it. The flag is read through a
+ref so honouring it does not rebuild `settle` and cancel an in-flight rAF.
+
+**Placement is data, not a slug check.** `Service.carousel` carries
+`afterChapter`, and the chapters map in `app/services/[slug]/page.tsx` renders
+the carousel after that index — so it sits between "Speed without judgement is
+just more noise" and "If the product thinks, the interface has to explain"
+because the number says 1, not because the template knows about AI. Dropped in
+as a sibling of the chapters it inherits their `gap-24 md:gap-32`, which is
+where its whitespace comes from: no wrapper, no panel, no background, no rule.
+
+`cardWidth="clamp(240px, 30vw, 430px)"` rather than the component's 22vw
+default. At 1440 the run is 1376px wide and 430px cards on a 1.05 pitch put both
+neighbours fully on screen at 1332px. The 240px floor keeps the centre card
+usable at 390, where the neighbours fall outside the frame and are clipped by
+the frame's own `overflow-hidden` — which is why there is no page overflow at
+any width.
+
+**Four slides is the minimum this can take.** With `loop` on, a card is
+teleported across the ring at exactly half a turn out, so `edge` fades it to
+zero at `count / 2`. At four, the distance-2 card is always invisible and you
+see three: centre plus both neighbours. That reads correctly, but adding a fifth
+asset would show four, and going below four would break the effect.
+
+### A parsing trap when testing it
+
+The browser rewrites `calc(-50% + -452px)` as `calc(-50% - 452px)` on the way
+into `style.transform`. A regex expecting a signed number silently returns null
+for every card left of centre, which looks like the layout has collapsed. Read
+the sign as an operator.
+
 ## Open / needs input
 
 - **Brand PNGs are absent.** `5.png`, `7.png`, `8.png`, `10.png` were never on

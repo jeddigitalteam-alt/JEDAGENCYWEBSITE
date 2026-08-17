@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SERVICES, getService } from "@/lib/services";
@@ -6,6 +7,7 @@ import { Eyebrow } from "@/components/ui/primitives";
 import RevealHeading from "@/components/motion/RevealHeading";
 import ServiceChapter from "@/components/services/ServiceChapter";
 import ServiceShowcase from "@/components/services/ServiceShowcase";
+import CoverflowCarousel from "@/components/ui/CoverflowCarousel";
 
 export function generateStaticParams() {
   return SERVICES.map((s) => ({ slug: s.slug }));
@@ -86,13 +88,37 @@ export default async function ServicePage({
         </p>
       )}
 
-      {/* The rest of the editorial run. Only the two web pages carry chapters
-          today, and both open on a showcase — which is where the space above
-          this comes from, so there is no top padding here to double it up. */}
+      {/* The rest of the editorial run. Both pages that carry chapters open on
+          a showcase — which is where the space above this comes from, so there
+          is no top padding here to double it up.
+
+          The grid's own `gap-24 md:gap-32` is what gives the carousel its air:
+          dropped in as a sibling of the chapters, it inherits the same generous
+          pause above and below without a wrapper, a rule or a background. */}
       {service.chapters?.length ? (
         <div className="mx-auto grid w-full max-w-[120rem] gap-24 pb-24 md:gap-32 md:pb-32">
-          {service.chapters.map((chapter) => (
-            <ServiceChapter key={chapter.statement.roman} chapter={chapter} />
+          {service.chapters.map((chapter, i) => (
+            <Fragment key={chapter.statement.roman}>
+              <ServiceChapter chapter={chapter} />
+              {service.carousel?.afterChapter === i ? (
+                <CoverflowCarousel
+                  slides={service.carousel.slides}
+                  label={service.carousel.label}
+                  /* Cards only. Everything the component can render around
+                     them is off, so there is no caption box reserving height
+                     and nothing under the cards at all. */
+                  showCaption={false}
+                  showPagination={false}
+                  showNavigation={false}
+                  /* Up from the component's 22vw default: at 1440 the page
+                     gives the run 1376px, and 430px cards on a 1.05 pitch put
+                     both neighbours fully on screen at 1332px. The 240px floor
+                     keeps the centre card usable at 390, where the neighbours
+                     fall outside the frame and clip rather than overflow. */
+                  cardWidth="clamp(240px, 30vw, 430px)"
+                />
+              ) : null}
+            </Fragment>
           ))}
         </div>
       ) : null}

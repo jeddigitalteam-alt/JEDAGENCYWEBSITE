@@ -106,6 +106,21 @@ export interface Service {
    */
   chapters?: Chapter[];
   /**
+   * A coverflow of images set between two chapters, as a visual break.
+   *
+   * Data rather than a slug special case in the page: `afterChapter` is the
+   * index of the chapter it follows, so moving it is a number here and the
+   * template stays general. Images only — the component's caption, pagination
+   * and navigation are all switched off where it is used, so there is nothing
+   * to write for it beyond alt text.
+   */
+  carousel?: {
+    afterChapter: number;
+    /** Names the region for assistive tech. Never shown. */
+    label: string;
+    slides: { src: string; alt: string }[];
+  };
+  /**
    * Search title and description, where the nav one-liner is not the right
    * thing to hand a search engine. `name` and `summary` are written for a
    * dropdown — short, and assuming you already know it is a design studio —
@@ -387,18 +402,34 @@ export const SERVICES: Service[] = [
       },
     ],
   },
+  /**
+   * The third page to carry the full editorial run — showcase, chapters, paper
+   * — and it earns it for the same reason the web and UX pages do: the argument
+   * is about the order the work happens in, which is prose, not a bullet list.
+   *
+   * Its grid is the first with a moving panel outside the web page. Nothing had
+   * to be built for that: `ShowcaseMedia` has carried a `video` kind since the
+   * merged web page needed one, so the mapping below is data like the rest.
+   */
   {
     slug: "digital-product-design",
     name: "Digital product design",
     summary: "Interfaces for products people use every day, not once.",
+    /* Not rendered on this page — the showcase carries this argument at length,
+       and printing the short version above it says the same thing twice before
+       the reader has scrolled. Kept as the service's canonical one-liner. */
     intro:
       "Product work rewards restraint. The tenth screen matters more than the first, and the empty state matters more than either.",
+    metaTitle: "Digital product design agency",
+    metaDescription:
+      "Digital product and app design from a Hampshire studio: product structure, user journeys, interactive prototypes and design systems built to stay clear as the product grows.",
     deliverables: [
+      "Product structure and information architecture",
       "Flow mapping and job stories",
-      "Interactive prototype",
-      "Component library with states",
-      "Empty, loading and error states designed",
-      "Accessibility annotations",
+      "Interactive prototype, built with real content",
+      "Interface design across the full breakpoint range",
+      "Component library with empty, loading and error states",
+      "Accessibility annotations and build handover",
     ],
     phases: [
       { name: "Discovery", weeks: 2 },
@@ -406,7 +437,101 @@ export const SERVICES: Service[] = [
       { name: "Interface design", weeks: 3 },
       { name: "Library", weeks: 2 },
     ],
-    headline: { roman: "Designed for the", italic: "tenth visit" },
+    headline: { roman: "Complex underneath.", italic: "Obvious on the surface" },
+    paper: true,
+    showcase: {
+      statement: {
+        roman: "If people have to work it out,",
+        italic: "the product has not finished the job",
+      },
+      body: [
+        "Every product is complicated somewhere. The question is who carries that complexity — the person using it, or the people who designed it. Our job is to move the weight off the screen and into the structure behind it.",
+        "Most of that work is decisions rather than drawing: what belongs on this screen, what belongs on the next one, what the sensible default is, and what happens when somebody gets it wrong. Settle those and the interface has very little left to do.",
+        "Which is why the visual layer comes last here. A product that looks resolved and still makes people stop and think has solved the wrong problem in the right typeface.",
+      ],
+      /* Every source is 1:1 — the three stills are 2000², 2000² and 1254², and
+         the clip is 952² — so the square tile takes nothing off any of them and
+         no panel needs a `position`. That is deliberate rather than lucky: the
+         two grids that had to be argued with both had landscape sources in a
+         square box, which is what "cut off at the edges" looks like when the
+         grid fits its container exactly. */
+      media: [
+        {
+          kind: "image",
+          src: "/work/digital-product-design/journal-laptop.png",
+          alt: "Bespoke Garden Decor — a journal article on choosing timber, open on a laptop above a full-width photograph",
+          width: 2000,
+          height: 2000,
+        },
+        {
+          kind: "video",
+          src: "/work/digital-product-design/interface-motion.mp4",
+          label:
+            "Bespoke Garden Decor — the homepage held behind sunlit foliage moving in the breeze",
+        },
+        {
+          kind: "image",
+          src: "/work/digital-product-design/garden-decor-phone.png",
+          alt: "Bespoke Garden Decor — the homepage on a phone, its quote and services actions set over a finished pergola",
+          width: 2000,
+          height: 2000,
+        },
+        {
+          kind: "image",
+          src: "/work/digital-product-design/south-downs-export.png",
+          alt: "South Downs Plant & Machinery — the export enquiry steps on a phone, beside the company mark over a working excavator",
+          width: 1254,
+          height: 1254,
+        },
+      ],
+    },
+    chapters: [
+      {
+        eyebrow: "Structure",
+        statement: { roman: "Structure before", italic: "polish" },
+        body: [
+          "Requirements arrive as a list. Products are not a list — they are a sequence of decisions somebody makes under time pressure, usually while doing something else. The first job is turning one into the other.",
+          "So the thing gets mapped before it gets drawn: what the product is for, what a person is actually trying to finish, and the order those steps happen in rather than the order the spreadsheet had them. Hierarchy falls out of that. What deserves the top of the screen is whatever the next decision needs.",
+          "Skipping this is what produces products that look considered and feel exhausting. A confused structure can be styled indefinitely and never improve, because the surface was never the problem.",
+        ],
+      },
+      {
+        eyebrow: "Journeys",
+        statement: {
+          roman: "Every interaction should",
+          italic: "answer a question",
+        },
+        body: [
+          "People arrive at a screen with a question — where am I, did that work, what happens if I press this, how much longer. An interface earns its place by answering the one being asked at that moment and staying quiet about the rest.",
+          "That makes feedback part of the design rather than a later ticket. Loading, saving, empty, partial, expired, failed: people spend real time in those states, and leaving them to be handled during the build is how a confident product turns confusing at exactly the wrong moment.",
+          "Friction is worth spending deliberately. A few steps should be slow — deleting something permanent, spending money. Most should not, and the ones people repeat every day deserve the most attention and usually get the least.",
+        ],
+      },
+      {
+        eyebrow: "Prototyping",
+        statement: {
+          roman: "Prototype before the",
+          italic: "expensive decisions",
+        },
+        body: [
+          "A flow that reads well as a diagram can still be wrong to use. The cheapest place to find that out is something clickable, not something built.",
+          "So it goes in front of people early, with real content, real lengths and real edge cases, at the widths it will be used at. Placeholder copy hides every problem worth finding: names run longer than the box, lists are emptier than the mockup, and the interesting screens turn out to be the ones nobody designed.",
+          "What comes back changes the design while changing it is still cheap. That is the whole argument for it — after the build starts, the same finding costs a fortnight and an awkward conversation.",
+        ],
+      },
+      {
+        eyebrow: "Systems",
+        statement: {
+          roman: "A product is never",
+          italic: "finished in one pass",
+        },
+        body: [
+          "Products keep going. Features arrive, teams change, and the design has to survive people who were not in the room when it was made. That is a systems problem rather than a screens problem.",
+          "So what gets handed over is components with their states defined, spacing and type that hold at every width, and rules specific enough to actually follow. Brand character lives inside that rather than on top of it: a product can be distinctly yours and still behave the way people expect, and where those two genuinely conflict, usability wins.",
+          "It stays honest by staying close to the build — the same components, in the browser, at real widths. The gap between the design file and the shipped product is where most of the quality is usually lost.",
+        ],
+      },
+    ],
   },
   {
     slug: "motion-video",
@@ -516,6 +641,36 @@ export const SERVICES: Service[] = [
           alt: "Generated study — a dark field of small tiles rolling in waves, catching a single cold highlight",
           width: 1535,
           height: 1024,
+        },
+      ],
+    },
+    /* Sits after chapter 1 — between "Speed without judgement is just more
+       noise" and "If the product thinks, the interface has to explain" — where
+       the page wants a pause between two dense arguments. Image-only: no
+       caption, no dots, no arrows, no heading.
+
+       The same four studies as the grid above, which is what was asked for and
+       is all the AI page has. They read differently here: square-cropped,
+       raked back in 3D and moving, against a static 5:4 grid two screens up. */
+    carousel: {
+      afterChapter: 1,
+      label: "Generated studies from the studio's own exploration",
+      slides: [
+        {
+          src: "/work/ai-design/expedition.png",
+          alt: "Generated study — a lone figure in an exposure suit walking through dust towards a distant industrial city",
+        },
+        {
+          src: "/work/ai-design/generative-lattice.png",
+          alt: "Generated study — a honeycomb lattice of overlapping cells, shading from deep violet through coral into orange",
+        },
+        {
+          src: "/work/ai-design/silhouette.png",
+          alt: "Generated study — a figure pressed against red backlit glass, one hand raised, the silhouette diffused",
+        },
+        {
+          src: "/work/ai-design/voxel-field.png",
+          alt: "Generated study — a dark field of small tiles rolling in waves, catching a single cold highlight",
         },
       ],
     },

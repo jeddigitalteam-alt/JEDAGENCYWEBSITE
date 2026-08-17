@@ -21,12 +21,14 @@ const ROUTES = [
   "/work/levant",
   "/services",
   "/services/brand-identity",
-  // The two pages carrying an editorial run and a showcase grid — the shapes
-  // most likely to regress. /services/web-design and /services/web-development
-  // both 308 here and are not pages any more.
+  // The pages carrying an editorial run and a showcase grid — the shapes most
+  // likely to regress. /services/web-design and /services/web-development both
+  // 308 here and are not pages any more.
   "/services/web-design-development",
   "/services/ux-ui-design",
   "/services/ai-design",
+  // The only grid with a moving panel outside the web page.
+  "/services/digital-product-design",
   "/industries",
   "/industries/sports",
   // /how-we-work now 308s to /work#how-we-work — it is not a page any more.
