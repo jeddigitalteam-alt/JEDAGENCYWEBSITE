@@ -7,7 +7,16 @@ import { SERVICES } from "@/lib/services";
 import { useReducedMotionPref } from "@/lib/hooks/useMediaQuery";
 import { useMarqueeRail } from "@/lib/hooks/useMarqueeRail";
 
-const SHOWN = SERVICES.slice(0, 5);
+/**
+ * Every service, in the order the data declares them.
+ *
+ * This used to be `SERVICES.slice(0, 5)`, which happened to mean "all of them
+ * except the retainer" — the retainer had no page worth linking to at the time.
+ * It has one now, so the slice was doing nothing but hiding a service. Derived
+ * rather than listed, so a service added to the data appears here without this
+ * file being touched; the only thing it needs is an entry in `ART` below.
+ */
+const SHOWN = SERVICES;
 
 /**
  * Travel rate, in px a second.
@@ -48,50 +57,68 @@ const SCRIM =
  * list is ever reordered. Files live under a plain lowercase path because Next
  * 404s a literal & in a static route -- the folder they arrived in is not servable.
  *
- * Four of the five are 1536x1024 (3:2). They fill the whole card, and every
- * card shape the panel takes — resting, hovered, tablet, mobile — is narrower
- * than 3:2, so object-cover fits those to height and crops horizontally only.
- * That makes the vertical half of object-position inert for them, and the
- * horizontal half the only thing worth tuning: at rest a panel shows barely a
- * third of the image's width, so each one is centred on its own subject (the
- * identity card, the screen, the dashboard) instead of wherever the middle
- * happens to land. They also sit so the lettering inside each shot lands whole
- * in the resting crop rather than being sliced mid-word; hovering only ever
- * widens the window, so what reads cleanly at rest still reads cleanly
- * expanded.
+ * **Every card now shows work from the page it links to.** The UX and UI card
+ * was the only one doing this; the rest pointed at generic stock under
+ * `/work/services/`, so the homepage promised one thing and the page delivered
+ * another. Each entry below is an asset that already exists for its own
+ * service, referenced in place rather than copied — so a card cannot drift out
+ * of sync with the page behind it.
  *
- * The UX and UI card is the exception. Its source is 1391x1131, which is taller
- * than 16/9, so that one crops vertically and its second number is the one
- * doing the work — biased above centre to keep the branded header and the
- * search panel in frame rather than the empty ground beneath them.
+ * They are also chosen to stay distinct from one another: printed stationery,
+ * a phone against a coral set, a machine search, a laptop on a plinth and a
+ * generated abstract. Five variations of a screen on a desk would read as one
+ * repeated card sliding past.
+ *
+ * The panels are much narrower than any of these sources — at rest a card shows
+ * barely a third of the image's width — so `object-position` is doing real
+ * work. Landscape sources crop horizontally, and the first number places the
+ * window over the subject rather than wherever the middle lands. Square sources
+ * crop vertically instead, so for those it is the second number that counts.
+ * Hovering only ever widens the window, so what reads cleanly at rest still
+ * reads cleanly expanded.
  */
 const ART: Record<string, { src: string; position: string; alt: string }> = {
+  /* From the page's own new showcase — Puzzle's identity, not a stock desk. */
   "brand-identity": {
-    src: "/work/services/brand-identity.png",
-    position: "40% 50%",
-    alt: "A printed identity system: blue cards, a type specimen and a guidelines document",
+    src: "/work/brand-identity/puzzle-stationery.png",
+    position: "50% 50%",
+    alt: "Puzzle — business cards and a brand box in blue and white, the puzzle-piece mark repeating across the set",
   },
   /* Keyed to the merged service. `web-development.png` is no longer referenced:
-     there is one web card now, and it is this one. */
+     there is one web card now, and it is this one. Panel 2 of that page's
+     showcase — square, so the vertical half of the position is what matters. */
   "web-design-development": {
-    src: "/work/services/web-design.png",
-    position: "44% 50%",
-    alt: "A website design shown on a laptop under coloured studio lighting",
+    src: "/work/web-design/levant-tee.png",
+    position: "50% 45%",
+    alt: "LEVANT — the 001 tee product page open on a phone against an orange set",
   },
   "ux-ui-design": {
     src: "/work/ux-ui-design/south-downs-app.png",
     position: "50% 42%",
     alt: "South Downs Plant & Machinery — the machine search on a phone, against the interface library it was built from",
   },
+  /* Panel 1 of that page's 2x2 — the laptop, not the phone, so this card does
+     not read as a near-repeat of the two phones either side of it. */
   "digital-product-design": {
-    src: "/work/services/digital-product-design.png",
-    position: "35% 50%",
-    alt: "A product dashboard on a tablet, with a phone and a design system panel",
+    src: "/work/digital-product-design/journal-laptop.png",
+    position: "50% 45%",
+    alt: "Bespoke Garden Decor — a journal article on choosing timber, open on a laptop above a full-width photograph",
   },
-  "motion-video": {
-    src: "/work/services/motion-video.png",
-    position: "37% 50%",
-    alt: "A video edit timeline with the finished frame previewed alongside it",
+  /* The one card that is not a mockup, which is the point: it is the only
+     service whose output is the image itself. */
+  "ai-design": {
+    src: "/work/ai-design/generative-lattice.png",
+    position: "50% 50%",
+    alt: "Generated study — a honeycomb lattice of overlapping cells, shading from deep violet through coral into orange",
+  },
+  /* The campaign shot, which is the only card showing a whole site rather than
+     a device — apt for the one service that is not a single discipline. Green
+     and dark, so it does not read as a repeat of the orange LEVANT card three
+     places ahead of it. */
+  retainer: {
+    src: "/work/gallery/levant-campaign.png",
+    position: "50% 50%",
+    alt: "LEVANT — the campaign site, its headline set over footage from the court",
   },
 };
 
@@ -233,17 +260,25 @@ export function ServicesPanels() {
                      three and a half. A clamp between those would pass through
                      awkward middles.
 
-                       base   88vw   ~1.1 cards   (390px -> 343px card)
-                       sm     44vw   ~2.3 cards   (768px -> 338px card)
-                       lg     29vw   ~3.4 cards   (1920px -> 557px card)
+                       base   64vw   ~1.6 cards   (390px -> 250x312 card)
+                       sm     34vw   ~2.9 cards   (768px -> 261x326 card)
+                       lg     22vw   ~4.5 cards   (1920px -> 422x528 card)
 
-                     16/9 rather than the artwork's own 3:2 because these are
-                     landscape cards sitting under a headline, and 3:2 is taller
-                     than the hero can spare on a laptop. The crop it asks of the
-                     picture is a consistent 16% off the height, taken evenly top
-                     and bottom, and it matches the featured work tile's
-                     `lg:aspect-[16/9]`. */
-                  className="group relative mr-1 aspect-[16/9] w-[88vw] shrink-0 self-start overflow-hidden rounded-xl border border-rule bg-ink-raised sm:w-[44vw] lg:w-[29vw]"
+                     **4:5, portrait.** These were 16/9 and read as banners
+                     rather than as cards. The width had to come down with the
+                     ratio rather than the height simply going up: the hero is
+                     `min-h-svh` with the rail taking what is left, so height
+                     added here is height added to the hero, and at 29vw a 4:5
+                     card is 696px tall on a 1920 display. Narrowing to 22vw
+                     buys most of that back and puts more cards on screen than
+                     before, which suits a strip that is already moving.
+
+                     The crop moved with it. Every source is 1:1 or wider and
+                     the box is now 0.8, so `object-cover` fits to height and
+                     crops horizontally on all five — the opposite of before.
+                     That makes the FIRST number of each `position` the one
+                     doing the work; they are retuned in the ART map above. */
+                  className="group relative mr-1 aspect-[4/5] w-[64vw] shrink-0 self-start overflow-hidden rounded-xl border border-rule bg-ink-raised sm:w-[34vw] lg:w-[22vw]"
                 >
                 {/* Art and scrim are card-level layers, not part of the link's
                     flow, so the copy keeps exactly the position it had. */}
@@ -256,7 +291,7 @@ export function ServicesPanels() {
                       /* Matches the card widths exactly, so the browser picks a
                          source for the box it will actually be drawn into
                          rather than over-fetching. */
-                      sizes="(min-width: 1024px) 29vw, (min-width: 640px) 44vw, 88vw"
+                      sizes="(min-width: 1024px) 22vw, (min-width: 640px) 34vw, 64vw"
                       className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] group-focus-within:scale-[1.03] motion-reduce:transform-none motion-reduce:transition-none"
                       style={{ objectPosition: art.position }}
                       draggable={false}

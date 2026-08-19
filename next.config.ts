@@ -38,6 +38,18 @@ const nextConfig: NextConfig = {
         destination: "/services/web-design-development",
         permanent: true,
       },
+      /**
+       * Motion and video is no longer a service. There is no successor page to
+       * send it to — unlike the web merge, this was not two things becoming
+       * one — so it lands on the services index, which is the nearest honest
+       * answer to "what do you actually offer". Permanent, for the same reason
+       * the entry was deleted rather than hidden.
+       */
+      {
+        source: "/services/motion-video",
+        destination: "/services",
+        permanent: true,
+      },
     ];
   },
 };

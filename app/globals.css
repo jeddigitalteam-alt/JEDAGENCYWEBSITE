@@ -186,6 +186,33 @@ body {
   }
 }
 
+/* The class form of the same thing, for `components/ui/Marquee.tsx`.
+   Everything else on the site writes this inline as
+   `motion-safe:animate-[marquee_38s_linear_infinite]`; that component arrived
+   asking for `animate-marquee` / `animate-marquee-reverse` and reading its
+   duration from a `--duration` custom property, so the two class names are
+   defined here rather than the component being rewritten to match. Same
+   keyframes as the rails above — no second copy.
+
+   Reverse is a separate property, not a competing `animation` shorthand: the
+   component applies BOTH classes when direction is "right", so anything that
+   re-declared `animation` would be settling the conflict on source order. */
+.animate-marquee {
+  animation: marquee var(--duration, 30s) linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation-direction: reverse;
+}
+
+/* Reduced motion gets the ribbon standing still rather than removed — the
+   words are content, and `motion-safe:` is how the rest of the site says this. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+}
+
 /* ============================================================
    The underlapping footer
 

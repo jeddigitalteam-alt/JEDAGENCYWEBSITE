@@ -21,6 +21,7 @@ const ROUTES = [
   "/work/levant",
   "/services",
   "/services/brand-identity",
+  // /services/motion-video 308s to /services — it is not a page any more.
   // The pages carrying an editorial run and a showcase grid — the shapes most
   // likely to regress. /services/web-design and /services/web-development both
   // 308 here and are not pages any more.
@@ -29,6 +30,8 @@ const ROUTES = [
   "/services/ai-design",
   // The only grid with a moving panel outside the web page.
   "/services/digital-product-design",
+  // Two showcase grids, a coverflow between them, and eight chapters.
+  "/services/retainer",
   "/industries",
   "/industries/sports",
   // /how-we-work now 308s to /work#how-we-work — it is not a page any more.

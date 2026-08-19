@@ -7,7 +7,9 @@ import { Eyebrow } from "@/components/ui/primitives";
 import RevealHeading from "@/components/motion/RevealHeading";
 import ServiceChapter from "@/components/services/ServiceChapter";
 import ServiceShowcase from "@/components/services/ServiceShowcase";
+import ShowcaseGrid from "@/components/services/ShowcaseGrid";
 import CoverflowCarousel from "@/components/ui/CoverflowCarousel";
+import Marquee from "@/components/ui/Marquee";
 
 export function generateStaticParams() {
   return SERVICES.map((s) => ({ slug: s.slug }));
@@ -100,6 +102,50 @@ export default async function ServicePage({
           {service.chapters.map((chapter, i) => (
             <Fragment key={chapter.statement.roman}>
               <ServiceChapter chapter={chapter} />
+
+              {service.marquee?.afterChapter === i ? (
+                <Marquee
+                  speed={38}
+                  /* `marginTop: 0` cancels the component's own `mt-10 sm:mt-24`.
+                     The grid already puts 96px (128 from md) either side of any
+                     child, which is the breathing room this wants; the two
+                     stacked would have made the ribbon float in a gap twice the
+                     size of every other break on the page. Inline rather than a
+                     class because `cn` here is a plain join, so two competing
+                     margin utilities would be settled by stylesheet order. */
+                  style={{ marginTop: 0 }}
+                  /* Decorative, and the track is rendered twice — without this
+                     a screen reader reads the eight verbs, then reads them
+                     again. The argument they illustrate is in the two chapters
+                     either side, in full. */
+                  aria-hidden="true"
+                  /* The inner track is capped at 90vw by the component;
+                     centring it stops the ribbon dying 80px short of the right
+                     edge at 1440 while touching the left. */
+                  className="[&>div]:mx-auto"
+                >
+                  {service.marquee.words.map((word, w) => (
+                    <span key={`${word}-${w}`} className="flex shrink-0 items-center">
+                      {/* Roman and italic alternating — the same pairing the
+                          headings use, so the ribbon reads as this site's
+                          typography rather than as a ticker. Dim, because at
+                          section-heading size in full-strength ink it would
+                          outweigh the two statements it sits between. */}
+                      <span
+                        className={`display text-step-4 text-content-dim ${
+                          w % 2 ? "italic" : ""
+                        }`}
+                      >
+                        {word}
+                      </span>
+                      <span
+                        className="mx-8 h-1.5 w-1.5 shrink-0 rounded-full bg-accent md:mx-12"
+                      />
+                    </span>
+                  ))}
+                </Marquee>
+              ) : null}
+
               {service.carousel?.afterChapter === i ? (
                 <CoverflowCarousel
                   slides={service.carousel.slides}
@@ -116,6 +162,16 @@ export default async function ServicePage({
                      keeps the centre card usable at 390, where the neighbours
                      fall outside the frame and clip rather than overflow. */
                   cardWidth="clamp(240px, 30vw, 430px)"
+                />
+              ) : null}
+
+              {/* The same `ShowcaseGrid` as the one under the opening
+                  statement, further down the run. No wrapper and no ratio of
+                  its own, so the two grids on a page are identical boxes. */}
+              {service.grid2?.afterChapter === i ? (
+                <ShowcaseGrid
+                  media={service.grid2.media}
+                  ratio={service.grid2.ratio}
                 />
               ) : null}
             </Fragment>

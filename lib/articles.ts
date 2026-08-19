@@ -186,7 +186,7 @@ export const ARTICLES: Article[] = [
 
       h2("The animation almost everyone under-invests in"),
       p("It is the one between pages. It is the only moment where a user genuinely loses their place, and on most sites it is a hard cut: the current page vanishes, the new one appears, the scroll position jumps to the top, and the reader reassembles the context themselves."),
-      p("Treating that moment as a designed transition rather than an absence is one of the cheapest improvements available to most sites. It is also most of what we mean by [motion and video](/services/motion-video) as a discipline: the moving parts of a brand, made to do a job rather than to be admired."),
+      p("Treating that moment as a designed transition rather than an absence is one of the cheapest improvements available to most sites. It is also most of what motion is for: the moving parts of a brand, made to do a job rather than to be admired."),
 
       h2("Motion and the people who asked for less of it"),
       p("`prefers-reduced-motion` is not an edge case, and it is not only about vestibular disorders — plenty of people simply turn it on. Respecting it does not mean removing feedback. It means removing travel: keep the state change, drop the distance, shorten or remove the transition."),

@@ -975,11 +975,54 @@ usable at 390, where the neighbours fall outside the frame and are clipped by
 the frame's own `overflow-hidden` — which is why there is no page overflow at
 any width.
 
-**Four slides is the minimum this can take.** With `loop` on, a card is
+**Slide count decides how deep the rake reads.** With `loop` on, a card is
 teleported across the ring at exactly half a turn out, so `edge` fades it to
-zero at `count / 2`. At four, the distance-2 card is always invisible and you
-see three: centre plus both neighbours. That reads correctly, but adding a fifth
-asset would show four, and going below four would break the effect.
+zero at `count / 2`. It ran on four to begin with, which showed three — centre
+plus one either side — and looked thin. It now carries **seven** studies of its
+own in `public/work/ai-design/carousel/`, which shows all seven: centre plus
+three receding on each side. Four is the floor; below that the effect collapses.
+
+Those seven are separate from the four in the 2×2 grid above, deliberately —
+the grid ran the same images twice on one page while there was nothing else to
+use. Six of the seven are 1:1; `filigree-cathedral.png` is 1148×1371 and the
+square card centre-crops it, which costs the top of the spire. `CoverflowSlide`
+has no per-slide `object-position` and adding one would mean editing the
+supplied component, so it is left centred.
+
+## The ribbon between Exploration and Judgement
+
+`components/ui/Marquee.tsx` is a second supplied component, kept as it arrived.
+It needed **no new keyframes**: the site already had `@keyframes marquee` for
+the clients rail, the services panels and the process timeline, all using the
+same duplicated-track, translate-by-`-50%` trick. Only the two class names the
+component asks for were added beside those keyframes — `.animate-marquee` (the
+`animation` shorthand, reading `--duration`) and `.animate-marquee-reverse`.
+
+**Reverse is `animation-direction`, not a second `animation` shorthand.** The
+component applies *both* classes when `direction="right"`, so anything that
+re-declared `animation` would be resolving the conflict on stylesheet order.
+Different property, no contest.
+
+Two things are passed at the call site rather than changed in the component:
+
+- `style={{ marginTop: 0 }}` cancels its own `mt-10 sm:mt-24`. The chapters grid
+  already puts 128px either side of any child, and the two stacked would have
+  floated the ribbon in a gap twice the size of every other break on the page.
+  Inline, not a class, because `cn` here is a plain join — two competing margin
+  utilities would be settled by stylesheet order, not by argument order.
+- `className="[&>div]:mx-auto"` centres the inner track. It is capped at `90vw`
+  by the component, which at 1440 is 1296px inside a 1376px column — left-
+  aligned it died 80px short on the right while touching the left.
+
+`aria-hidden` on the whole strip: the track is rendered twice, so without it a
+screen reader reads the eight verbs and then reads them again. They are
+decorative — the argument they illustrate is in the two chapters either side.
+Note that `innerText` is **not** the way to check this; it reflects rendering,
+not the accessibility tree. `locator.ariaSnapshot()` is (and `page.accessibility`
+no longer exists in this Playwright).
+
+Placement is the `carousel` pattern again — `Service.marquee.afterChapter`, set
+to 0. Six other service pages were checked and carry none.
 
 ### A parsing trap when testing it
 
@@ -987,6 +1030,120 @@ The browser rewrites `calc(-50% + -452px)` as `calc(-50% - 452px)` on the way
 into `style.transform`. A regex expecting a signed number silently returns null
 for every card left of centre, which looks like the layout has collapsed. Read
 the sign as an operator.
+
+## Motion and video is gone, and Brand Identity got a grid
+
+**Removing the service was one deleted array entry.** The header dropdown, the
+mobile nav, the footer, the services index, the homepage cards, the scope
+builder, the contact form and `generateStaticParams` all read `SERVICES`, so
+nothing else needed touching. Four things did not derive from it and were fixed
+by hand: the hardcoded "Seven ways we can help" on `/services` (now six), a
+`[motion and video](/services/motion-video)` link inside
+`the-tenth-screen`, the `motion-video` key in the homepage `ART` map, and a
+308 to `/services` in `next.config.ts`. No successor page, so it lands on the
+index rather than pretending one service replaced it.
+
+Five files under `public/work/services/` are now unreferenced —
+`brand-identity`, `web-design`, `web-development`, `digital-product-design` and
+`motion-video`. Left on disk deliberately; deleting them is a separate decision.
+
+**The homepage cards now show work from the pages they link to.** Only the UX
+and UI card did before; the rest pointed at generic stock. They are also chosen
+to stay distinct from one another — stationery, a phone on coral, a machine
+search, a laptop, a generated abstract — because five variations of a screen on
+a desk read as one repeated card sliding past. `object-position` still matters
+and is set per card: landscape sources crop horizontally, square ones crop
+vertically, so which number does the work depends on the source.
+
+**Brand Identity is now `paper: true`**, and that is not a style preference.
+The grid's gutters are the page showing through rather than a drawn divider, so
+the white cross between the four tiles only exists on a light surface — the
+requirement was that it match the other four galleries exactly, and on ink it
+cannot. Its grid is `aspect-[5/4]`: three sources are 1.25:1 and fit to the
+pixel, and the crop that remains falls on the clip.
+
+### The clip is not the one on the product page
+
+`345308 (2).mp4` in the staging folder **was replaced** between the product page
+work and this. The old one was 29.6MB and 59.8s of foliage over the Bespoke
+Garden Decor homepage; the new one is 1.7MB and 6.5s of the LEVANT drop 001
+campaign. Different footage, not a re-encode — so
+`digital-product-design/interface-motion.mp4` still holds the original and
+**still weighs 29.6MB**. That is the one outstanding performance problem on the
+site. Do not assume the two are interchangeable: the file name was reused, the
+content was not. This one is named `levant-campaign-film.mp4` for that reason.
+
+## The homepage cards went portrait, and the hero grew
+
+`aspect-[16/9] w-[88vw] sm:w-[44vw] lg:w-[29vw]` became
+`aspect-[4/5] w-[64vw] sm:w-[34vw] lg:w-[22vw]` on the card `<li>` in
+`ServicesPanels`. That one class list is the whole change; `sizes` was updated
+to match so the optimiser still fetches for the box it draws into.
+
+**The width had to come down with the ratio, not just the height go up.** The
+hero is `min-h-svh` with the rail taking whatever is left, so height added to a
+card is height added to the hero. At the old 29vw a 4:5 card is 696px tall on a
+1920 display. 22vw buys most of that back and puts 4.5 cards on screen instead
+of 3.4, which suits a strip that is already moving.
+
+**It still costs hero height, and that is the trade-off to know about.** The
+hero now runs past the viewport by roughly 165–260px on desktop where it was
+0–110px, so the standfirst and the scroll counter sit below the fold on a short
+laptop. There is no arrangement that keeps a 4:5 card, a full headline, a CTA
+and the standfirst inside one screen — the only levers are narrower cards or
+less hero. Left as asked; revisit by dropping `lg:w-[22vw]` to about 18vw if
+the fold matters more than the card size.
+
+**The crop flipped axis.** Every source is 1:1 or wider and the box is now 0.8,
+so `object-cover` fits to height and crops horizontally on all five — the
+opposite of before. The first number of each `position` in the ART map is now
+the one doing the work; the second is inert.
+
+Speed did not need touching: `useMarqueeRail` derives `--cycle` from the
+measured track at a fixed `PX_PER_SECOND`, so a narrower track simply produced
+a shorter cycle (31.8s against 56s) at the same travel rate.
+
+### Two measurement traps, both in the test rather than the page
+
+A `fill` image inside a card with `border border-rule` is `inset-0` on the
+*padding* box, so the picture is exactly 2px smaller than the card in each
+axis. That is not a letterbox.
+
+`getBoundingClientRect()` on a 3D-rotated element returns its **projected** box
+— the coverflow's raked neighbours measure 0.84 while being perfectly square.
+Use `offsetWidth`/`offsetHeight` when the question is about the element rather
+than about what it covers on screen.
+
+## The retainer page, and the second grid
+
+The retainer was already a service with a stub page. It now carries the fullest
+editorial run on the site: a showcase, **two** `ShowcaseGrid`s with the shared
+coverflow between them, and eight chapters.
+
+`Service.grid2` is the new field — the third to take `afterChapter`, alongside
+`carousel` and `marquee`, and it works identically. One `ShowcaseGrid` under
+the opening statement, another dropped in after a chapter, both inheriting the
+chapters grid's `gap-24 md:gap-32`. No wrapper, no ratio of its own.
+
+**Fifteen assets, all referenced where they already live.** Nothing was copied
+into a retainer folder — the whole point of the page is that the studio's
+existing work is the evidence. Zero AI Design imagery anywhere on it, which was
+an explicit requirement and is asserted rather than assumed.
+
+**Two pairs of files on this site are byte-identical**, which matters when
+picking a spread that must not repeat itself:
+
+    gallery/bespoke-garden-decor-products.png  ==  web-design/bespoke-garden-decor.png
+    ux-ui-design/south-downs-app.png           ==  web-design/south-downs.png
+
+Found by hashing, not by looking — the filenames give no hint. There are 12
+distinct 1:1 sources on the site, not the 14 the directory listing suggests,
+which is why both retainer grids are square and use the pool carefully.
+
+`SHOWN` in `ServicesPanels` was `SERVICES.slice(0, 5)`. That slice meant "all
+except the retainer" and existed only because the retainer had nothing worth
+linking to. It is now plain `SERVICES`, so a service added to the data appears
+on the homepage without touching that file — it only needs an `ART` entry.
 
 ## Open / needs input
 

@@ -26,7 +26,7 @@ export default function ServicesPage() {
         <RevealHeading
         as="h2"
         className="display mt-4 max-w-[18ch] text-step-5"
-        roman="Seven ways we"
+        roman="Six ways we"
         italic="can help"
       />
         <p className="mt-6 max-w-[54ch] text-step-0 text-content-dim">

@@ -121,6 +121,32 @@ export interface Service {
     slides: { src: string; alt: string }[];
   };
   /**
+   * A typographic ribbon travelling between two chapters.
+   *
+   * Same shape as `carousel` and for the same reason: `afterChapter` is the
+   * index it follows, so only the service that declares one renders one, and
+   * the template never learns which page it is on.
+   */
+  marquee?: {
+    afterChapter: number;
+    /** Set alternately roman and italic, in the display face. */
+    words: string[];
+  };
+  /**
+   * A second showcase grid, later in the editorial run.
+   *
+   * `showcase.media` is the first one and sits under the opening statement;
+   * this is the same `ShowcaseGrid` dropped in after a chapter, for a page with
+   * enough ground to cover that one grid at the top would be the only pictures
+   * in a long read. Third field to take `afterChapter`, alongside `carousel`
+   * and `marquee`, and it works the same way.
+   */
+  grid2?: {
+    afterChapter: number;
+    media: ShowcaseMedia[];
+    ratio?: string;
+  };
+  /**
    * Search title and description, where the nav one-liner is not the right
    * thing to hand a search engine. `name` and `summary` are written for a
    * dropdown — short, and assuming you already know it is a design studio —
@@ -163,6 +189,57 @@ export const SERVICES: Service[] = [
       { name: "System and rules", weeks: 2 },
     ],
     headline: { roman: "An identity that", italic: "holds up unattended" },
+    /* Paper, like every other page carrying a showcase. Not decoration: the
+       grid's gutters are the page showing through rather than a drawn divider,
+       so the white cross between the four tiles only exists on a light surface.
+       On ink this same grid reads as four tiles separated by dark, which is a
+       different thing entirely. */
+    paper: true,
+    showcase: {
+      statement: {
+        roman: "The mark is the start of it,",
+        italic: "not the job",
+      },
+      body: [
+        "An identity is a system rather than a picture. The mark matters, but what decides whether it holds together is everything around it — the type, the spacing, the colour rules, and the templates somebody reaches for at eleven at night.",
+        "So the parts that get used most are the parts we design hardest, and what is allowed gets written down. Not a hundred pages nobody opens: the decisions that actually come up every week, answered clearly enough that a new person makes the right one without having to ask.",
+        "The test is never the launch. It is month seven, when the people who commissioned it have moved on and the brand is being applied by someone who was never in the room.",
+      ],
+      /* Three of the four sources are 1.25:1 and the fourth is the clip. At 5:4
+         the stills fit to the pixel and the crop that remains falls on the
+         video, where a moving background has nothing to lose — the same call
+         the AI page's grid makes. */
+      ratio: "aspect-[5/4]",
+      media: [
+        {
+          kind: "image",
+          src: "/work/brand-identity/puzzle-stationery.png",
+          alt: "Puzzle — business cards and a brand box in blue and white, the puzzle-piece mark repeating across the set",
+          width: 1402,
+          height: 1122,
+        },
+        {
+          kind: "video",
+          src: "/work/brand-identity/levant-campaign-film.mp4",
+          label:
+            "LEVANT — the drop 001 campaign film, the wordmark and headline set over footage from the court",
+        },
+        {
+          kind: "image",
+          src: "/work/brand-identity/levant-poster.png",
+          alt: "LEVANT — a bus shelter poster at dusk, the wordmark over a sunset court",
+          width: 1397,
+          height: 1126,
+        },
+        {
+          kind: "image",
+          src: "/work/brand-identity/bespoke-type-specimen.png",
+          alt: "Bespoke Garden Decor — the brand typeface shown as a specimen beside the logotype and its weights",
+          width: 1402,
+          height: 1122,
+        },
+      ],
+    },
   },
   /**
    * Web design and web development were two services and are now one.
@@ -533,27 +610,13 @@ export const SERVICES: Service[] = [
       },
     ],
   },
-  {
-    slug: "motion-video",
-    name: "Motion and video",
-    summary: "Motion with a reason, cut to the length it earns.",
-    intro:
-      "Motion should explain something or acknowledge something. If it does neither, it is a loading delay with ambition.",
-    deliverables: [
-      "Motion principles and timing scale",
-      "Launch film or product demo",
-      "Social cutdowns",
-      "Lottie or code-based UI motion",
-      "Sound design",
-    ],
-    phases: [
-      { name: "Concept and script", weeks: 1 },
-      { name: "Storyboard", weeks: 1 },
-      { name: "Production", weeks: 2 },
-      { name: "Edit and grade", weeks: 2 },
-    ],
-    headline: { roman: "Motion that", italic: "means something" },
-  },
+  /* Motion and video was removed as a service. Everything that listed it —
+     the header dropdown, the mobile nav, the footer, the services index, the
+     homepage cards, the scope builder, the contact form and
+     `generateStaticParams` — reads this array, so deleting the entry was the
+     whole change. `/services/motion-video` 308s to `/services`; see
+     `next.config.ts`. The motion work itself has not gone anywhere: the moving
+     panels on the web and product pages are still there. */
   /**
    * Two subjects on one page, deliberately: using AI in the creative process,
    * and designing the products that use it. They are the same argument seen
@@ -644,33 +707,65 @@ export const SERVICES: Service[] = [
         },
       ],
     },
+    /* Between Exploration and Judgement. The verbs the page argues about, in
+       the order the work actually happens — and it ends on "judge", which is
+       the word the chapter underneath it opens on. */
+    marquee: {
+      afterChapter: 0,
+      words: [
+        "Generate",
+        "Explore",
+        "Iterate",
+        "Refine",
+        "Question",
+        "Select",
+        "Design",
+        "Judge",
+      ],
+    },
     /* Sits after chapter 1 — between "Speed without judgement is just more
        noise" and "If the product thinks, the interface has to explain" — where
        the page wants a pause between two dense arguments. Image-only: no
        caption, no dots, no arrows, no heading.
 
-       The same four studies as the grid above, which is what was asked for and
-       is all the AI page has. They read differently here: square-cropped,
-       raked back in 3D and moving, against a static 5:4 grid two screens up. */
+       Seven studies of its own, separate from the four in the grid above — at
+       seven the fold keeps three cards either side of the centre visible
+       instead of one, which is what the effect wants.
+
+       Copied out of the `&` staging folder into `carousel/` on the way in, per
+       the convention the rest of the site follows: a literal `&` in an asset
+       path passes `next dev` and 404s in a production build. */
     carousel: {
       afterChapter: 1,
       label: "Generated studies from the studio's own exploration",
       slides: [
         {
-          src: "/work/ai-design/expedition.png",
-          alt: "Generated study — a lone figure in an exposure suit walking through dust towards a distant industrial city",
+          src: "/work/ai-design/carousel/iridescent-film.png",
+          alt: "Generated study — a macro of oil and bubbles on water, refracting magenta, amber and cyan against black",
         },
         {
-          src: "/work/ai-design/generative-lattice.png",
-          alt: "Generated study — a honeycomb lattice of overlapping cells, shading from deep violet through coral into orange",
+          src: "/work/ai-design/carousel/glass-nave.png",
+          alt: "Generated study — a vast glass and gold nave receding to a lit vertical seam, a single figure at the centre",
         },
         {
-          src: "/work/ai-design/silhouette.png",
-          alt: "Generated study — a figure pressed against red backlit glass, one hand raised, the silhouette diffused",
+          src: "/work/ai-design/carousel/salvage-walker.png",
+          alt: "Generated study — a vast four-legged machine built from salvaged plate, one lit eye, standing in rain over flooded ground",
         },
         {
-          src: "/work/ai-design/voxel-field.png",
-          alt: "Generated study — a dark field of small tiles rolling in waves, catching a single cold highlight",
+          src: "/work/ai-design/carousel/filigree-cathedral.png",
+          alt: "Generated study — a white filigree cathedral of woven tracery and statuary against a bright blue sky",
+        },
+        {
+          src: "/work/ai-design/carousel/particle-portrait.png",
+          alt: "Generated study — a profile in shadow dissolving into orange and cyan shards at the edge of the face",
+        },
+        {
+          src: "/work/ai-design/carousel/glass-garden.png",
+          alt: "Generated study — a woodland of transparent glass flowers and ferns above a stream, lit through mist",
+        },
+        {
+          src: "/work/ai-design/carousel/glass-city.png",
+          alt: "Generated study — a plaza of coloured glass towers and bridges reflected in wet stone, one figure crossing",
         },
       ],
     },
@@ -729,20 +824,246 @@ export const SERVICES: Service[] = [
     slug: "retainer",
     name: "Retainer",
     summary: "A standing arrangement for teams who keep shipping.",
+    /* Not rendered on this page — the showcase carries the argument. Kept as
+       the service's canonical one-liner. */
     intro:
       "A fixed number of days a month, spent on whatever is most useful. No scoping ceremony for every small piece of work.",
+    metaTitle: "Design retainer",
+    metaDescription:
+      "An ongoing design retainer from a Hampshire studio: retained creative support across brand, web, UX and product design, for teams with a steady stream of work rather than one project.",
     deliverables: [
       "Named team and fixed monthly days",
-      "Shared board and weekly call",
-      "Design system upkeep",
-      "Quarterly review",
-      "First refusal on your calendar",
+      "Shared board and a standing call",
+      "Work across brand, web, UX, product and campaign",
+      "Design system and component upkeep",
+      "Context kept between briefs, not rebuilt",
+      "Quarterly review of what the days are buying",
     ],
     phases: [
       { name: "Onboarding", weeks: 1 },
       { name: "Rolling delivery", weeks: 4 },
     ],
-    headline: { roman: "Standing capacity,", italic: "no ceremony" },
+    headline: {
+      roman: "Better work starts when we",
+      italic: "stop starting over",
+    },
+    paper: true,
+    showcase: {
+      statement: {
+        roman: "A project begins by explaining everything.",
+        italic: "This begins where we left off",
+      },
+      body: [
+        "The expensive part of hiring a studio is rarely the work. It is the fortnight either side of it — explaining the product, the audience, the internal politics, the three things that were tried in 2023 and quietly abandoned, and the one thing the founder will never approve.",
+        "Do that once and it is an investment. Do it every time something needs designing, with a different supplier each time, and it is a tax you pay for the privilege of starting again.",
+        "A retainer is the arrangement where that context stops being thrown away. The same people, a known number of days a month, pointed at whatever is most useful — and each brief starting from somewhere further along than the last one did.",
+      ],
+      /* Four disciplines, one each: web, interface, product and identity. All
+         referenced where they already live — nothing was copied for this page.
+         Three are 1:1 and fit the square tile exactly; the stationery shot is
+         1.25 and gives up a fifth of its width, which lands on the dark ground
+         either side of a centred box. */
+      media: [
+        {
+          kind: "image",
+          src: "/work/web-design/bespoke-garden-decor.png",
+          alt: "Bespoke Garden Decor — the products page, its handcrafted range laid out in a three-column grid",
+          width: 2000,
+          height: 2000,
+        },
+        {
+          kind: "image",
+          src: "/work/ux-ui-design/machine-search.png",
+          alt: "South Downs Plant & Machinery — the machine search interface, filters open beside the results",
+          width: 2000,
+          height: 2000,
+        },
+        {
+          kind: "image",
+          src: "/work/digital-product-design/journal-laptop.png",
+          alt: "Bespoke Garden Decor — a journal article on choosing timber, open on a laptop above a full-width photograph",
+          width: 2000,
+          height: 2000,
+        },
+        {
+          kind: "image",
+          src: "/work/brand-identity/puzzle-stationery.png",
+          alt: "Puzzle — business cards and a brand box in blue and white, the puzzle-piece mark repeating across the set",
+          width: 1402,
+          height: 1122,
+        },
+      ],
+    },
+    /* The same component the AI page uses, with its own slides — seven pieces
+       of client work rather than generated studies, so the two pages configure
+       one carousel independently. Sits after MOMENTUM, between the two grids. */
+    carousel: {
+      afterChapter: 1,
+      label: "A cross-section of work from across the studio's disciplines",
+      slides: [
+        {
+          src: "/work/gallery/south-downs-home.png",
+          alt: "South Downs Plant & Machinery — the homepage, its machine search sitting over a working yard",
+        },
+        {
+          src: "/work/ux-ui-design/levant-product.png",
+          alt: "LEVANT — the product page open on a phone, the garment shown against a coral set",
+        },
+        {
+          src: "/work/gallery/bespoke-garden-decor-journal.png",
+          alt: "Bespoke Garden Decor — the journal index, its articles set as a run of illustrated cards",
+        },
+        {
+          src: "/work/digital-product-design/garden-decor-phone.png",
+          alt: "Bespoke Garden Decor — the homepage on a phone, its quote and services actions set over a finished pergola",
+        },
+        {
+          src: "/work/ux-ui-design/loading-options-spec.png",
+          alt: "An interface specification — loading and empty states drawn out as a set of annotated options",
+        },
+        {
+          src: "/work/web-design/levant-tee.png",
+          alt: "LEVANT — the 001 tee product page open on a phone against an orange set",
+        },
+        {
+          src: "/work/brand-identity/bespoke-type-specimen.png",
+          alt: "Bespoke Garden Decor — the brand typeface shown as a specimen beside the logotype and its weights",
+        },
+      ],
+    },
+    /* Second grid, after JUDGEMENT. Four different pieces from the first — and
+       one of them moves, because by this point in the page a still grid twice
+       would read as the same picture in a different place. */
+    grid2: {
+      afterChapter: 3,
+      media: [
+        {
+          kind: "image",
+          src: "/work/ux-ui-design/enquiry-sheet.png",
+          alt: "South Downs Plant & Machinery — the export enquiry sheet, its steps laid out in black and yellow",
+          width: 1872,
+          height: 1872,
+        },
+        {
+          kind: "video",
+          src: "/work/web-design/levant.mp4",
+          label:
+            "LEVANT — the 001 tee page in motion on a phone, against a coral set",
+        },
+        {
+          kind: "image",
+          src: "/work/digital-product-design/south-downs-export.png",
+          alt: "South Downs Plant & Machinery — the export enquiry steps on a phone, beside the company mark over a working excavator",
+          width: 1254,
+          height: 1254,
+        },
+        {
+          kind: "image",
+          src: "/work/brand-identity/levant-poster.png",
+          alt: "LEVANT — a bus shelter poster at dusk, the wordmark over a sunset court",
+          width: 1397,
+          height: 1126,
+        },
+      ],
+    },
+    chapters: [
+      {
+        eyebrow: "Context",
+        statement: {
+          roman: "No brief should have to",
+          italic: "start at zero",
+        },
+        body: [
+          "Most of what makes a piece of design right is unwritten. Which competitor the board is quietly measuring themselves against. Which word the founder has banned. Which page actually earns the enquiries, and which one everybody talks about but nobody visits.",
+          "None of that arrives in a brief. It accumulates — and when the relationship ends at the end of a project, it is thrown away with it, then paid for again the next time somebody new is hired.",
+          "Kept, it changes what a brief has to contain. \"The usual, but for the trade side\" is a complete instruction to somebody who already knows the product, and a fortnight of discovery to somebody who does not.",
+        ],
+      },
+      {
+        eyebrow: "Momentum",
+        statement: {
+          roman: "Groundwork only has to be",
+          italic: "laid once",
+        },
+        body: [
+          "The first piece of work with anyone is the slowest, and it should be. Type has to be chosen, a grid decided, components drawn, tone argued about, approvals routed through people you have not met.",
+          "The second piece inherits all of it. So does the tenth. What was a fortnight of setup becomes an afternoon of extending something that already exists, and the time saved goes into the part that was always the point — whether the thing is any good.",
+          "That is the practical case for continuity. Not that anyone works faster under a retainer, but that less of the work is spent rebuilding a starting position that was already reached months ago.",
+        ],
+      },
+      {
+        eyebrow: "Flexibility",
+        statement: {
+          roman: "The work changes.",
+          italic: "The relationship does not have to",
+        },
+        body: [
+          "Requirements rarely stay in one discipline. A quarter that starts with a landing page ends up needing a component library, then a campaign, then a rethink of how the enquiry flow actually behaves on a phone.",
+          "Under a project arrangement each of those is a new conversation with a new supplier, each starting at zero. Under a retainer they are the same arrangement pointed somewhere else — brand, web, interface, product or campaign, decided month by month against what is actually in front of you.",
+          "It is worth saying what this is not. It is not unlimited design, and the days are finite. What it removes is the procurement round in the middle, not the need to decide what matters most.",
+        ],
+      },
+      {
+        eyebrow: "Judgement",
+        statement: {
+          roman: "You are retaining the thinking,",
+          italic: "not just the output",
+        },
+        body: [
+          "The weakest version of a retainer is a queue: briefs in one end, assets out the other, nobody asking whether the brief was right. That arrangement produces a great deal of work and very little progress, and it is the reason some teams have tried one and concluded they do not work.",
+          "The useful version is the opposite. Somebody who knows the product well enough to say that the page is not the problem, that the two things being asked for contradict each other, or that this has been tried before and here is why it did not hold.",
+          "That judgement is the part that genuinely compounds. It cannot be bought in for a fortnight, because it is made of everything learned in the months before — and it is worth more than the extra pair of hands most retainers are sold as.",
+        ],
+      },
+      {
+        eyebrow: "Extension",
+        statement: {
+          roman: "Close enough to understand it.",
+          italic: "Outside enough to question it",
+        },
+        body: [
+          "This works alongside an internal team rather than in place of one. Most teams do not need every discipline permanently on staff; they need the ones they are missing, available when the work calls for them, and gone from the payroll when it does not.",
+          "The useful position is a slightly awkward one: close enough to the business to know how it really works, far enough outside it to still notice what everybody internal has stopped seeing. Familiarity is what makes the work fast, and it is also what dulls the questions, so the distance is worth protecting deliberately.",
+          "In practice that means being in the standing call and on the board, and still being the ones who ask why a thing is being done at all.",
+        ],
+      },
+      {
+        eyebrow: "Continuity",
+        statement: {
+          roman: "One project should remember",
+          italic: "the one before it",
+        },
+        body: [
+          "Systems decay fastest at the handovers. A component library built by one supplier and extended by the next drifts within two quarters — two type scales, four button variants, a spacing system nobody can explain.",
+          "Kept in one place, the opposite happens. Decisions get reused rather than relitigated, the system gets tightened instead of forked, and the reasons behind the odd-looking choices survive the person who made them.",
+          "Over a year that difference is not stylistic. It is the difference between a product that feels designed and one that looks like a record of everyone who has touched it.",
+        ],
+      },
+      {
+        eyebrow: "How it runs",
+        statement: {
+          roman: "Four steps, and then",
+          italic: "it just keeps going",
+        },
+        body: [
+          "First, we get close. A short onboarding to learn the product, the brand, the standards and — as much as any of it — how your team actually works, who decides, and how feedback really travels.",
+          "Then we set the rhythm. How work enters the pipeline, how competing priorities get settled, how often we speak. A shared board and a standing call is usually the whole of the machinery; anything heavier tends to become the work rather than serve it.",
+          "Then we keep making. Work moves without rebuilding context for every brief, and the fixed days get pointed wherever they are most useful that month. Every quarter we look back at what those days actually bought, and change where they go if the answer is unconvincing.",
+        ],
+      },
+      {
+        eyebrow: "Who it suits",
+        statement: {
+          roman: "If there is always a next brief,",
+          italic: "stop treating them as separate projects",
+        },
+        body: [
+          "This makes sense for teams with a steady stream of design work rather than one defined thing: an internal marketing or product team that needs capacity it does not have, a business changing quickly enough that the work never really stops, or anyone tired of sourcing and briefing somebody new every quarter.",
+          "It does not make sense for everyone. If you need one identity, or one site, and then nothing for eighteen months, a project is the honest answer and costs less. A retainer only pays for itself where the context has something to accumulate into.",
+          "If the next brief is already forming while the current one is being signed off, that is the signal. Tell us what the year looks like and we will say whether this is the right shape for it.",
+        ],
+      },
+    ],
   },
 ];
 
