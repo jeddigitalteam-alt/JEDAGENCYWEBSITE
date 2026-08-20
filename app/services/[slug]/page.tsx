@@ -8,6 +8,10 @@ import RevealHeading from "@/components/motion/RevealHeading";
 import ServiceChapter from "@/components/services/ServiceChapter";
 import ServiceShowcase from "@/components/services/ServiceShowcase";
 import ShowcaseGrid from "@/components/services/ShowcaseGrid";
+import FAQ, { FaqJsonLd } from "@/components/ui/FAQ";
+import CtaStrip from "@/components/ui/CtaStrip";
+import WhatsAppCta from "@/components/ui/WhatsAppCta";
+import { SERVICE_FAQS } from "@/lib/faqs";
 import CoverflowCarousel from "@/components/ui/CoverflowCarousel";
 import Marquee from "@/components/ui/Marquee";
 
@@ -47,6 +51,7 @@ export default async function ServicePage({
   if (!service) notFound();
 
   const total = service.phases.reduce((n, p) => n + p.weeks, 0);
+  const faqs = SERVICE_FAQS[service.slug] ?? [];
 
   /**
    * The small blue markers — the deliverable arrows and the phase numerals.
@@ -174,6 +179,20 @@ export default async function ServicePage({
                   ratio={service.grid2.ratio}
                 />
               ) : null}
+
+              {/* Renders nothing until a WhatsApp number is configured. */}
+              {service.whatsappAfterChapter === i ? <WhatsAppCta /> : null}
+
+              {/* Breaks the article gutter itself, so it needs no wrapper here
+                  — see the component. */}
+              {service.ctaStrip?.afterChapter === i ? (
+                <CtaStrip
+                  statement={service.ctaStrip.statement}
+                  body={service.ctaStrip.body}
+                  label={service.ctaStrip.label}
+                  secondary={service.ctaStrip.secondary}
+                />
+              ) : null}
             </Fragment>
           ))}
         </div>
@@ -247,6 +266,21 @@ export default async function ServicePage({
           </div>
         </section>
       </div>
+
+      {/* Every service carries its own set — written for that discipline, and
+          the source of both the visible section and its `FAQPage` schema, so
+          the two cannot drift. Sits after the detail and before the links out,
+          which is where someone still deciding actually has questions. */}
+      {faqs.length ? (
+        <>
+          <FaqJsonLd faqs={faqs} />
+          <FAQ
+            faqs={faqs}
+            eyebrow="Questions"
+            className="mt-24 border-t border-rule pt-16 md:mt-32 md:pt-20"
+          />
+        </>
+      ) : null}
 
       <nav className="mt-24 flex flex-wrap gap-3 border-t border-rule pt-8">
         {SERVICES.filter((s) => s.slug !== service.slug).map((s) => (

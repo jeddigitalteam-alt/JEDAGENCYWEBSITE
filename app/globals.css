@@ -186,6 +186,19 @@ body {
   }
 }
 
+/* A slow drift, for the About page's closing sticker. Small enough that it
+   reads as the thing not being quite pinned down rather than as an animation,
+   and stopped entirely by `motion-reduce:animate-none` at the call site. */
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0) rotate(-1.2deg);
+  }
+}
+
 /* The class form of the same thing, for `components/ui/Marquee.tsx`.
    Everything else on the site writes this inline as
    `motion-safe:animate-[marquee_38s_linear_infinite]`; that component arrived

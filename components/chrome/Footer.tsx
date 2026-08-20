@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { SITE } from "@/lib/site";
+import { SITE, CONTACT_CHANNELS, whatsappHref } from "@/lib/site";
 import { SERVICES } from "@/lib/services";
 import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 import { SOCIAL_MARKS } from "@/components/brand/social-marks";
@@ -179,20 +179,50 @@ export function Footer() {
                 — only the visible label changes. Sized at 1.25rem inside a
                 2.5rem target, which keeps the tap area past the 44px floor on
                 a phone while the glyph itself stays quiet. */}
+            {/* All four marks are always drawn. Instagram and LinkedIn come
+                from `SITE.social`; Facebook and WhatsApp read their
+                destinations from `CONTACT_CHANNELS`, which holds `null` for
+                both today.
+
+                A missing destination changes the ELEMENT, not the appearance:
+                the icon renders identically, at the same size and in the same
+                row, but as a `<span role="img">` rather than an `<a>`. So it
+                is not in the tab order, has no href to follow and cannot
+                navigate anywhere — while still reading as a finished part of
+                the set rather than something greyed out or captioned.
+
+                Hover feedback is the one thing the inactive version drops. A
+                background that lights up under the cursor is a promise that
+                clicking does something, and here it does not.
+
+                Fill either value in and that entry becomes a real link with no
+                other change to this file. */}
             <ul className="flex items-center gap-1">
-              {SITE.social.map((s) => {
+              {[
+                ...SITE.social.map((s) => ({ label: s.label, href: s.href as string | null })),
+                { label: "Facebook" as const, href: CONTACT_CHANNELS.facebookUrl },
+                { label: "WhatsApp" as const, href: whatsappHref() },
+              ].map((s) => {
                 const Mark = SOCIAL_MARKS[s.label];
+                const shared =
+                  "flex h-11 w-11 items-center justify-center rounded-full text-content-dim";
                 return (
                   <li key={s.label}>
-                    <a
-                      href={s.href}
-                      rel="noreferrer noopener"
-                      target="_blank"
-                      aria-label={s.label}
-                      className="flex h-11 w-11 items-center justify-center rounded-full text-content-dim transition-colors hover:bg-[color-mix(in_oklab,var(--ink)_12%,transparent)] hover:text-content"
-                    >
-                      <Mark className="h-5 w-5" />
-                    </a>
+                    {s.href ? (
+                      <a
+                        href={s.href}
+                        rel="noreferrer noopener"
+                        target="_blank"
+                        aria-label={s.label}
+                        className={`${shared} transition-colors hover:bg-[color-mix(in_oklab,var(--ink)_12%,transparent)] hover:text-content`}
+                      >
+                        <Mark className="h-5 w-5" />
+                      </a>
+                    ) : (
+                      <span role="img" aria-label={s.label} className={shared}>
+                        <Mark className="h-5 w-5" />
+                      </span>
+                    )}
                   </li>
                 );
               })}

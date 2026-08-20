@@ -1145,6 +1145,104 @@ except the retainer" and existed only because the retainer had nothing worth
 linking to. It is now plain `SERVICES`, so a service added to the data appears
 on the homepage without touching that file — it only needs an `ART` entry.
 
+## About, rebuilt — and the FAQ that now runs site-wide
+
+The old About page was ~900 words of body copy with nothing to look at. Every
+argument it made is still there; most of it is now carried by a component. What
+went: "Why we exist" (three paragraphs) became one statement plus the sticker
+row; "How we show up" (four numbered principles) became the three engagement
+cards; "The journey" was cut outright, because it restated the process every
+service page already publishes phase by phase. **`components/about/AboutJourney.tsx`
+is now orphaned** — left on disk deliberately, deleting it is a separate call.
+
+### The results graphic, and why it charts a schedule
+
+The supplied component arrived with placeholder bars — 35/25/99/37 against
+"competitor 1..4", labelled *conversions*. Those are gone and were **not**
+replaced with invented equivalents.
+
+**There is no defensible performance data in this repository.** `lib/work.ts`
+says so itself: its `outcomes` are deliberately non-numeric ("Launched on
+schedule", "Clearer buying journey") and the comment above them states that
+sell-through and the like are "the client's data to publish, not ours". So the
+chart uses the one honest set of figures the site already publishes — the
+`digital-product-design` phase breakdown, 2/3/3/2 across ten weeks — and the
+section argues from it. A test asserts the four values in the component match
+`lib/services.ts` exactly, so the two cannot drift.
+
+Everything else about the supplied design is intact: candy-striped track, spring
+bar, NumberFlow, the callout with its dot and tail, the stagger. What changed:
+`framer-motion` → `motion/react` (same library, current name); the unused
+`CirclePercent` import removed rather than installing `lucide-react`;
+`lg::text-6xl` (a stray second colon that silently disabled the large size);
+shadcn tokens mapped to the semantic layer; entrance moved to `useInViewOnce`
+so it plays when reached rather than on mount.
+
+`@number-flow/react` is the one dependency added.
+
+### Two things that bit
+
+**The callout overflowed the document on a phone.** It is ~150px wide and a bar
+at 390 is ~78px, so centring it pushed 14px past the edge — real, measured, and
+invisible until something checks `scrollWidth`. Hidden below `sm`; the blue bar
+carries the emphasis on its own at that size.
+
+**NumberFlow keeps every digit 0-9 in a shadow reel** and translates the right
+one into view, so `textContent` on the host is empty and the DOM cannot tell you
+which figure is showing. Assert the element count and check the values at
+source instead of trying to read them off the page.
+
+### FAQ
+
+One component, `components/ui/FAQ.tsx`, used by About and all six service
+pages, with content in `lib/faqs.ts`. `FaqJsonLd` takes the *same array* the
+section renders, so the `FAQPage` schema cannot drift from what is on screen —
+tested per page. Questions are `<h3>` wrapping a real `<button>` with
+`aria-expanded`/`aria-controls`; the panel is removed when closed, not hidden.
+
+Every question is unique across all seven pages. That is asserted, and it caught
+a genuine duplicate — "Do you create prototypes?" was in both the UX/UI and
+digital product sets.
+
+## Contact channels, and the two values that are missing
+
+`CONTACT_CHANNELS` in `lib/site.ts` holds `whatsappNumber` and `facebookUrl`,
+**both `null`**. There is no Puzzle phone number and no Facebook page anywhere
+in this repository — searched for `+44`, `tel:`, `wa.me` and "facebook" across
+every `.ts`, `.tsx`, `.md` and `.json` — so there is nothing to build a `wa.me`
+link out of and nothing to point a Facebook icon at.
+
+Everything downstream checks first and renders **nothing** when the value is
+missing: the two new footer icons, `WhatsAppCta`, and the four places that
+place a WhatsApp strip. Fill either value in and all of them light up at once;
+that is the only change needed. `whatsappHref()` builds the link (digits only,
+message percent-encoded) from the one central value, so no component knows a
+number.
+
+Worth saying explicitly: the number printed on the cards in
+`/work/brand-identity/puzzle-stationery.png` is `+44 20 7946 xxxx`, which is
+Ofcom's reserved range for drama and fiction. It is mockup artwork. It is not a
+contact and must never be wired up.
+
+**`SITE.social` still points Instagram and LinkedIn at `https://instagram.com`
+and `https://linkedin.com`** — the bare sites, not Puzzle accounts. Those were
+already there; they are placeholders too.
+
+## Scope enquiry: the plumbing already existed
+
+The brief asked for the selected scope to be carried into the enquiry rather
+than discarded. It already was: `ScopeBuilder.send()` pushes
+`/contact?scope=<slugs>&weeks=<n>`, `ContactForm` reads both from the query,
+prefills the message, and posts `scope` and `estimatedWeeks` as their own
+Formspree fields. What was missing was any sign of it on screen, so the three
+steps are now labelled — 01 build, 02 review, 03 send — and the button says
+"Send my scope".
+
+`ContactForm` already had `idle | submitting | success | error`, disabled its
+submit while in flight, and refused to send at all without
+`NEXT_PUBLIC_FORMSPREE_ID`. None of that was touched. **That env var is still
+unset**, so submitting shows the "not configured" state rather than pretending.
+
 ## Open / needs input
 
 - **Brand PNGs are absent.** `5.png`, `7.png`, `8.png`, `10.png` were never on

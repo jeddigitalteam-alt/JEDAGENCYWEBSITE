@@ -80,8 +80,12 @@ export function ScopeBuilder({ atTop = false }: { atTop?: boolean }) {
       <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_1.1fr]">
         {/* shelf */}
         <div>
-          <p className="mono mb-4 text-content-dim">
-            Available — {available.length}
+          {/* The three steps are labelled now. The flow was always build →
+              review → send, but nothing on the page said so, and the button at
+              the end was the only instruction anywhere. */}
+          <p className="mono mb-4 flex items-baseline gap-3 text-content-dim">
+            <span className="text-blue">01</span>
+            Build your scope — {available.length} available
           </p>
           <ul className="flex flex-wrap gap-3">
             <AnimatePresence mode="popLayout">
@@ -114,7 +118,10 @@ export function ScopeBuilder({ atTop = false }: { atTop?: boolean }) {
         {/* board */}
         <div className="rounded-2xl border border-rule bg-ink-raised p-5 md:p-6">
           <div className="flex items-baseline justify-between">
-            <p className="mono text-content-dim">Your scope</p>
+            <p className="mono flex items-baseline gap-3 text-content-dim">
+              <span className="text-blue">02</span>
+              Review your scope
+            </p>
             <p className="mono tabular-nums text-content-dim">
               {String(picked.length).padStart(2, "0")} /{" "}
               {String(SCOPE_SERVICES.length).padStart(2, "0")}
@@ -202,18 +209,22 @@ export function ScopeBuilder({ atTop = false }: { atTop?: boolean }) {
               </AnimatePresence>
             </ul>
 
+            <p className="mono mt-8 flex items-baseline gap-3 border-t border-rule pt-6 text-content-dim">
+              <span className="text-blue">03</span>
+              Send it to Puzzle
+            </p>
             <button
               onClick={send}
               disabled={!picked.length}
-              className="mono mt-6 w-full rounded-full bg-blue px-6 py-3.5 text-ink transition-colors enabled:hover:bg-blue-lift enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink-raised disabled:text-content-dim"
+              className="mono mt-4 w-full rounded-full bg-blue px-6 py-3.5 text-ink transition-colors enabled:hover:bg-blue-lift enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink-raised disabled:text-content-dim"
             >
               {picked.length
-                ? `Send this scope — ${estimate.weeks} weeks`
+                ? `Send my scope — ${estimate.weeks} weeks`
                 : "Add a service first"}
             </button>
             <p className="mono mt-3 text-content-dim">
-              Takes you to the contact form with this scope filled in. Nothing
-              is sent yet.
+              Your selections and the estimate travel with you to the enquiry
+              form — nothing is sent until you submit it there.
             </p>
           </div>
         </div>

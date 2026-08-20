@@ -147,6 +147,29 @@ export interface Service {
     ratio?: string;
   };
   /**
+   * A quiet WhatsApp strip after this chapter index.
+   *
+   * Separate from `ctaStrip` so the two never land together: the blue strip is
+   * the section-sized ask, this is a single line. Renders nothing at all until
+   * a WhatsApp number is configured — see `CONTACT_CHANNELS`.
+   */
+  whatsappAfterChapter?: number;
+  /**
+   * A blue CTA band partway down the editorial run.
+   *
+   * Fifth field to take `afterChapter`, and it works like the rest. Only on
+   * the pages with a long enough stretch of consecutive prose to want breaking
+   * up — a strip on a two-screen page is an interruption, not pacing.
+   */
+  ctaStrip?: {
+    afterChapter: number;
+    statement: { roman: string; italic?: string };
+    /** One plain sentence under the statement. */
+    body?: string;
+    label: string;
+    secondary?: { label: string; href: string };
+  };
+  /**
    * Search title and description, where the nav one-liner is not the right
    * thing to hand a search engine. `name` and `summary` are written for a
    * dropdown — short, and assuming you already know it is a design studio —
@@ -326,6 +349,19 @@ export const SERVICES: Service[] = [
             "LEVANT — the 001 tee page in motion on a phone, against a coral set",
         },
       ],
+    },
+    /* Between Design and Build — the one seam on this page, and the point the
+       argument has just finished making. */
+    whatsappAfterChapter: 1,
+    ctaStrip: {
+      afterChapter: 0,
+      statement: {
+        roman: "Want to book an",
+        italic: "intro meeting with us?",
+      },
+      body: "Have a website in mind, or just want to talk an idea through? Tell us where you're at and we'll take it from there.",
+      label: "Book an intro",
+      secondary: { label: "Build a scope", href: "/services#scope" },
     },
     chapters: [
       {
@@ -562,6 +598,19 @@ export const SERVICES: Service[] = [
         },
       ],
     },
+    /* Halfway down four consecutive chapters — after Journeys, before
+       Prototyping, which is the middle of the run. */
+    whatsappAfterChapter: 3,
+    ctaStrip: {
+      afterChapter: 1,
+      statement: {
+        roman: "Got something complicated",
+        italic: "to make feel simple?",
+      },
+      body: "Book an intro and talk it through, or send us a scope if you already know the shape of it.",
+      label: "Book an intro",
+      secondary: { label: "Build a scope", href: "/services#scope" },
+    },
     chapters: [
       {
         eyebrow: "Structure",
@@ -723,6 +772,8 @@ export const SERVICES: Service[] = [
         "Judge",
       ],
     },
+    /* No CTA strip on this page: four chapters with a carousel and a marquee
+       already in among them is enough punctuation. */
     /* Sits after chapter 1 — between "Speed without judgement is just more
        noise" and "If the product thinks, the interface has to explain" — where
        the page wants a pause between two dense arguments. Image-only: no
@@ -965,6 +1016,19 @@ export const SERVICES: Service[] = [
           height: 1126,
         },
       ],
+    },
+    /* Between Continuity and How it runs: the argument is made by that point,
+       and what follows is mechanics. */
+    whatsappAfterChapter: 2,
+    ctaStrip: {
+      afterChapter: 5,
+      statement: {
+        roman: "Want to talk about",
+        italic: "an ongoing arrangement?",
+      },
+      body: "Tell us what the year looks like and we'll say whether a retainer is the right shape for it.",
+      label: "Book an intro",
+      secondary: { label: "Build a scope", href: "/services#scope" },
     },
     chapters: [
       {
