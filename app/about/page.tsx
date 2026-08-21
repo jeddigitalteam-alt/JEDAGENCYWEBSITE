@@ -128,11 +128,16 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* One low-friction option after the two opening text sections, and
-          well clear of the blue CTA at the foot of the page. Renders nothing
-          until a WhatsApp number is configured. */}
+      {/* One low-friction option after the two opening text sections, and well
+          clear of the blue CTA at the foot of the page.
+
+          The padded wrapper is load-bearing: the strip is full-bleed by default and
+          works by cancelling
+          the gutter it inherits, so with no parent padding to cancel it pushes
+          20px (32 from md) past each edge of the document instead. Same wrapper
+          the CTA strips use for the same reason. */}
       <div className="px-5 md:px-8">
-        <WhatsAppCta className="mx-auto w-full max-w-[64rem]" />
+        <WhatsAppCta />
       </div>
 
       {/* ------------------------------------------------- results graphic */}

@@ -262,7 +262,7 @@ export const ARTICLES: Article[] = [
       h2("A working rule"),
       p("Use the tools where the cost was labour. Decline to use them where the cost was judgement. Let them widen the search and shorten the loop, and do not let them make the choice."),
       p("In practice that means being explicit about which mode you are in. Widening — generate freely, cheaply, without attachment. Narrowing — put the generator down and argue from the constraint, the audience and the evidence. Most of the poor outcomes we see come from running both modes at once, where every difficult decision can be deferred by producing one more option."),
-      p("It is how we approach [AI design](/services/ai-design) work, and how we tend to advise teams [building AI products](/industries/ai): the model is a fast collaborator with no stake in the result, which makes it excellent at proposing and unqualified at deciding."),
+      p("It is how we approach [AI design](/services/ai-design) work, and how we tend to advise teams [building AI products](/markets): the model is a fast collaborator with no stake in the result, which makes it excellent at proposing and unqualified at deciding."),
 
       takeaway("Producing more is not the same as producing better. Use these tools to widen the search and shorten the loop, keep the choosing entirely human, and be explicit about which of the two you are doing at any given moment."),
     ],
@@ -384,7 +384,7 @@ export const ARTICLES: Article[] = [
       h2("Making the boundary legible"),
       p("None of this is about making the model seem smarter. It is about making the boundary between the model's capability and the user's judgement legible enough that the user can work with it."),
       p("People are remarkably tolerant of a tool that is wrong in ways they can see and fix, and remarkably intolerant of one that is wrong in ways they cannot predict. Legibility, not accuracy, is what separates the two — which is why the correction path deserves the same care as the generation path, and usually gets a fraction of it."),
-      p("This is the practical half of the argument in [how AI is reshaping creative design](/articles/how-ai-is-reshaping-creative-design): the model proposes, the person decides, and the interface's job is to make that division obvious. It is the shape of most of the [AI product work](/industries/ai) we take on."),
+      p("This is the practical half of the argument in [how AI is reshaping creative design](/articles/how-ai-is-reshaping-creative-design): the model proposes, the person decides, and the interface's job is to make that division obvious. It is the shape of most of the [AI product work](/markets) we take on."),
 
       takeaway("Design the correction path with the same care as the generation path. Make fixing cheap, specific and local; show the basis rather than a confidence score; and prefer undo over confirmation wherever the action can be reversed."),
     ],

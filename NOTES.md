@@ -1243,6 +1243,45 @@ submit while in flight, and refused to send at all without
 `NEXT_PUBLIC_FORMSPREE_ID`. None of that was touched. **That env var is still
 unset**, so submitting shows the "not configured" state rather than pretending.
 
+## Industries became Markets
+
+Nine thin sector pages plus an index said roughly the same thing nine times and
+split their search value between them. They are now one editorial page at
+`/markets`. Deleted: `app/industries/`, `components/industries/`,
+`lib/industries.ts`. All ten old URLs 308 to `/markets` — the index and
+`/industries/:slug` — so nothing 404s.
+
+**Markets is a plain nav link, not a panel.** Industries had a mega-menu column
+listing its nine pages; with one destination there is nothing to drop down to.
+That has a consequence for the test suite: `scripts/verify-chrome.mjs` and
+`scripts/verify-interactions.mjs` still assert an Industries panel exists,
+lists sector links, and closes on Escape. **Those assertions are now stale and
+will fail.** They were not part of the regular run here and are left for a
+deliberate pass rather than half-edited. `verify-routes.mjs` was updated.
+
+`lib/work.ts` keeps its own `industries: string[]` tags on projects. That field
+is work classification, not routing, and nothing pointed at the deleted pages.
+
+## Two collisions worth knowing about
+
+**Every WhatsApp strip is full bleed, with no prop.** `WhatsAppCta` used to
+take a `fullBleed` flag; it is gone, because a variant you have to remember to
+switch on is a variant that gets forgotten. All five placements — About,
+Markets, and the web/product/retainer service pages — are now identical width.
+
+**The full-bleed treatments cancel a gutter they must actually be inside.**
+`CtaStrip` and `WhatsAppCta fullBleed` both work by `-mx-5 md:-mx-8`, the exact
+inverse of the page gutter. Drop one into a container with *no* padding and it
+pushes 20px (32 from md) past each edge of the document — which is precisely
+what happened when the About WhatsApp strip was first placed as a bare sibling.
+Measured as 32px of horizontal overflow on `/about` at every width. The fix is
+the padded wrapper every other use already has.
+
+**The About CTA's calendar is drawn on the same 96-unit grid as the service
+stickers**, deliberately, so it belongs to the family. That means
+`svg[viewBox='0 0 96 96']` now returns seven on `/about`, not six. Scope sticker
+queries to `a svg[...]` — only the six stickers are inside a link.
+
 ## Open / needs input
 
 - **Brand PNGs are absent.** `5.png`, `7.png`, `8.png`, `10.png` were never on

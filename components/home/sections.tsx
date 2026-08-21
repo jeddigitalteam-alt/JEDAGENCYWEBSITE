@@ -15,6 +15,7 @@ import { homepageArticles } from "@/lib/articles";
 import { WORK } from "@/lib/work";
 import { Eyebrow, SectionHeading } from "@/components/ui/primitives";
 import TestimonialQuote from "@/components/home/TestimonialQuote";
+import ReviewCta from "@/components/home/ReviewCta";
 import WorkTile from "@/components/work/WorkTile";
 
 /* ------------------------------------------------------------------ work */
@@ -223,25 +224,33 @@ export function Testimonials() {
        blocks, so it is deliberately more than the 24/32 its neighbours use. */
     <section className="px-5 py-24 md:px-8 md:py-32">
       <Eyebrow>Fit notes</Eyebrow>
-      <SectionHeading
-        roman="What clients said"
-        italic="afterwards"
-        className="mt-4 max-w-[22ch]"
-      />
+      <SectionHeading roman="Testimonials" className="mt-4 max-w-[22ch]" />
 
-      {/* The gap between the quotes is larger than the gap from the heading to
-          the first one, so the heading reads as belonging to the group rather
-          than to the quote directly under it. */}
-      <div className="mt-16 grid gap-24 md:mt-20 md:gap-32">
-        {quotes.map((q) => (
-          <TestimonialQuote
-            key={q.key}
-            rating={q.rating}
-            quote={q.quote}
-            company={q.company}
-            attribution={q.attribution}
-          />
-        ))}
+      {/* Quotes left, the review invitation right. The quotes are set at
+          display size on a wide measure, which left most of the right-hand half
+          of the page empty; widening the measure to fill it would have made
+          them harder to read, so the space carries the one thing this section
+          is actually asking for instead.
+
+          7/5 rather than half and half, and the panel starts at column 9 — the
+          gutter keeps it clear of the longest line of the quote beside it.
+          Below `lg` it drops underneath, where it reads as the last item in the
+          group. */}
+      <div className="mt-16 grid gap-16 md:mt-20 lg:grid-cols-12 lg:gap-16">
+        <div className="grid gap-24 md:gap-32 lg:col-span-7">
+          {quotes.map((q) => (
+            <TestimonialQuote
+              key={q.key}
+              rating={q.rating}
+              quote={q.quote}
+              company={q.company}
+              attribution={q.attribution}
+            />
+          ))}
+        </div>
+        <div className="lg:col-span-4 lg:col-start-9">
+          <ReviewCta />
+        </div>
       </div>
     </section>
   );

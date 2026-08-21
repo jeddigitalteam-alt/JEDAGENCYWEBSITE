@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Eyebrow } from "@/components/ui/primitives";
 import RevealHeading from "@/components/motion/RevealHeading";
 import { SITE } from "@/lib/site";
-import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 
 /**
  * The closing block: a full-bleed blue field with the ask on the left and an
@@ -107,13 +106,36 @@ function MarkSticker({ className = "" }: { className?: string }) {
           strokeLinejoin="round"
         />
       </svg>
-      {/* Centred over the blob. `keyline="none"` because the piece is sitting
-          on white here rather than on the dark header, where the keyline is
-          what separates it from the field behind it. */}
-      <PuzzleSiteLogo
-        keyline="none"
-        className="absolute left-1/2 top-1/2 w-[42%] -translate-x-1/2 -translate-y-1/2"
-      />
+      {/* Centred over the blob. A calendar rather than the puzzle piece: the
+          block asks for an intro meeting, and the mark said "Puzzle" — which
+          the wordmark two feet above it already does. This says what the button
+          does.
+
+          Drawn here rather than pulled from an icon set. `lucide-react` is not
+          a dependency, and a stock calendar at a uniform 2px weight would sit
+          next to the hand-cut service stickers looking like it came from
+          somewhere else. Same 2.6 stroke, same round joins, same blue as the
+          rest of the family — with the two rings at the top and one date
+          filled, which is what makes a rounded box read as a calendar. */}
+      <svg
+        viewBox="0 0 96 96"
+        className="absolute left-1/2 top-1/2 w-[44%] -translate-x-1/2 -translate-y-1/2"
+        aria-hidden="true"
+        focusable="false"
+        fill="none"
+        stroke="var(--blue)"
+        strokeWidth={5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="14" y="24" width="68" height="60" rx="10" />
+        <path d="M14 42h68" />
+        {/* the two hangers */}
+        <path d="M32 14v16M64 14v16" />
+        {/* a fortnight of dates, with one taken */}
+        <path d="M30 56h.01M48 56h.01M66 56h.01M30 70h.01M66 70h.01" />
+        <circle cx="48" cy="70" r="7" fill="var(--blue)" stroke="none" />
+      </svg>
     </div>
   );
 }

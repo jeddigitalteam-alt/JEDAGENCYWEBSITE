@@ -31,7 +31,7 @@ const COLUMN_LINK =
 const STUDIO: [label: string, href: string][] = [
   ["Work", "/work"],
   ["Services", "/services"],
-  ["Industries", "/industries"],
+  ["Markets", "/markets"],
   ["How we work", "/work#how-we-work"],
   ["About", "/about"],
   ["Labs", "/labs"],

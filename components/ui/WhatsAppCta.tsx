@@ -85,11 +85,8 @@ export function WhatsAppCta({
 
   const row = "flex flex-wrap items-center gap-x-5 gap-y-3";
 
-  return (
-    <section
-      className={`border-y border-rule py-8 md:py-10 ${className}`}
-      aria-label="Message us on WhatsApp"
-    >
+  const body = (
+    <>
       {href ? (
         /* The whole strip is the target — a 44px-plus row rather than a small
            pill at the end of a line. */
@@ -104,6 +101,41 @@ export function WhatsAppCta({
       ) : (
         <div className={row}>{inner}</div>
       )}
+    </>
+  );
+
+  return (
+    /**
+     * Always full bleed. There is no constrained variant and no prop to
+     * remember: every WhatsApp strip on the site is the same width, and a new
+     * placement gets that for free.
+     *
+     * `-mx-5 md:-mx-8` is the exact inverse of the page gutter — the same
+     * technique the blue `CtaStrip` uses, and the reason both reach the
+     * viewport edge with nothing left over. Deliberately NOT `100vw` or
+     * `calc(50% - 50vw)`: those measure the scrollbar as page width and push a
+     * real horizontal overflow on Windows, which is the exact failure this is
+     * avoiding.
+     *
+     * The one thing it depends on is being inside the site's standard gutter,
+     * which every page provides — the service template's padded `<article>`,
+     * and a `px-5 md:px-8` wrapper on About and Markets. Drop it into a
+     * container with no padding and it will overrun by 20px (32 from md); that
+     * is the trade for not using viewport units, and it is recorded in NOTES.
+     *
+     * The rules run the full width with it, so the strip reads as a divider
+     * across the page rather than a bordered box inside the column.
+     */
+    <section
+      className={`-mx-5 border-y border-rule md:-mx-8 ${className}`}
+      aria-label="Message us on WhatsApp"
+    >
+      {/* Background edge to edge, content back on the site's own grid — so the
+          mark, the copy and the action line up with everything above and below
+          them. Compact: this is a break in a page, not a section of one. */}
+      <div className="mx-auto w-full max-w-[100rem] px-5 py-8 md:px-8 md:py-10">
+        {body}
+      </div>
     </section>
   );
 }

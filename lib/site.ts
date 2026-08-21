@@ -1,5 +1,4 @@
 import { SERVICES } from "./services";
-import { INDUSTRIES } from "./industries";
 
 export const SITE = {
   name: "Puzzle",
@@ -36,9 +35,17 @@ export const CONTACT_CHANNELS: {
   /** International format, digits and spaces — e.g. "+44 7700 900000". */
   whatsappNumber: string | null;
   facebookUrl: string | null;
+  /**
+   * Where "Leave a review" points — a Google Business profile, a Trustpilot
+   * page, whichever you use. `null` for the same reason as the two above:
+   * there is no verified review destination anywhere in this repository, and
+   * the CTA renders as a finished graphic without one rather than guessing.
+   */
+  reviewUrl: string | null;
 } = {
   whatsappNumber: null,
   facebookUrl: null,
+  reviewUrl: null,
 };
 
 /** The one message every WhatsApp entry point opens with. */
@@ -73,11 +80,9 @@ export const PRIMARY_NAV: {
   columns?: { heading: string; links: NavLink[] }[];
 }[] = [
   { label: "Work", href: "/work" },
-  /* Services and Industries are two top-level destinations with a panel each,
-     not one panel with two columns. They answer different questions — what we
-     do, and who we have done it for — and burying the second inside the first
-     made it findable only by someone already looking for the first. Neither
-     list is duplicated: each appears under exactly one heading. */
+  /* Services is the one entry with a panel. Industries had one too, dropping
+     down to nine sector pages; those are now a single editorial page, so
+     Markets below is a plain link — there is nothing to list. */
   {
     label: "Services",
     href: "/services",
@@ -92,20 +97,7 @@ export const PRIMARY_NAV: {
       },
     ],
   },
-  {
-    label: "Industries",
-    href: "/industries",
-    columns: [
-      {
-        heading: "Industries",
-        links: INDUSTRIES.map((i) => ({
-          label: i.name,
-          href: `/industries/${i.slug}`,
-          description: i.summary,
-        })),
-      },
-    ],
-  },
+  { label: "Markets", href: "/markets" },
   /* "How we work" is no longer a top-level destination: the process lives on
      the work page, under the projects it produced. */
   { label: "About", href: "/about" },
@@ -118,7 +110,7 @@ export const ALL_ROUTES: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Work", href: "/work" },
   { label: "Services", href: "/services" },
-  { label: "Industries", href: "/industries" },
+  { label: "Markets", href: "/markets" },
   // Still findable by name in the palette — it just resolves to the section.
   { label: "How we work", href: "/work#how-we-work" },
   { label: "About", href: "/about" },
@@ -128,10 +120,6 @@ export const ALL_ROUTES: NavLink[] = [
   ...SERVICES.map((s) => ({
     label: `Services — ${s.name}`,
     href: `/services/${s.slug}`,
-  })),
-  ...INDUSTRIES.map((i) => ({
-    label: `Industries — ${i.name}`,
-    href: `/industries/${i.slug}`,
   })),
 ];
 

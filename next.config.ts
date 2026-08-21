@@ -50,6 +50,16 @@ const nextConfig: NextConfig = {
         destination: "/services",
         permanent: true,
       },
+      /**
+       * Industries — an index plus nine sector pages — is now one editorial
+       * page at /markets. Every one of those URLs has existed publicly, so all
+       * ten redirect rather than 404: the index, and `:slug` catching the nine
+       * beneath it. They all land on the same page because the sectors are no
+       * longer separate destinations; sending each to an anchor would promise a
+       * section that may not correspond to the old page.
+       */
+      { source: "/industries", destination: "/markets", permanent: true },
+      { source: "/industries/:slug", destination: "/markets", permanent: true },
     ];
   },
 };
