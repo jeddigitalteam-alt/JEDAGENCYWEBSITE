@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Netlify form definitions</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <!--
+      NETLIFY FORM DEFINITIONS — not a page anyone visits.
+
+      Netlify detects forms by parsing the HTML it receives at deploy time. A
+      Next.js form is rendered by React in the browser, so the build output
+      contains no <form> for the crawler to find and the form never registers.
+      Putting `data-netlify="true"` on the React component alone does nothing.
+
+      The fix Netlify documents for JavaScript-rendered forms is this file: a
+      plain HTML document in the publish directory, holding one definition per
+      form. It is copied to the deploy verbatim, the crawler finds both forms,
+      and the dashboard gets two form records. The React components then POST
+      to `/__forms.html` as URL-encoded data and stay on the site.
+
+      RULES FOR EDITING
+      -----------------
+      Every field the React form submits must exist here, spelled identically.
+      A field submitted but not declared is dropped silently — the submission
+      arrives with that value missing and nothing warns you. If you add a field
+      to `ContactForm`, add it here in the same commit.
+
+      `email` is named `email` deliberately: Netlify reads a field with that
+      name to set Reply-To on the notification, so replying to the email goes
+      to the person who submitted it rather than nowhere.
+
+      `subject` is also a Netlify convention — it overrides the notification's
+      subject line. The React form fills it with a readable summary.
+
+      `bot-field` is the honeypot named by `data-netlify-honeypot`. It must be
+      declared here and rendered (hidden) in the React form.
+    -->
+
+    <!-- General enquiries, from /contact -->
+    <form name="puzzle-contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="puzzle-contact" />
+      <input type="hidden" name="subject" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="firstName" />
+      <input type="text" name="lastName" />
+      <input type="email" name="email" />
+      <input type="text" name="company" />
+      <input type="tel" name="phone" />
+      <input type="text" name="projectType" />
+      <input type="text" name="timeline" />
+      <textarea name="message"></textarea>
+    </form>
+
+    <!--
+      Scope enquiries, from the services board. Same contact fields plus the
+      two that make it a scope: the readable service names and the estimate.
+    -->
+    <form name="puzzle-scope-enquiry" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="puzzle-scope-enquiry" />
+      <input type="hidden" name="subject" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="firstName" />
+      <input type="text" name="lastName" />
+      <input type="email" name="email" />
+      <input type="text" name="company" />
+      <input type="tel" name="phone" />
+      <input type="text" name="projectType" />
+      <input type="text" name="timeline" />
+      <input type="text" name="scope" />
+      <input type="text" name="estimatedWeeks" />
+      <textarea name="message"></textarea>
+    </form>
+  </body>
+</html>

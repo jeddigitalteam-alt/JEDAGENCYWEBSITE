@@ -4,7 +4,19 @@ export const SITE = {
   name: "Puzzle",
   /** Wordmark is set lowercase. */
   wordmark: "puzzle",
-  email: "hello@puzzle.studio",
+  /**
+   * The single public-facing enquiry address.
+   *
+   * Every place the address appears — the contact page, the footer, the About
+   * page's closing block and the contact form's fallback — reads this value and
+   * builds its own `mailto:` from it. Nothing hardcodes an address, so changing
+   * Puzzle's enquiry email is this one line and nothing else.
+   *
+   * It replaced a placeholder on the old puzzle.studio domain, which was never
+   * a live mailbox. The literal is not repeated here so that grepping the repo
+   * for the old address returns nothing at all.
+   */
+  email: "enquiries@puzzlestudios.co.uk",
   location: "Hampshire, UK",
   timezone: "Europe/London",
   address: ["Hampshire", "United Kingdom"],

@@ -8,14 +8,18 @@ import { SITE } from "@/lib/site";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-const PROJECT_TYPES = [
-  "Brand identity",
-  "Website",
-  "Digital product",
-  "Motion or video",
-  "Retainer",
-  "Something else",
-];
+/* Derived from the live service list, so a service added or removed in
+   lib/services.ts changes these options and nothing has to be remembered here.
+   "Motion or video" was hardcoded in this array and outlived the service it
+   named by several passes — which is the argument for deriving it. */
+const PROJECT_TYPES = [...SERVICES.map((s) => s.name), "Something else"];
+
+/** Where Netlify's crawler found the form definitions. See public/__forms.html. */
+const NETLIFY_ENDPOINT = "/__forms.html";
+
+/** The two forms this component can submit as. */
+const FORM_CONTACT = "puzzle-contact";
+const FORM_SCOPE = "puzzle-scope-enquiry";
 const TIMELINES = [
   "As soon as possible",
   "Next quarter",
@@ -33,17 +37,22 @@ type Status = "idle" | "submitting" | "success" | "error";
 interface FormState {
   projectType: string;
   timeline: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  company: string;
+  phone: string;
   message: string;
-  company: string; // honeypot
+  /**
+   * Netlify's honeypot. `company` used to play this role and is now a field
+   * people actually fill in, so the trap moved to the name Netlify expects.
+   */
+  botField: string;
 }
 
 export function ContactForm() {
   const reduced = useReducedMotion();
   const searchParams = useSearchParams();
-  const formspreeId = process.env.NEXT_PUBLIC_FORMSPREE_ID;
-  const configured = Boolean(formspreeId);
 
   // Scope handed over from the services board.
   const scopeSlugs = useMemo(
@@ -59,17 +68,26 @@ export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
+  /* A scope in the query string is what makes this a scope enquiry — the same
+     visible form, submitted under the other name, so Netlify shows the two
+     apart without a second copy of the UI existing anywhere. */
+  const isScopeEnquiry = scopeNames.length > 0;
+  const formName = isScopeEnquiry ? FORM_SCOPE : FORM_CONTACT;
+
   const [form, setForm] = useState<FormState>({
     projectType: scopeNames[0] ?? "",
     timeline: scopeWeeks ? "As soon as possible" : "",
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
+    company: "",
+    phone: "",
     message: scopeNames.length
       ? `Scope built on the site: ${scopeNames.join(", ")}.` +
         (scopeWeeks ? ` Indicative timeline ${scopeWeeks} weeks.` : "") +
         "\n\n"
       : "",
-    company: "",
+    botField: "",
   });
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
@@ -77,7 +95,10 @@ export function ContactForm() {
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
   const detailsValid =
-    form.name.trim().length > 1 && emailValid && form.message.trim().length > 9;
+    form.firstName.trim().length > 1 &&
+    form.lastName.trim().length > 0 &&
+    emailValid &&
+    form.message.trim().length > 9;
 
   const canAdvance = [
     Boolean(form.projectType),
@@ -88,11 +109,14 @@ export function ContactForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
-    if (!detailsValid || !configured) return;
+    if (!detailsValid) return;
+    // Guard rather than rely on the disabled attribute: a double-click can land
+    // a second submit before React has re-rendered the button.
+    if (status === "submitting") return;
 
     // Honeypot: a real user never fills a field they cannot see. Silently
     // succeed rather than telling a bot what tripped it.
-    if (form.company) {
+    if (form.botField) {
       setStatus("success");
       return;
     }
@@ -100,35 +124,55 @@ export function ContactForm() {
     setStatus("submitting");
     setErrorMessage(null);
 
+    /* Netlify wants URL-encoded form data, not JSON, and it wants `form-name`
+       in the body — that is how it decides which of the two declared forms a
+       submission belongs to. `URLSearchParams` does the encoding, including
+       the newlines in the message and the commas in the scope. */
+    const who = [form.firstName.trim(), form.lastName.trim()]
+      .filter(Boolean)
+      .join(" ");
+    const payload: Record<string, string> = {
+      "form-name": formName,
+      /* Netlify uses a `subject` field to title the notification email. Company
+         where there is one, person where there is not, so the inbox is
+         readable without opening anything. */
+      subject: `New Puzzle ${isScopeEnquiry ? "scope enquiry" : "enquiry"} — ${
+        form.company.trim() || who || "no name given"
+      }`,
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      email: form.email.trim(),
+      company: form.company.trim(),
+      phone: form.phone.trim(),
+      projectType: form.projectType,
+      timeline: form.timeline,
+      message: form.message.trim(),
+    };
+    if (isScopeEnquiry) {
+      // Readable service names, never slugs — this is what a person reads in
+      // the Netlify dashboard.
+      payload.scope = scopeNames.join(", ");
+      payload.estimatedWeeks = scopeWeeks ?? "";
+    }
+
     try {
-      const res = await fetch(`https://formspree.io/f/${formspreeId}`, {
+      const res = await fetch(NETLIFY_ENDPOINT, {
         method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          message: form.message,
-          projectType: form.projectType,
-          timeline: form.timeline,
-          scope: scopeNames.join(", ") || "—",
-          estimatedWeeks: scopeWeeks ?? "—",
-        }),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(payload).toString(),
       });
 
       if (res.ok) {
         setStatus("success");
         return;
       }
-
-      const data = await res.json().catch(() => null);
       setErrorMessage(
-        data?.errors?.[0]?.message ??
-          `The form service returned ${res.status}. Your message was not sent.`,
+        `The form returned ${res.status}. Your enquiry was not sent.`,
       );
       setStatus("error");
     } catch {
       setErrorMessage(
-        "We couldn't reach the form service. Check your connection and try again.",
+        "We couldn't reach the form. Check your connection and try again.",
       );
       setStatus("error");
     }
@@ -137,13 +181,30 @@ export function ContactForm() {
   if (status === "success") {
     return (
       <div className="rounded-2xl border border-blue/40 bg-ink-raised p-8 md:p-10">
-        <p className="mono text-blue">Sent</p>
+        <p className="mono text-blue">
+          {isScopeEnquiry ? "Scope sent" : "Enquiry sent"}
+        </p>
         <h2 className="display mt-4 text-step-3">
-          That’s with us. <em>We’ll reply within two working days</em>
+          {isScopeEnquiry ? (
+            <>
+              We’ve got your scope. <em>We’ll take a look and come back to you</em>
+            </>
+          ) : (
+            <>
+              We’ve got it. <em>We’ll take a look and come back to you</em>
+            </>
+          )}
         </h2>
+        {/* No promised turnaround — nothing on this site commits to one. */}
         <p className="mt-4 max-w-[52ch] text-step--1 text-content-dim">
-          If it’s urgent, email {SITE.email} directly and put “urgent” in the
-          subject line — that one we watch.
+          If you need to add anything, reply to{" "}
+          <a
+            href={`mailto:${SITE.email}`}
+            className="text-blue underline underline-offset-4"
+          >
+            {SITE.email}
+          </a>
+          .
         </p>
       </div>
     );
@@ -215,17 +276,35 @@ export function ContactForm() {
                 Who are we talking to?
               </legend>
 
-              <Field
-                label="Name"
-                id="name"
-                value={form.name}
-                onChange={(v) => set("name", v)}
-                error={
-                  touched && form.name.trim().length < 2
-                    ? "Enter your name so we know who to reply to."
-                    : null
-                }
-              />
+              {/* Two across from `sm`. The single name field became two, and
+                  company and phone are new — six stacked inputs would have made
+                  this step twice as long as the two before it. Same Field
+                  component, same styling. */}
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  label="First name"
+                  id="firstName"
+                  value={form.firstName}
+                  onChange={(v) => set("firstName", v)}
+                  error={
+                    touched && form.firstName.trim().length < 2
+                      ? "Enter your first name so we know who to reply to."
+                      : null
+                  }
+                />
+                <Field
+                  label="Last name"
+                  id="lastName"
+                  value={form.lastName}
+                  onChange={(v) => set("lastName", v)}
+                  error={
+                    touched && form.lastName.trim().length < 1
+                      ? "And your last name."
+                      : null
+                  }
+                />
+              </div>
+
               <Field
                 label="Email"
                 id="email"
@@ -238,6 +317,22 @@ export function ContactForm() {
                     : null
                 }
               />
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  label="Company (optional)"
+                  id="company"
+                  value={form.company}
+                  onChange={(v) => set("company", v)}
+                />
+                <Field
+                  label="Phone (optional)"
+                  id="phone"
+                  type="tel"
+                  value={form.phone}
+                  onChange={(v) => set("phone", v)}
+                />
+              </div>
 
               <div className="grid gap-2">
                 <label htmlFor="message" className="mono text-content-dim">
@@ -257,16 +352,25 @@ export function ContactForm() {
                 ) : null}
               </div>
 
-              {/* honeypot — hidden from people, not from bots */}
+              {/* Netlify's honeypot — hidden from people, not from bots.
+                  Named `bot-field` to match `data-netlify-honeypot` in
+                  public/__forms.html; the two must agree.
+
+                  It used to be named `company`, which was fine while company
+                  was not a real field. It is one now, so leaving the trap on
+                  that name would have meant every visitor who filled in their
+                  company tripped the honeypot and had their enquiry silently
+                  dropped. Off-screen rather than `display:none`, so a bot that
+                  fills every input still trips it. */}
               <div aria-hidden="true" className="absolute -left-[9999px]">
-                <label htmlFor="company">Company</label>
+                <label htmlFor="bot-field">Do not fill this in</label>
                 <input
-                  id="company"
-                  name="company"
+                  id="bot-field"
+                  name="bot-field"
                   tabIndex={-1}
                   autoComplete="off"
-                  value={form.company}
-                  onChange={(e) => set("company", e.target.value)}
+                  value={form.botField}
+                  onChange={(e) => set("botField", e.target.value)}
                 />
               </div>
             </fieldset>
@@ -274,15 +378,20 @@ export function ContactForm() {
         </motion.div>
       </AnimatePresence>
 
-      {/* not-configured state — never pretend to send */}
-      {!configured ? (
-        <div className="rounded-lg border border-coral/50 bg-ink-raised p-5">
-          <p className="mono text-coral">Form not configured</p>
+      {/* No "not configured" banner. There is no key to set any more: the form
+          posts to Netlify, which processes it in the deployed environment.
+          Under plain `npm run dev` nothing is listening behind /__forms.html,
+          so a submission lands in the error state below — honest locally, and
+          never seen by a visitor on the deployed site. `netlify dev` runs the
+          handler locally if you want to exercise it end to end. */}
+
+      {status === "error" && errorMessage ? (
+        <div role="alert" className="rounded-lg border border-coral/50 p-5">
+          <p className="mono text-coral">Not sent</p>
           <p className="mt-2 max-w-[56ch] text-step--1 text-content-dim">
-            <code className="mono">NEXT_PUBLIC_FORMSPREE_ID</code> isn’t set, so
-            this form can’t deliver anything and submitting is disabled. Add it
-            to <code className="mono">.env.local</code> — see{" "}
-            <code className="mono">.env.example</code>. In the meantime, email{" "}
+            Something went wrong sending your enquiry. Please try again, or
+            email us at{" "}
+            {/* From the central config — nothing here knows the address. */}
             <a
               href={`mailto:${SITE.email}`}
               className="text-blue underline underline-offset-4"
@@ -291,13 +400,11 @@ export function ContactForm() {
             </a>
             .
           </p>
-        </div>
-      ) : null}
-
-      {status === "error" && errorMessage ? (
-        <div role="alert" className="rounded-lg border border-coral/50 p-5">
-          <p className="mono text-coral">Not sent</p>
-          <p className="mt-2 text-step--1 text-content-dim">{errorMessage}</p>
+          {/* The technical detail second, and quieter — useful to us, not to
+              the person trying to get in touch. */}
+          {errorMessage ? (
+            <p className="mono mt-3 text-content-dim">{errorMessage}</p>
+          ) : null}
         </div>
       ) : null}
 
@@ -324,14 +431,14 @@ export function ContactForm() {
         ) : (
           <button
             type="submit"
-            disabled={!configured || status === "submitting"}
+            disabled={status === "submitting"}
             className="mono rounded-full bg-blue px-6 py-3 text-ink transition-colors enabled:hover:bg-blue-lift enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink-raised disabled:text-content-dim"
           >
             {status === "submitting"
               ? "Sending…"
-              : configured
-                ? "Send it"
-                : "Sending unavailable"}
+              : isScopeEnquiry
+                ? "Send my scope"
+                : "Send enquiry"}
           </button>
         )}
       </div>
