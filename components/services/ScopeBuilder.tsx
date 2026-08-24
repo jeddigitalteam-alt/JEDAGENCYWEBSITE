@@ -18,7 +18,14 @@ const SPRING = { type: "spring", stiffness: 420, damping: 32, mass: 0.7 } as con
  * board. Every count on this component derives from this list, so the shelf,
  * the "picked / total" counter and the estimate all stay in agreement.
  */
-const SCOPE_SERVICES = SERVICES.filter((s) => s.slug !== "retainer");
+/* Every service, retainer included. It used to be filtered out, because the
+   board could only express a number of weeks and a retainer has no end — so
+   adding it would have inflated the estimate by a month of nothing. The
+   estimator now excludes anything without a `baseline` from the arithmetic and
+   reports it separately, so a retainer can sit on the board honestly: the
+   project window is unchanged and the readout says the support continues after
+   it. */
+const SCOPE_SERVICES = SERVICES;
 
 /**
  * "Build your scope."
@@ -51,7 +58,7 @@ export function ScopeBuilder({ atTop = false }: { atTop?: boolean }) {
   const send = () => {
     const params = new URLSearchParams({
       scope: picked.join(","),
-      weeks: String(estimate.weeks),
+      weeks: String(estimate.mid),
     });
     router.push(`/contact?${params.toString()}`);
   };
@@ -179,15 +186,15 @@ export function ScopeBuilder({ atTop = false }: { atTop?: boolean }) {
           {/* live estimate */}
           <div className="mt-6 border-t border-rule pt-5">
             <div className="flex items-baseline justify-between">
-              <p className="mono text-content-dim">Indicative timeline</p>
+              <p className="mono text-content-dim">Estimated delivery</p>
               <motion.p
-                key={estimate.weeks}
+                key={estimate.label}
                 initial={reduced ? false : { opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.28, ease: EASE }}
                 className="display text-step-2 tabular-nums"
               >
-                {estimate.weeks ? `${estimate.weeks} weeks` : "—"}
+                {estimate.label}
               </motion.p>
             </div>
 
@@ -219,12 +226,20 @@ export function ScopeBuilder({ atTop = false }: { atTop?: boolean }) {
               className="mono mt-4 w-full rounded-full bg-blue px-6 py-3.5 text-ink transition-colors enabled:hover:bg-blue-lift enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink-raised disabled:text-content-dim"
             >
               {picked.length
-                ? `Send my scope — ${estimate.weeks} weeks`
+                ? `Send my scope — ${estimate.label}`
                 : "Add a service first"}
             </button>
+            {/* Said once, only when it applies: a retainer has no end date, so
+                it contributes no weeks to the window above it. */}
+            {estimate.hasRetainer && !estimate.ongoingOnly ? (
+              <p className="mono mt-3 text-blue">
+                Then ongoing retainer support
+              </p>
+            ) : null}
             <p className="mono mt-3 text-content-dim">
-              Your selections and the estimate travel with you to the enquiry
-              form — nothing is sent until you submit it there.
+              Indicative, not a quote — final timing depends on scope, content,
+              feedback and technical complexity. Your selections travel with you
+              to the enquiry form; nothing is sent until you submit it there.
             </p>
           </div>
         </div>

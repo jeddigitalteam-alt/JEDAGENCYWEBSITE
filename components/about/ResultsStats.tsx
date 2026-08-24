@@ -54,10 +54,10 @@ import { Eyebrow, SectionHeading } from "@/components/ui/primitives";
  * schedule is ever re-planned.
  */
 const PHASES: { weeks: number; label: string; highlight?: boolean }[] = [
-  { weeks: 2, label: "Discovery" },
-  { weeks: 3, label: "Flows and prototype", highlight: true },
-  { weeks: 3, label: "Interface design" },
-  { weeks: 2, label: "Library" },
+  { weeks: 1, label: "Discovery" },
+  { weeks: 2, label: "Flows and prototype", highlight: true },
+  { weeks: 2, label: "Interface design" },
+  { weeks: 1, label: "Library" },
 ];
 
 const LONGEST = Math.max(...PHASES.map((p) => p.weeks));

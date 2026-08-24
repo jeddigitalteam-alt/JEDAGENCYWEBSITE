@@ -80,13 +80,13 @@ export const SERVICE_FAQS: Record<string, Faq[]> = {
     },
     {
       q: "How long does a website project take?",
-      a: "It depends on scope — the number of templates, how much content exists already, and how many people need to approve things. The phase breakdown published on this page is a realistic shape for a project of that size, and we will give you a specific schedule once we know what is actually involved.",
+      a: "A focused website project will often sit around four to five weeks, depending on scope, content readiness and technical requirements. What moves it is the number of templates, how much copy already exists and how many people need to approve things. The phase breakdown published on this page is the shape of that work, and you get a specific schedule once we know what is involved.",
     },
   ],
   "ux-ui-design": [
     {
       q: "What is UX and UI design?",
-      a: "UX design is the structure: what the product is for, what someone is trying to finish, and the order those steps actually happen in. UI design is the surface that makes that structure legible — hierarchy, type, spacing, states and behaviour. They are two halves of the same job and we do not separate them.",
+      a: "UX design is the structure: what the product is for, what someone is trying to finish, and the order those steps actually happen in. UI design is the surface that makes that structure legible — hierarchy, type, spacing, states and behaviour. Focused engagements can often be done in two to four weeks; larger product systems take longer. They are two halves of the same job and we do not separate them.",
     },
     {
       q: "What is the difference between UX and UI?",
@@ -116,7 +116,7 @@ export const SERVICE_FAQS: Record<string, Faq[]> = {
   "digital-product-design": [
     {
       q: "What is digital product design?",
-      a: "Designing something people use repeatedly rather than visit once — an app, a dashboard, a tool, a platform. It covers product structure, user journeys, interface design, feedback states and the system that keeps it consistent as it grows. The tenth screen matters more than the first.",
+      a: "Designing something people use repeatedly rather than visit once — an app, a dashboard, a tool, a platform. It covers product structure, user journeys, interface design, feedback states and the system that keeps it consistent as it grows. Focused product work typically sits around four to six weeks, depending on complexity and how much discovery and prototyping is needed. The tenth screen matters more than the first.",
     },
     {
       q: "Can you design an MVP?",
@@ -146,7 +146,7 @@ export const SERVICE_FAQS: Record<string, Faq[]> = {
   "brand-identity": [
     {
       q: "What does a brand identity project include?",
-      a: "Positioning and messaging, the wordmark and its lockups, a type system, a colour system with contrast documented, and the usage rules and templates that keep it intact. The published phase breakdown on this page shows how the work is shaped. The deliverable is a system, not a logo file.",
+      a: "Positioning and messaging, the wordmark and its lockups, a type system, a colour system with contrast documented, and the usage rules and templates that keep it intact. Most focused identity projects sit around three to four weeks, depending on how much strategy, exploration and rollout is involved. The deliverable is a system, not a logo file.",
     },
     {
       q: "Is brand identity more than a logo?",
@@ -176,7 +176,7 @@ export const SERVICE_FAQS: Record<string, Faq[]> = {
   "ai-design": [
     {
       q: "What is AI design?",
-      a: "Two related things: using AI within the creative process to explore more directions faster, and designing the products and interfaces that sit on top of AI models. Both appear on this page because they are the same argument from either end — a model produces more than it judges.",
+      a: "Two related things: using AI within the creative process to explore more directions faster, and designing the products and interfaces that sit on top of AI models. Focused engagements can often be delivered in two to four weeks, depending on whether it is exploration or product work. Both appear on this page because they are the same argument from either end — a model produces more than it judges.",
     },
     {
       q: "How does Puzzle use AI in the creative process?",

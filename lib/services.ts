@@ -87,6 +87,18 @@ export interface Service {
   intro: string;
   deliverables: string[];
   phases: Phase[];
+  /**
+   * The realistic delivery window for this service on its own, in weeks.
+   *
+   * Separate from `phases` on purpose. Phases describe the *shape* of the work
+   * and are what the service page publishes; this is the range the scope
+   * estimator reasons about, and `max` is deliberately the same number the
+   * phases sum to, so the page and the calculator can never disagree.
+   *
+   * A service with no baseline contributes nothing to an estimate. That is the
+   * retainer: it has no end, so adding weeks for it would be meaningless.
+   */
+  baseline?: { min: number; max: number };
   /** Roman/italic split for the service page headline. */
   headline: { roman: string; italic: string };
   /**
@@ -206,11 +218,12 @@ export const SERVICES: Service[] = [
       "Usage rules and a working template set",
     ],
     phases: [
-      { name: "Audit and positioning", weeks: 2 },
-      { name: "Territories", weeks: 2 },
-      { name: "Refinement", weeks: 2 },
-      { name: "System and rules", weeks: 2 },
+      { name: "Audit and positioning", weeks: 1 },
+      { name: "Territories", weeks: 1 },
+      { name: "Refinement", weeks: 1 },
+      { name: "System and rules", weeks: 1 },
     ],
+    baseline: { min: 3, max: 4 },
     headline: { roman: "An identity that", italic: "holds up unattended" },
     /* Paper, like every other page carrying a showcase. Not decoration: the
        grid's gutters are the page showing through rather than a drawn divider,
@@ -299,12 +312,12 @@ export const SERVICES: Service[] = [
     ],
     phases: [
       { name: "Structure", weeks: 1 },
-      { name: "Art direction", weeks: 2 },
-      { name: "Page design", weeks: 3 },
-      { name: "Build", weeks: 3 },
-      { name: "Integration", weeks: 2 },
-      { name: "Launch", weeks: 1 },
+      { name: "Art direction", weeks: 1 },
+      { name: "Page design", weeks: 1 },
+      { name: "Build", weeks: 1 },
+      { name: "Integration and launch", weeks: 1 },
     ],
+    baseline: { min: 4, max: 5 },
     headline: {
       roman: "Designed to look right,",
       italic: "built to work properly",
@@ -410,11 +423,12 @@ export const SERVICES: Service[] = [
       "Design system with every state documented",
     ],
     phases: [
-      { name: "Journeys and audit", weeks: 2 },
-      { name: "Architecture and wireframes", weeks: 2 },
-      { name: "Interface design", weeks: 3 },
-      { name: "Prototype and iterate", weeks: 2 },
+      { name: "Journeys and audit", weeks: 1 },
+      { name: "Architecture and wireframes", weeks: 1 },
+      { name: "Interface design", weeks: 1 },
+      { name: "Prototype and iterate", weeks: 1 },
     ],
+    baseline: { min: 2, max: 4 },
     headline: {
       roman: "Interfaces people",
       italic: "don’t have to think about",
@@ -545,11 +559,12 @@ export const SERVICES: Service[] = [
       "Accessibility annotations and build handover",
     ],
     phases: [
-      { name: "Discovery", weeks: 2 },
-      { name: "Flows and prototype", weeks: 3 },
-      { name: "Interface design", weeks: 3 },
-      { name: "Library", weeks: 2 },
+      { name: "Discovery", weeks: 1 },
+      { name: "Flows and prototype", weeks: 2 },
+      { name: "Interface design", weeks: 2 },
+      { name: "Library", weeks: 1 },
     ],
+    baseline: { min: 4, max: 6 },
     headline: { roman: "Complex underneath.", italic: "Obvious on the surface" },
     paper: true,
     showcase: {
@@ -699,11 +714,12 @@ export const SERVICES: Service[] = [
       "Guidance on disclosure",
     ],
     phases: [
-      { name: "Capability mapping", weeks: 2 },
-      { name: "Interaction model", weeks: 2 },
-      { name: "Interface design", weeks: 3 },
-      { name: "Testing with real output", weeks: 2 },
+      { name: "Capability mapping", weeks: 1 },
+      { name: "Interaction model", weeks: 1 },
+      { name: "Interface design", weeks: 1 },
+      { name: "Testing with real output", weeks: 1 },
     ],
+    baseline: { min: 2, max: 4 },
     headline: {
       roman: "AI changes the speed.",
       italic: "Taste decides the direction",
@@ -894,6 +910,8 @@ export const SERVICES: Service[] = [
       { name: "Onboarding", weeks: 1 },
       { name: "Rolling delivery", weeks: 4 },
     ],
+    /* No baseline: a retainer is not a project with an end, so it never
+       contributes weeks to a scope estimate. See `estimateScope`. */
     headline: {
       roman: "Better work starts when we",
       italic: "stop starting over",
@@ -1155,26 +1173,137 @@ export function isPaperRoute(pathname: string): boolean {
  * diminishing amount of calendar time. Kept here so the board and the contact
  * form agree on the number.
  */
-export function estimateScope(slugs: string[]) {
+/**
+ * How much of a second service's time is *added* rather than absorbed.
+ *
+ * Keyed by an unordered slug pair. The closer two disciplines sit to each
+ * other, the more of the second one happens inside the first: interface design
+ * runs against the site build it is for, so UX beside web adds 0.30 of its own
+ * length; an identity beside a product shares less, so it adds more.
+ *
+ * These are not universal — a single factor across every pair was the thing
+ * that made the old numbers wrong in both directions at once.
+ */
+const OVERLAP: Record<string, number> = {
+  "brand-identity|web-design-development": 0.4,
+  "brand-identity|ux-ui-design": 0.3,
+  "brand-identity|digital-product-design": 0.35,
+  "ai-design|brand-identity": 0.3,
+  "ux-ui-design|web-design-development": 0.3,
+  "digital-product-design|web-design-development": 0.35,
+  "ai-design|web-design-development": 0.3,
+  "digital-product-design|ux-ui-design": 0.3,
+  "ai-design|ux-ui-design": 0.3,
+  "ai-design|digital-product-design": 0.3,
+};
+
+/** Anything unlisted. Deliberately the middle of the 0.25–0.5 band. */
+const OVERLAP_DEFAULT = 0.4;
+
+/**
+ * Each service after the second is absorbed further still — a team already
+ * running three workstreams absorbs a fourth more cheaply than it absorbed the
+ * second. Without this, four services compound into a number nobody would
+ * quote.
+ */
+const DECAY = 0.6;
+
+const pairKey = (a: string, b: string) => [a, b].sort().join("|");
+
+export interface ScopeEstimate {
+  /** Bottom of the window, in weeks. 0 when nothing is selected. */
+  min: number;
+  /** Top of the window. */
+  max: number;
+  /** The single number for anywhere that needs one — e.g. Netlify. */
+  mid: number;
+  /** "5–7 weeks", or "4 weeks" when the window collapses to one number. */
+  label: string;
+  /** True when a retainer is in the selection. It adds no weeks. */
+  hasRetainer: boolean;
+  /** True when nothing selected has a baseline — retainer only. */
+  ongoingOnly: boolean;
+  phases: Phase[];
+  services: Service[];
+}
+
+/**
+ * What a selection of services realistically takes, as a window.
+ *
+ * **This is not the sum of the parts, and it is not the old model either.**
+ * Previously the longest service ran in full and every other one added 60% of
+ * its own length, on top of per-service figures that were themselves twice
+ * what the work takes — brand plus a website came out at seventeen weeks.
+ *
+ * The model now: the longest selected service sets the floor, because it has
+ * to happen. Every other service adds only the part that cannot happen inside
+ * it, which is its own length times a pair-specific overlap factor, decayed for
+ * each additional service after the first. Identity direction and site
+ * structure genuinely do run at the same time; the estimate should say so.
+ *
+ * A retainer is excluded from the arithmetic entirely — it is an arrangement,
+ * not a duration — and flagged instead, so the interface can say "then ongoing"
+ * rather than adding a month to a project that has not got longer.
+ */
+export function estimateScope(slugs: string[]): ScopeEstimate {
   const chosen = SERVICES.filter((s) => slugs.includes(s.slug));
-  if (!chosen.length) return { weeks: 0, phases: [] as Phase[], services: chosen };
-
-  const sorted = [...chosen].sort(
-    (a, b) => sumWeeks(b.phases) - sumWeeks(a.phases),
+  const hasRetainer = chosen.some((s) => !s.baseline);
+  const timed = chosen.filter(
+    (s): s is Service & { baseline: { min: number; max: number } } =>
+      Boolean(s.baseline),
   );
-  const weeks = sorted.reduce((total, service, i) => {
-    const own = sumWeeks(service.phases);
-    // First service runs at full length; each subsequent one overlaps ~40%.
-    return total + (i === 0 ? own : Math.round(own * 0.6));
-  }, 0);
 
-  const phases = dedupePhases(sorted.flatMap((s) => s.phases));
-  return { weeks, phases, services: sorted };
+  const empty: ScopeEstimate = {
+    min: 0,
+    max: 0,
+    mid: 0,
+    label: hasRetainer ? "Ongoing" : "—",
+    hasRetainer,
+    ongoingOnly: hasRetainer && timed.length === 0,
+    phases: dedupePhases(chosen.flatMap((s) => s.phases)),
+    services: chosen,
+  };
+  if (!timed.length) return empty;
+
+  /* Longest first, by the top of its window then the bottom — so the ordering
+     is stable when two services share a maximum. */
+  const sorted = [...timed].sort(
+    (a, b) => b.baseline.max - a.baseline.max || b.baseline.min - a.baseline.min,
+  );
+  const lead = sorted[0];
+
+  let min = lead.baseline.min;
+  let max = lead.baseline.max;
+
+  sorted.slice(1).forEach((service, i) => {
+    const factor =
+      (OVERLAP[pairKey(lead.slug, service.slug)] ?? OVERLAP_DEFAULT) *
+      DECAY ** i;
+    min += service.baseline.min * factor;
+    max += service.baseline.max * factor;
+  });
+
+  const lo = Math.max(1, Math.round(min));
+  const hi = Math.max(lo, Math.round(max));
+
+  return {
+    min: lo,
+    max: hi,
+    // Rounded up, so the single number is never the optimistic end.
+    mid: Math.ceil((lo + hi) / 2),
+    label: lo === hi ? `${lo} weeks` : `${lo}–${hi} weeks`,
+    hasRetainer,
+    ongoingOnly: false,
+    phases: dedupePhases(sorted.flatMap((s) => s.phases)),
+    services: [...sorted, ...chosen.filter((s) => !s.baseline)],
+  };
 }
 
-function sumWeeks(phases: Phase[]) {
-  return phases.reduce((n, p) => n + p.weeks, 0);
-}
+/* `sumWeeks` lived here. The estimator used it to derive a service's length
+   from its phases; it now reads `baseline` instead, because the phases describe
+   the shape of the work and the baseline describes how long it takes, and
+   conflating the two is what produced a seventeen-week website. The service
+   page still totals its own phases inline for the "How it runs" heading. */
 
 function dedupePhases(phases: Phase[]) {
   const seen = new Map<string, Phase>();

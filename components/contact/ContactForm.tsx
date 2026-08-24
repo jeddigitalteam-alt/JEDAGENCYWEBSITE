@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { SERVICES } from "@/lib/services";
+import { SERVICES, estimateScope } from "@/lib/services";
 import { SITE } from "@/lib/site";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -59,10 +59,16 @@ export function ContactForm() {
     () => (searchParams.get("scope") ?? "").split(",").filter(Boolean),
     [searchParams],
   );
-  const scopeWeeks = searchParams.get("weeks");
   const scopeNames = SERVICES.filter((s) => scopeSlugs.includes(s.slug)).map(
     (s) => s.name,
   );
+  /* Recomputed here rather than read from the query string. The board puts
+     `weeks` in the URL, but recalculating from the slugs means the figure in
+     the enquiry can never disagree with the one on the board — and cannot be
+     edited by changing the address bar. */
+  const estimate = useMemo(() => estimateScope(scopeSlugs), [scopeSlugs]);
+  const scopeWeeks = estimate.mid ? String(estimate.mid) : "";
+  const scopeRange = estimate.label;
 
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<Status>("idle");
@@ -84,7 +90,7 @@ export function ContactForm() {
     phone: "",
     message: scopeNames.length
       ? `Scope built on the site: ${scopeNames.join(", ")}.` +
-        (scopeWeeks ? ` Indicative timeline ${scopeWeeks} weeks.` : "") +
+        (scopeRange !== "—" ? ` Estimated delivery ${scopeRange}.` : "") +
         "\n\n"
       : "",
     botField: "",
@@ -152,7 +158,12 @@ export function ContactForm() {
       // Readable service names, never slugs — this is what a person reads in
       // the Netlify dashboard.
       payload.scope = scopeNames.join(", ");
+      /* Two fields on purpose. `estimatedWeeks` stays a single integer so the
+         existing Netlify column keeps working and nothing already submitted
+         becomes unreadable; `estimatedRange` is the honest window, which is
+         what a person actually reads in the dashboard. */
       payload.estimatedWeeks = scopeWeeks ?? "";
+      payload.estimatedRange = scopeRange;
     }
 
     try {
