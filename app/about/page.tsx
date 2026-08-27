@@ -131,8 +131,8 @@ export default function AboutPage() {
       {/* One low-friction option after the two opening text sections, and well
           clear of the blue CTA at the foot of the page.
 
-          The padded wrapper is load-bearing: the strip is full-bleed by default and
-          works by cancelling
+          The padded wrapper is load-bearing: the strip is full-bleed by default
+          and works by cancelling
           the gutter it inherits, so with no parent padding to cancel it pushes
           20px (32 from md) past each edge of the document instead. Same wrapper
           the CTA strips use for the same reason. */}

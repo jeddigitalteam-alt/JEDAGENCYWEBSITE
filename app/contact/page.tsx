@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { SITE } from "@/lib/site";
+import { SITE, mapsHref } from "@/lib/site";
 import { Eyebrow } from "@/components/ui/primitives";
 import ContactForm from "@/components/contact/ContactForm";
 import RevealHeading from "@/components/motion/RevealHeading";
@@ -56,7 +56,9 @@ export default function ContactPage() {
               ))}
             </address>
             <a
-              href="https://www.openstreetmap.org/search?query=Hampshire%2C%20United%20Kingdom"
+              /* Built from the postcode in the config, so this and the
+                 address above it can never disagree. */
+              href={mapsHref()}
               target="_blank"
               rel="noreferrer noopener"
               className="mono mt-4 inline-flex rounded-full border border-rule px-4 py-2 transition-colors hover:border-blue hover:text-blue"

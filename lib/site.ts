@@ -17,34 +17,71 @@ export const SITE = {
    * for the old address returns nothing at all.
    */
   email: "enquiries@puzzlestudios.co.uk",
-  location: "Hampshire, UK",
+  /** Compact form, for anywhere a single line is wanted. */
+  location: "Hampshire, SO21 3JU",
   timezone: "Europe/London",
-  address: ["Hampshire", "United Kingdom"],
+  /**
+   * The studio address, one line per element. Rendered as-is inside
+   * `<address>` on the contact page and in the footer, so the order here is
+   * the order on screen.
+   *
+   * County, postcode, country — and nothing else. There is no street, no
+   * building and no town in this list because none has been supplied, and an
+   * address is the last place to guess. The postcode's second character is the
+   * letter O, not a zero.
+   */
+  address: ["Hampshire", "SO21 3JU", "United Kingdom"],
+  /**
+   * The postcode on its own, for the map link to search on. Derived from
+   * nothing else, so `mapsHref` below cannot drift from the address above.
+   */
+  postcode: "SO21 3JU",
+  /**
+   * Instagram and LinkedIn. Facebook and WhatsApp live in `CONTACT_CHANNELS`
+   * below, because those two are contact routes as well as profiles.
+   *
+   * `href` may be `null`, and LinkedIn's is. Both of these were the bare
+   * `https://instagram.com` and `https://linkedin.com` — the sites themselves,
+   * not Puzzle accounts — which is worse than no link at all: it looks
+   * deliberate and sends people to a login page. Instagram now has its real
+   * profile; LinkedIn keeps `null` until there is a verified company URL, and
+   * the footer renders its icon without a link exactly as it does Facebook's.
+   */
   social: [
-    { label: "Instagram", href: "https://instagram.com" },
-    { label: "LinkedIn", href: "https://linkedin.com" },
-  ],
+    {
+      label: "Instagram",
+      href: "https://www.instagram.com/puzzlestudiosuk/",
+    },
+    { label: "LinkedIn", href: null },
+  ] as { label: "Instagram" | "LinkedIn"; href: string | null }[],
 } as const;
 
 /**
- * Channels that are wired up but not yet pointed anywhere real.
+ * The contact channels, in one place.
  *
- * **Both of these are `null` on purpose.** There is no Puzzle phone number and
- * no Facebook page anywhere in this repository, so there is nothing to build a
- * `wa.me` link out of and nothing to link a Facebook icon to. Everything that
- * consumes them — the footer icons, `WhatsAppCta`, the WhatsApp strips on the
- * long service pages — checks first and renders nothing when the value is
- * missing, rather than shipping a link that 404s or, worse, messages a stranger.
+ * **WhatsApp is live.** The verified WhatsApp Business number below is the
+ * single source of truth for it: the footer icon and every `WhatsAppCta` on the
+ * site build their link from `whatsappHref()`, and no component holds a number
+ * of its own. Changing it is this one value.
  *
- * Fill either one in and every place that uses it starts working at once. That
- * is the only change needed; nothing else references a number directly.
+ * **Facebook and the review URL are still `null`, on purpose.** There is no
+ * Puzzle Facebook page and no verified review destination in this repository.
+ * Everything that consumes them checks first and renders the graphic without a
+ * link rather than shipping one that 404s. Fill either in and it activates with
+ * no other change.
  *
  * (Note: the number printed on the business cards in
- * `/work/brand-identity/puzzle-stationery.png` is +44 20 7946 xxxx, which is
- * Ofcom's reserved range for fiction. It is mockup artwork, not a contact.)
+ * `/work/brand-identity/puzzle-stationery.png` is in Ofcom's reserved range for
+ * fiction. It is mockup artwork, not a contact, and is not wired to anything.)
  */
 export const CONTACT_CHANNELS: {
-  /** International format, digits and spaces — e.g. "+44 7700 900000". */
+  /**
+   * The Puzzle WhatsApp Business number, in international format.
+   *
+   * Written the readable way, with the plus and the spaces — `whatsappHref`
+   * strips everything that is not a digit, so the format here is for whoever
+   * reads this file rather than for `wa.me`.
+   */
   whatsappNumber: string | null;
   facebookUrl: string | null;
   /**
@@ -55,10 +92,32 @@ export const CONTACT_CHANNELS: {
    */
   reviewUrl: string | null;
 } = {
-  whatsappNumber: null,
-  facebookUrl: null,
+  /* The verified Puzzle WhatsApp Business account. This is the only phone
+     number the site exposes anywhere, and it is a business line — no personal
+     number appears in this repository. */
+  whatsappNumber: "+44 7351 392373",
+  /* The verified Puzzle Studios page. The URL people copy out of the app
+     carries share and tracking parameters — `?mibextid=`, `?rdid=`, a
+     `share/` prefix — and none of that belongs on the site, so this is the
+     bare canonical form. */
+  facebookUrl: "https://www.facebook.com/profile.php?id=61594104050246",
   reviewUrl: null,
 };
+
+/**
+ * "Open in maps", built from the postcode alone.
+ *
+ * A postcode search rather than a pin: there are no coordinates and no street
+ * address to place one with, and inventing either would put a marker on a
+ * building that is not ours. OpenStreetMap is what the contact page already
+ * linked to — it needs no account and no API key, and it hands off to the
+ * device's own map app on a phone.
+ */
+export function mapsHref(): string {
+  return `https://www.openstreetmap.org/search?query=${encodeURIComponent(
+    `${SITE.postcode}, United Kingdom`,
+  )}`;
+}
 
 /** The one message every WhatsApp entry point opens with. */
 export const WHATSAPP_PREFILL =

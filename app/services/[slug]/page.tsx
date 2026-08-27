@@ -180,7 +180,7 @@ export default async function ServicePage({
                 />
               ) : null}
 
-              {/* Renders nothing until a WhatsApp number is configured. */}
+              {/* Full-bleed WhatsApp strip, live now the number is set. */}
               {service.whatsappAfterChapter === i ? <WhatsAppCta /> : null}
 
               {/* Breaks the article gutter itself, so it needs no wrapper here

@@ -14,20 +14,20 @@ const WHATSAPP_GREEN = "#25D366";
  * into a pitch, which is why it appears once per page at most and never beside
  * another call to action.
  *
- * **It always renders.** When `CONTACT_CHANNELS.whatsappNumber` is `null` —
- * which it is today, because there is no Puzzle number in this repository —
- * the strip is drawn exactly as it will look when it works, but as a `<div>`
- * rather than an `<a>`: no href, not in the tab order, nothing to follow. A
- * `wa.me` link built from a guessed number would message a stranger, and
- * `href="#"` would scroll the page to the top and look broken.
+ * **It always renders.** With a number configured — which there now is — the
+ * strip is a live `<a>` to the Puzzle WhatsApp Business account. If
+ * `CONTACT_CHANNELS.whatsappNumber` were ever cleared, the identical markup
+ * renders as a `<div>` instead: no href, not in the tab order, nothing to
+ * follow. That fallback stays because a `wa.me` link built from a guess would
+ * message a stranger, and `href="#"` would scroll to the top and look broken.
  *
  * Nothing about it reads as unfinished — no "coming soon", no grey-out, same
  * type, same green, same layout. The only thing the inactive version drops is
  * hover feedback, because a row that lights up under the cursor is a promise
  * that clicking does something.
  *
- * Put a number in the config and every placement becomes a live link with no
- * change to this file.
+ * The number lives in the config and nowhere else, so every placement follows
+ * it with no change to this file.
  *
  * The mark keeps WhatsApp green while the type around it stays in the page's
  * own token layer — recolouring the glyph to Puzzle blue would lose the only

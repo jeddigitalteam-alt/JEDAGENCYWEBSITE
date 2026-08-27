@@ -181,8 +181,8 @@ export function Footer() {
                 a phone while the glyph itself stays quiet. */}
             {/* All four marks are always drawn. Instagram and LinkedIn come
                 from `SITE.social`; Facebook and WhatsApp read their
-                destinations from `CONTACT_CHANNELS`, which holds `null` for
-                both today.
+                destinations from `CONTACT_CHANNELS`. Instagram, Facebook and
+                WhatsApp all link out; LinkedIn has no verified URL yet.
 
                 A missing destination changes the ELEMENT, not the appearance:
                 the icon renders identically, at the same size and in the same
@@ -199,7 +199,7 @@ export function Footer() {
                 other change to this file. */}
             <ul className="flex items-center gap-1">
               {[
-                ...SITE.social.map((s) => ({ label: s.label, href: s.href as string | null })),
+                ...SITE.social,
                 { label: "Facebook" as const, href: CONTACT_CHANNELS.facebookUrl },
                 { label: "WhatsApp" as const, href: whatsappHref() },
               ].map((s) => {
