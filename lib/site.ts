@@ -17,6 +17,15 @@ export const SITE = {
    * for the old address returns nothing at all.
    */
   email: "enquiries@puzzlestudios.co.uk",
+  /**
+   * The business line, as it should be read.
+   *
+   * The same number the WhatsApp Business account uses — see
+   * `CONTACT_CHANNELS.whatsappNumber`, which is derived from this rather than
+   * repeating it, so there is one number in this file and not two that could
+   * drift apart. `telHref` below turns it into a `tel:` link.
+   */
+  phone: "+44 7351 392373",
   /** Compact form, for anywhere a single line is wanted. */
   location: "Hampshire, SO21 3JU",
   timezone: "Europe/London",
@@ -95,7 +104,7 @@ export const CONTACT_CHANNELS: {
   /* The verified Puzzle WhatsApp Business account. This is the only phone
      number the site exposes anywhere, and it is a business line — no personal
      number appears in this repository. */
-  whatsappNumber: "+44 7351 392373",
+  whatsappNumber: SITE.phone,
   /* The verified Puzzle Studios page. The URL people copy out of the app
      carries share and tracking parameters — `?mibextid=`, `?rdid=`, a
      `share/` prefix — and none of that belongs on the site, so this is the
@@ -103,6 +112,18 @@ export const CONTACT_CHANNELS: {
   facebookUrl: "https://www.facebook.com/profile.php?id=61594104050246",
   reviewUrl: null,
 };
+
+/**
+ * The `tel:` link, built from `SITE.phone`.
+ *
+ * `tel:` wants the number in E.164 — a leading plus and digits, nothing else —
+ * so the spaces come out while the plus stays. The plus is what makes it dial
+ * correctly from abroad; stripping it would give a number that only works
+ * inside the UK.
+ */
+export function telHref(): string {
+  return `tel:+${SITE.phone.replace(/\D/g, "")}`;
+}
 
 /**
  * "Open in maps", built from the postcode alone.

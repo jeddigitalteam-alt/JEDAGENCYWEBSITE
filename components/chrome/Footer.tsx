@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { SITE, CONTACT_CHANNELS, whatsappHref } from "@/lib/site";
+import { SITE, CONTACT_CHANNELS, whatsappHref, telHref } from "@/lib/site";
 import { SERVICES } from "@/lib/services";
 import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 import { SOCIAL_MARKS } from "@/components/brand/social-marks";
@@ -273,6 +273,16 @@ export function Footer() {
             © {new Date().getFullYear()} {SITE.name}
           </p>
           <StudioClock />
+          {/* Phone beside the email, in the same treatment — the bottom row is
+              already a flex row that wraps, so this needs no layout change and
+              drops onto its own line on a narrow screen like the rest. */}
+          <a
+            href={telHref()}
+            className="mono transition-colors hover:text-content"
+            style={{ color: "var(--link)" }}
+          >
+            {SITE.phone}
+          </a>
           <a
             href={`mailto:${SITE.email}`}
             className="mono transition-colors hover:text-content"

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { SITE, mapsHref } from "@/lib/site";
+import { SITE, mapsHref, telHref } from "@/lib/site";
 import { Eyebrow } from "@/components/ui/primitives";
 import ContactForm from "@/components/contact/ContactForm";
 import RevealHeading from "@/components/motion/RevealHeading";
@@ -43,6 +43,16 @@ export default function ContactPage() {
               className="display mt-3 block text-step-2 transition-colors hover:text-blue"
             >
               {SITE.email}
+            </a>
+            {/* Into the panel that already exists for reaching us directly,
+                rather than a section of its own. A step down from the email —
+                that is the panel's headline and stays the thing you notice
+                first — but the same face, block and hover. */}
+            <a
+              href={telHref()}
+              className="display mt-2 block text-step-1 text-content-dim transition-colors hover:text-blue"
+            >
+              {SITE.phone}
             </a>
           </div>
 
