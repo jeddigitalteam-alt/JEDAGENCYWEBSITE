@@ -63,7 +63,34 @@ export const metadata: Metadata = {
       "Puzzle is a Hampshire design studio. We build brand identities, websites and digital products that fit together.",
   },
   twitter: { card: "summary_large_image" },
-  icons: { icon: "/icon.svg" },
+  /**
+   * The Puzzle mark — the piece on its own, never the wordmark, because at
+   * 16px a wordmark is a grey smear. All of these are rendered from the one
+   * `public/icon.svg` by `scripts/gen-favicons.mjs`.
+   *
+   * Order matters: a browser takes the last declaration it understands, so the
+   * ICO is listed first as the universal floor and the SVG last, which is what
+   * a current browser will actually use and the only one that stays sharp on a
+   * high-density display at any size.
+   *
+   * `/favicon.ico` also exists as a real file at the site root, which is the
+   * path Google's favicon crawler requests directly — it does not have to find
+   * a `<link>` tag to get there, and previously that path was a 404.
+   *
+   * The URLs are literal and stable. Google caches a favicon against its URL
+   * and re-crawls it on its own schedule, so these should not be renamed.
+   */
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+  },
 };
 
 /**
