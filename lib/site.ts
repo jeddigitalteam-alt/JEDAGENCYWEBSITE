@@ -1,5 +1,19 @@
 import { SERVICES } from "./services";
 
+/**
+ * The canonical production origin. No trailing slash — everything that builds
+ * on it appends a path that starts with one.
+ *
+ * This is the one place the domain is written. `metadataBase` in the root
+ * layout, every canonical URL, the sitemap and robots.txt all derive from it,
+ * so the site cannot advertise two different homes to a crawler.
+ *
+ * It replaced `https://puzzle.studio`, which was never the live domain: with
+ * that as `metadataBase`, every canonical URL and Open Graph tag on the site
+ * pointed at a host Puzzle does not own.
+ */
+export const SITE_URL = "https://puzzlestudios.co.uk";
+
 export const SITE = {
   name: "Puzzle",
   /** Wordmark is set lowercase. */

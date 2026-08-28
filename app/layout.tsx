@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SITE_URL } from "@/lib/site";
 import { Geist, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 // Generated from the files actually present in public/fonts/gilroy/ — see
@@ -39,7 +40,10 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const SITE = "https://puzzle.studio";
+/* The canonical origin, from the one place it is written. Was
+   "https://puzzle.studio" — a domain Puzzle does not own — which made every
+   canonical URL and og:url on the site point somewhere else. */
+const SITE = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
