@@ -217,7 +217,13 @@ export function Hero() {
         <ServicesPanels />
       </div>
 
-      <div className="relative z-10 mt-6 flex items-end justify-between gap-6">
+      {/* The intro line, alone on this row. It used to share it with a
+          "Scroll — 01 / 06" counter under `justify-between`; with the counter
+          gone the flex row had one child and nothing to distribute, so the
+          wrapper keeps only what it was actually contributing — the z-index and
+          the space above. The paragraph's own `max-w-[34ch]` still sets its
+          measure, so nothing below moves. */}
+      <div className="relative z-10 mt-6">
         <motion.p
           className="max-w-[34ch] text-step-0 text-content-dim"
           initial={{ opacity: 0, y: 12 }}
@@ -227,15 +233,6 @@ export function Hero() {
           A design studio in Hampshire. Identity, websites and product work for
           companies that would rather be understood than admired.
         </motion.p>
-
-        <motion.div
-          className="mono shrink-0 text-content-dim"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: show ? 1 : 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          Scroll — 01 / 06
-        </motion.div>
       </div>
     </section>
   );
