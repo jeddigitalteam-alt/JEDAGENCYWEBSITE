@@ -87,11 +87,10 @@ export const SITE = {
  * site build their link from `whatsappHref()`, and no component holds a number
  * of its own. Changing it is this one value.
  *
- * **Facebook and the review URL are still `null`, on purpose.** There is no
- * Puzzle Facebook page and no verified review destination in this repository.
- * Everything that consumes them checks first and renders the graphic without a
- * link rather than shipping one that 404s. Fill either in and it activates with
- * no other change.
+ * **Facebook and the review URL are both live.** Everything that consumes
+ * them checks for `null` first and renders the graphic without a link rather
+ * than shipping one that 404s, so either can be emptied again and the site
+ * still renders — the CTA simply stops being a link.
  *
  * (Note: the number printed on the business cards in
  * `/work/brand-identity/puzzle-stationery.png` is in Ofcom's reserved range for
@@ -108,10 +107,12 @@ export const CONTACT_CHANNELS: {
   whatsappNumber: string | null;
   facebookUrl: string | null;
   /**
-   * Where "Leave a review" points — a Google Business profile, a Trustpilot
-   * page, whichever you use. `null` for the same reason as the two above:
-   * there is no verified review destination anywhere in this repository, and
-   * the CTA renders as a finished graphic without one rather than guessing.
+   * Where "Leave a review" points — the Puzzle Google Business review link.
+   *
+   * Consumed by `ReviewCta` on the homepage, which renders the whole panel as
+   * an external `<a>` when this is set and as an inert `<div>` when it is
+   * `null`. Kept nullable for that reason: emptying it is a supported state,
+   * not a broken one.
    */
   reviewUrl: string | null;
 } = {
@@ -124,7 +125,10 @@ export const CONTACT_CHANNELS: {
      `share/` prefix — and none of that belongs on the site, so this is the
      bare canonical form. */
   facebookUrl: "https://www.facebook.com/profile.php?id=61594104050246",
-  reviewUrl: null,
+  /* The Google Business review link — the short `g.page/r/…/review` form,
+     which is the one Google itself hands out for asking customers to review.
+     It opens the write-a-review dialog directly rather than the profile. */
+  reviewUrl: "https://g.page/r/Cfz-rXBrxjtaEAE/review",
 };
 
 /**

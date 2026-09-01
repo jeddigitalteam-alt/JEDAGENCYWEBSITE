@@ -1,7 +1,12 @@
 /**
- * Generates public/logo.svg and public/icon.svg from the canonical geometry in
- * components/brand/puzzle-paths.ts, so the static files can never drift from
+ * Generates public/logo.svg from the canonical two-piece geometry in
+ * components/brand/puzzle-paths.ts, so the static file can never drift from
  * the React component. Run via `npm run gen:logo`.
+ *
+ * THIS SCRIPT DOES NOT WRITE public/icon.svg. It used to, emitting the
+ * two-piece mark — which is how the old interlocking logo ended up in the
+ * browser tab and in Google's favicon cache. The favicon is the SINGLE piece
+ * and is owned entirely by scripts/gen-favicons.mjs. Do not add it back here.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -53,21 +58,10 @@ const logo = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${LOGO_VIEWBOX}">
 </svg>
 `;
 
-/* Favicon — solid blue, no keyline. A white outline is worse than useless in a
-   browser tab: it vanishes on a light tab strip, and at 16px the halo is under
-   half a pixel, so it only muddies the silhouette. */
-const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" fill="${BLUE}">
-  <title>Puzzle</title>
-  <path d="${A}"/>
-  <path d="${B}"/>
-</svg>
-`;
-
 mkdirSync(join(root, "public"), { recursive: true });
 writeFileSync(join(root, "public/logo.svg"), logo);
-writeFileSync(join(root, "public/icon.svg"), icon);
 
 console.log(
-  `wrote public/logo.svg (blue + white keyline) + public/icon.svg (solid)\n` +
+  `wrote public/logo.svg (blue + white keyline)\n` +
     `  piece A: ${A.length} chars\n  piece B: ${B.length} chars`,
 );
