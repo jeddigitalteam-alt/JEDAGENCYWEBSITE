@@ -120,11 +120,14 @@ export const CONTACT_CHANNELS: {
      number the site exposes anywhere, and it is a business line — no personal
      number appears in this repository. */
   whatsappNumber: SITE.phone,
-  /* The verified Puzzle Studios page. The URL people copy out of the app
-     carries share and tracking parameters — `?mibextid=`, `?rdid=`, a
-     `share/` prefix — and none of that belongs on the site, so this is the
-     bare canonical form. */
-  facebookUrl: "https://www.facebook.com/profile.php?id=61594104050246",
+  /* The verified Puzzle Studios page, as the share link supplied for it.
+     This is the form Facebook's own share sheet produces: a `share/` prefix
+     that redirects to the page, plus `?mibextid=`, which is Facebook's
+     attribution parameter and carries no routing meaning. Both are kept here
+     because this exact URL is the one that was provided; the link resolves
+     with or without the parameter, so it can be trimmed to
+     `https://www.facebook.com/share/1JpDxXf97a/` without breaking anything. */
+  facebookUrl: "https://www.facebook.com/share/1JpDxXf97a/?mibextid=wwXIfr",
   /* The Google Business review link — the short `g.page/r/…/review` form,
      which is the one Google itself hands out for asking customers to review.
      It opens the write-a-review dialog directly rather than the profile. */
