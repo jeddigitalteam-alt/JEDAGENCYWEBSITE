@@ -50,6 +50,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       { url: "/markets", changeFrequency: "monthly", priority: 0.7 },
       { url: "/articles", changeFrequency: "weekly", priority: 0.6 },
       { url: "/labs", changeFrequency: "monthly", priority: 0.5 },
+      /* Listed so it is indexable and discoverable, but last: it is a page
+         people are sent to rather than one they search for. */
+      { url: "/terms", changeFrequency: "yearly", priority: 0.3 },
     ] as const
   ).map((r) => ({ ...r, url: `${SITE_URL}${r.url}`, lastModified: now }));
 

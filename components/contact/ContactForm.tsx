@@ -35,7 +35,13 @@ const STEPS = ["Project", "Timeline", "Details"] as const;
 type Status = "idle" | "submitting" | "success" | "error";
 
 interface FormState {
-  projectType: string;
+  /**
+   * One or more services. Multi-select: a project is rarely one discipline,
+   * and the scope board next door has always let people pick several — this
+   * step used to hold a single string, which quietly dropped everything after
+   * the first when a scope arrived from there.
+   */
+  projectTypes: string[];
   timeline: string;
   firstName: string;
   lastName: string;
@@ -81,7 +87,9 @@ export function ContactForm() {
   const formName = isScopeEnquiry ? FORM_SCOPE : FORM_CONTACT;
 
   const [form, setForm] = useState<FormState>({
-    projectType: scopeNames[0] ?? "",
+    /* Every service the board sent, not `scopeNames[0]`. A scope of three
+       arrived here and became one. */
+    projectTypes: scopeNames,
     timeline: scopeWeeks ? "As soon as possible" : "",
     firstName: "",
     lastName: "",
@@ -99,6 +107,16 @@ export function ContactForm() {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
+  /* Add or remove one service, leaving the rest alone. Selections live in
+     `form`, which outlives the step, so going back and forward keeps them. */
+  const toggleProjectType = (option: string) =>
+    setForm((f) => ({
+      ...f,
+      projectTypes: f.projectTypes.includes(option)
+        ? f.projectTypes.filter((p) => p !== option)
+        : [...f.projectTypes, option],
+    }));
+
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
   const detailsValid =
     form.firstName.trim().length > 1 &&
@@ -107,7 +125,7 @@ export function ContactForm() {
     form.message.trim().length > 9;
 
   const canAdvance = [
-    Boolean(form.projectType),
+    form.projectTypes.length > 0,
     Boolean(form.timeline),
     detailsValid,
   ][step];
@@ -150,7 +168,11 @@ export function ContactForm() {
       email: form.email.trim(),
       company: form.company.trim(),
       phone: form.phone.trim(),
-      projectType: form.projectType,
+      /* Joined into the one `projectType` field Netlify already declares in
+         public/__forms.html — a field submitted but not declared there is
+         dropped silently, so this stays a single readable string rather than
+         becoming a second field nobody registered. */
+      projectType: form.projectTypes.join(", "),
       timeline: form.timeline,
       message: form.message.trim(),
     };
@@ -268,17 +290,18 @@ export function ContactForm() {
           {step === 0 ? (
             <Choices
               legend="What kind of project is it?"
+              hint="Pick as many as apply."
               options={PROJECT_TYPES}
-              value={form.projectType}
-              onChange={(v) => set("projectType", v)}
+              selected={(o) => form.projectTypes.includes(o)}
+              onSelect={toggleProjectType}
             />
           ) : null}
           {step === 1 ? (
             <Choices
               legend="When do you need it?"
               options={TIMELINES}
-              value={form.timeline}
-              onChange={(v) => set("timeline", v)}
+              selected={(o) => form.timeline === o}
+              onSelect={(v) => set("timeline", v)}
             />
           ) : null}
           {step === 2 ? (
@@ -457,18 +480,27 @@ export function ContactForm() {
   );
 }
 
+/**
+ * A row of toggle buttons.
+ *
+ * Selection is expressed as a predicate rather than a value so one component
+ * serves both the single-choice step (timeline) and the multi-choice one
+ * (services) with ONE set of classes — the selected treatment cannot drift
+ * between the two, which is what a second copy of this would have risked.
+ * `aria-pressed` was already the right semantics for both.
+ */
 function Choices({
   legend,
   hint,
   options,
-  value,
-  onChange,
+  selected,
+  onSelect,
 }: {
   legend: string;
   hint?: string;
   options: string[];
-  value: string;
-  onChange: (v: string) => void;
+  selected: (option: string) => boolean;
+  onSelect: (option: string) => void;
 }) {
   return (
     <fieldset>
@@ -478,12 +510,12 @@ function Choices({
       ) : null}
       <div className="mt-6 flex flex-wrap gap-3">
         {options.map((o) => {
-          const on = value === o;
+          const on = selected(o);
           return (
             <button
               key={o}
               type="button"
-              onClick={() => onChange(o)}
+              onClick={() => onSelect(o)}
               aria-pressed={on}
               className={`mono rounded-full border px-5 py-3 transition-colors ${
                 on

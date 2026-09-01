@@ -86,14 +86,9 @@ export interface Testimonial {
 /**
  * Rendered as "fit notes" — each quote is a piece that seats next to the
  * project it refers to, rather than a floating carousel of praise.
+ *
+ * Empty today. The homepage section reads `TESTIMONIALS[0]` and drops the slot
+ * when there is nothing in it, so the array staying here is what keeps adding
+ * a fit note a data change rather than a component one.
  */
-export const TESTIMONIALS: Testimonial[] = [
-  {
-    quote:
-      "They pushed back on our brief twice. Both times they were right, and it saved us a quarter.",
-    name: "Richard",
-    role: "Founder",
-    project: "Bespoke Garden Decor",
-    rating: 5,
-  },
-];
+export const TESTIMONIALS: Testimonial[] = [];

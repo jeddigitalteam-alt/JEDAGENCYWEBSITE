@@ -16,6 +16,7 @@ export function SmoothScroll() {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     let lenis: Lenis | null = null;
     let raf = 0;
+    let growth: ResizeObserver | null = null;
 
     const start = () => {
       if (lenis) return;
@@ -27,6 +28,24 @@ export function SmoothScroll() {
         touchMultiplier: 1.6,
       });
       setLenis(lenis);
+
+      /* Keep the scroll limit honest while the page is open.
+
+         Lenis watches `content` for height changes, and `content` defaults to
+         <html> — which this document pins to `height: 100%` via the `h-full`
+         in app/layout.tsx. That element's box is therefore always exactly the
+         viewport, so it never reports a resize and Lenis never re-measures.
+         The limit stays frozen at whatever the page was when Lenis started,
+         and anything that grows the page afterwards is simply unreachable:
+         the contact form's last step is taller than its first, and the extra
+         height could not be scrolled to at all.
+
+         <body> is the element that actually grows with the content, so that is
+         what gets measured. `resize()` is the same call `resetScroll` already
+         makes on a route change, for the same stale-limit reason. */
+      growth = new ResizeObserver(() => lenis?.resize());
+      growth.observe(document.body);
+
       const loop = (time: number) => {
         lenis?.raf(time);
         raf = requestAnimationFrame(loop);
@@ -36,6 +55,8 @@ export function SmoothScroll() {
 
     const stop = () => {
       cancelAnimationFrame(raf);
+      growth?.disconnect();
+      growth = null;
       lenis?.destroy();
       lenis = null;
       setLenis(null);

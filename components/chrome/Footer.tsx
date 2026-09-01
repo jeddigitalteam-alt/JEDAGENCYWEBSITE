@@ -272,6 +272,17 @@ export function Footer() {
           <p className="mono text-content-dim">
             © {new Date().getFullYear()} {SITE.name}
           </p>
+          {/* Legal, in the bottom row rather than the Studio column: that
+              column is the map of the site, and this is the small print. Same
+              mono treatment as the phone and email beside it, so it reads as
+              one row of links rather than a new kind of thing. */}
+          <Link
+            href="/terms"
+            className="mono transition-colors hover:text-content"
+            style={{ color: "var(--link)" }}
+          >
+            Terms &amp; Conditions
+          </Link>
           <StudioClock />
           {/* Phone beside the email, in the same treatment — the bottom row is
               already a flex row that wraps, so this needs no layout change and
