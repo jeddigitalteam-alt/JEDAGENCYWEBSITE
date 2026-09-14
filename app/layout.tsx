@@ -14,6 +14,11 @@ import Header from "@/components/chrome/Header";
 import Footer from "@/components/chrome/Footer";
 import FooterReveal from "@/components/chrome/FooterReveal";
 import CommandPalette from "@/components/chrome/CommandPalette";
+import CookieConsent from "@/components/chrome/CookieConsent";
+import { consentHeadScript } from "@/lib/consent";
+
+/* GA4 measurement ID — the site's only Google tag. */
+const GA_ID = "G-HZ6V0BP7HR";
 
 /* Display — high contrast, and its italic has real calligraphic slope, which
    is what makes roman/italic mixing legible inside one headline at 11vw. */
@@ -126,22 +131,21 @@ export default function RootLayout({
          --ink / --surface. */
       style={{ backgroundColor: "#0f0f12" }}
     >
-      {/* Google tag (gtag.js) — GA4. An explicit <head> so the tag is its first
-          child; Next still merges the Metadata API tags into this element. The
-          only GA/GTM on the site: add none elsewhere or pageviews double. */}
+      {/* Google tag (gtag.js) — GA4, behind Consent Mode v2. An explicit <head>
+          so the tag is its first child; Next still merges the Metadata API tags
+          into this element. The only GA/GTM on the site: add none elsewhere or
+          pageviews double.
+
+          The inline script sets every signal to denied, restores a saved
+          choice, and only then runs `config` — see `consentHeadScript` in
+          lib/consent.ts. The loader is async, so it cannot run ahead of it. */}
       <head>
         <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-HZ6V0BP7HR"
+          dangerouslySetInnerHTML={{ __html: consentHeadScript(GA_ID) }}
         />
         <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "window.dataLayer = window.dataLayer || [];" +
-              "function gtag(){dataLayer.push(arguments);}" +
-              "gtag('js', new Date());" +
-              "gtag('config', 'G-HZ6V0BP7HR');",
-          }}
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
         />
       </head>
       {/* `isolate` is load-bearing, not tidiness. The footer underlaps the page
@@ -188,6 +192,8 @@ export default function RootLayout({
           </div>
           <Footer />
           <FooterReveal />
+          {/* Inside the provider: it waits for the intro to clear. */}
+          <CookieConsent />
         </IntroProvider>
       </body>
     </html>

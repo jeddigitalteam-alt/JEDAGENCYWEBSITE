@@ -7,6 +7,7 @@ import { SITE, CONTACT_CHANNELS, whatsappHref, telHref } from "@/lib/site";
 import { SERVICES } from "@/lib/services";
 import PuzzleSiteLogo from "@/components/brand/PuzzleSiteLogo";
 import { SOCIAL_MARKS } from "@/components/brand/social-marks";
+import { openConsentSettings } from "@/lib/consent";
 
 /**
  * The footer's call to action, on the blue field.
@@ -283,6 +284,22 @@ export function Footer() {
           >
             Terms &amp; Conditions
           </Link>
+          <Link
+            href="/privacy"
+            className="mono transition-colors hover:text-content"
+            style={{ color: "var(--link)" }}
+          >
+            Privacy Policy
+          </Link>
+          {/* Reopens the consent panel. A button, not a link: it goes nowhere. */}
+          <button
+            type="button"
+            onClick={openConsentSettings}
+            className="mono cursor-pointer transition-colors hover:text-content"
+            style={{ color: "var(--link)" }}
+          >
+            Cookie settings
+          </button>
           <StudioClock />
           {/* Phone beside the email, in the same treatment — the bottom row is
               already a flex row that wraps, so this needs no layout change and
