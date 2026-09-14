@@ -126,6 +126,24 @@ export default function RootLayout({
          --ink / --surface. */
       style={{ backgroundColor: "#0f0f12" }}
     >
+      {/* Google tag (gtag.js) — GA4. An explicit <head> so the tag is its first
+          child; Next still merges the Metadata API tags into this element. The
+          only GA/GTM on the site: add none elsewhere or pageviews double. */}
+      <head>
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-HZ6V0BP7HR"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.dataLayer = window.dataLayer || [];" +
+              "function gtag(){dataLayer.push(arguments);}" +
+              "gtag('js', new Date());" +
+              "gtag('config', 'G-HZ6V0BP7HR');",
+          }}
+        />
+      </head>
       {/* `isolate` is load-bearing, not tidiness. The footer underlaps the page
           by painting at z-index -1, and a negative index only stays inside the
           document if something above it forms a stacking context; without this
